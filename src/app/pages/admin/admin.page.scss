@@ -1,9 +1,9 @@
 /* =====================================================================
    Panel de administración
 
-   Mismo fondo y velo que el resto. Las opciones se agrupan por lo que
-   administran y cada una dice qué hace: una lista de nombres sueltos
-   obliga a entrar para averiguarlo.
+   Mismos fondo, velo y colores que el resto de las pestañas. Las
+   opciones se agrupan por lo que administran y cada una dice qué hace:
+   una lista de nombres sueltos obliga a entrar para averiguarlo.
    ===================================================================== */
 
 .cabecera-limpia ion-toolbar {
@@ -32,33 +32,28 @@
   object-position: 50% 45%;
 }
 
-/*
- * El velo de administración vira al ámbar en vez del morado de las otras
- * pantallas: el panel maneja datos de todos, y conviene que se note de
- * inmediato que no se está en la aplicación normal.
- */
 .velo {
   position: absolute;
   inset: 0;
   background:
     radial-gradient(
       72% 62% at 50% 46%,
-      rgba(10, 8, 6, 0.93) 0%,
-      rgba(10, 8, 6, 0.81) 44%,
-      rgba(10, 8, 6, 0.44) 78%,
-      rgba(10, 8, 6, 0.3) 100%
+      rgba(6, 6, 14, 0.93) 0%,
+      rgba(6, 6, 14, 0.8) 44%,
+      rgba(6, 6, 14, 0.42) 78%,
+      rgba(6, 6, 14, 0.28) 100%
     ),
     linear-gradient(
       180deg,
-      rgba(14, 11, 8, 0.76) 0%,
-      rgba(14, 11, 8, 0.66) 38%,
-      rgba(12, 10, 8, 0.86) 100%
+      rgba(8, 8, 18, 0.74) 0%,
+      rgba(8, 8, 18, 0.64) 38%,
+      rgba(8, 8, 18, 0.84) 100%
     ),
     radial-gradient(
       90% 55% at 50% -10%,
-      rgba(240, 162, 75, 0.24) 0%,
-      rgba(217, 119, 87, 0.12) 46%,
-      rgba(10, 8, 6, 0) 76%
+      rgba(139, 92, 246, 0.28) 0%,
+      rgba(79, 124, 255, 0.14) 46%,
+      rgba(8, 8, 18, 0) 76%
     );
 }
 
@@ -85,9 +80,9 @@
   justify-content: center;
 
   border-radius: 20px;
-  color: #ffd9a8;
-  background: rgba(240, 162, 75, 0.18);
-  border: 1px solid rgba(240, 162, 75, 0.48);
+  color: #fff;
+  background: linear-gradient(135deg, #8b5cf6, #4f7cff 55%, #22d3ee);
+  box-shadow: 0 14px 32px rgba(79, 124, 255, 0.4);
 }
 
 .titulo {
@@ -116,13 +111,13 @@
 
   border-radius: 22px;
   border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(18, 16, 20, 0.8);
+  background: rgba(16, 16, 24, 0.78);
   backdrop-filter: blur(16px);
   box-shadow: 0 26px 60px rgba(0, 0, 0, 0.48);
 }
 
 .panel.apagado {
-  background: rgba(18, 16, 20, 0.6);
+  background: rgba(16, 16, 24, 0.6);
   border-style: dashed;
   border-color: rgba(255, 255, 255, 0.14);
   box-shadow: none;
@@ -164,7 +159,7 @@
 
   &:hover {
     background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(240, 162, 75, 0.5);
+    border-color: rgba(126, 179, 255, 0.5);
     transform: translateX(3px);
 
     .opcion-flecha {
@@ -187,9 +182,9 @@
   justify-content: center;
 
   border-radius: 13px;
-  background: rgba(240, 162, 75, 0.14);
-  border: 1px solid rgba(240, 162, 75, 0.34);
-  color: #ffd9a8;
+  background: rgba(79, 124, 255, 0.16);
+  border: 1px solid rgba(126, 179, 255, 0.34);
+  color: #9ec1ff;
 }
 
 .opcion-texto {
@@ -286,11 +281,11 @@
     background:
       linear-gradient(
         180deg,
-        rgba(14, 11, 8, 0.82) 0%,
-        rgba(12, 10, 8, 0.94) 45%,
-        rgba(12, 10, 8, 0.96) 100%
+        rgba(8, 8, 18, 0.8) 0%,
+        rgba(8, 8, 18, 0.93) 45%,
+        rgba(8, 8, 18, 0.96) 100%
       ),
-      radial-gradient(90% 40% at 50% -10%, rgba(240, 162, 75, 0.2) 0%, rgba(10, 8, 6, 0) 70%);
+      radial-gradient(90% 40% at 50% -10%, rgba(139, 92, 246, 0.22) 0%, rgba(8, 8, 18, 0) 70%);
   }
 
   .lienzo {
