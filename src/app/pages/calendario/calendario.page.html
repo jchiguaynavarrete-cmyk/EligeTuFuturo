@@ -1,38 +1,145 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>📅 Calendario PAES</ion-title>
-  </ion-toolbar>
+<!--
+  Calendario del proceso PAES.
+
+  Mismo lenguaje que Carreras y Favoritos. Las fechas vienen de la base,
+  no escritas en el código, para que se puedan actualizar cada año sin
+  volver a publicar la aplicación.
+-->
+<ion-header class="cabecera-limpia">
+  <ion-toolbar></ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content fullscreen="true" class="pantalla-calendario">
+  <div class="fondo" aria-hidden="true">
+    <img class="foto" src="/assets/estudiantes-biblioteca.jpg" alt="" decoding="async" />
+    <span class="velo"></span>
+  </div>
 
-  <ion-card *ngFor="let f of fechas">
-    <ion-card-content>
+  <div class="lienzo">
 
-      <h2>{{ f.titulo }}</h2>
+    <!-- ========================= Encabezado ========================= -->
+    <div class="encabezado">
+      <div class="marca">
+        <span class="marca-logo" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="23" height="23">
+            <path d="M24 14 L37 20 L24 26 L11 20 Z" fill="#fff" opacity="0.96" />
+            <path
+              d="M16.5 22.5 V29 c0 0 3.2 3.2 7.5 3.2 S31.5 29 31.5 29 V22.5"
+              fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity="0.96" />
+            <path d="M37 20 V30" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.8" />
+          </svg>
+        </span>
+        <span class="marca-nombre">Elige<em>Tu</em>Futuro</span>
+      </div>
 
-      <p>
-        📆 {{ f.fecha | date:'dd/MM/yyyy' }}
+      <h1 class="titulo">Calendario PAES</h1>
+      <p class="bajada">Las fechas del proceso, para que no se te pase ninguna.</p>
+    </div>
+
+    <!-- Cargando -->
+    <div class="cargando" *ngIf="cargando">
+      <span class="giro" aria-hidden="true"></span>
+      <p>Cargando las fechas…</p>
+    </div>
+
+    <ng-container *ngIf="!cargando">
+
+      <p class="error" *ngIf="error">{{ error }}</p>
+
+      <!-- ====================== Lo que viene ====================== -->
+      <section class="destacado" *ngIf="proxima as p">
+        <p class="destacado-rotulo">Lo más próximo</p>
+        <h2 class="destacado-titulo">{{ p.titulo }}</h2>
+        <p class="destacado-cuenta">{{ textoDias(p) }}</p>
+        <p class="destacado-fecha">{{ p.cuando | date:'EEEE d MMMM y' }}</p>
+      </section>
+
+      <!-- Todo pasó: decirlo en vez de mostrar cuatro tarjetas tachadas -->
+      <section class="aviso-viejo" *ngIf="!hayPendientes && hitos.length > 0">
+        <p class="aviso-titulo">Todas estas fechas ya pasaron</p>
+        <p class="aviso-texto">
+          Corresponden a un proceso anterior.
+          <ng-container *ngIf="esAdmin">
+            Puedes actualizarlas con el botón de editar de cada una.
+          </ng-container>
+          <ng-container *ngIf="!esAdmin">
+            Las del proceso siguiente se publicarán aquí mismo.
+          </ng-container>
+        </p>
+      </section>
+
+      <!-- ====================== Línea de tiempo ====================== -->
+      <ol class="linea">
+        <li
+          *ngFor="let h of hitos"
+          class="hito"
+          [class.pasada]="h.estado === 'pasada'"
+          [class.hoy]="h.estado === 'hoy'"
+          [class.proxima]="h.estado === 'proxima'">
+
+          <!-- Punto y línea que une los hitos -->
+          <span class="marcador" aria-hidden="true">
+            <span class="punto">
+              <svg *ngIf="h.estado === 'pasada'" width="13" height="13" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </span>
+          </span>
+
+          <div class="tarjeta">
+            <div class="tarjeta-top">
+              <div class="tarjeta-texto">
+                <h3>{{ h.titulo }}</h3>
+                <p class="fecha">{{ h.cuando | date:'d MMMM y' }}</p>
+                <p class="descripcion" *ngIf="h.descripcion">{{ h.descripcion }}</p>
+              </div>
+
+              <span class="pastilla">{{ textoDias(h) }}</span>
+            </div>
+
+            <div class="tarjeta-acciones">
+              <button
+                type="button"
+                class="btn-agendar"
+                *ngIf="h.dias >= 0"
+                (click)="agendar(h)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="5" width="18" height="16" rx="2" />
+                  <path d="M8 3v4M16 3v4M3 10h18" />
+                  <path d="M12 14v4M10 16h4" />
+                </svg>
+                Agregar a mi calendario
+              </button>
+
+              <button
+                type="button"
+                class="btn-editar"
+                *ngIf="esAdmin"
+                (click)="editar(h)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                </svg>
+                Editar
+              </button>
+            </div>
+          </div>
+        </li>
+      </ol>
+
+      <!-- Sin fechas cargadas -->
+      <div class="vacio" *ngIf="hitos.length === 0 && !error">
+        <p class="vacio-titulo">Todavía no hay fechas publicadas</p>
+        <p class="vacio-texto">Cuando se conozcan las del proceso, aparecerán aquí.</p>
+      </div>
+
+      <p class="pie-admin" *ngIf="esAdmin && hitos.length > 0">
+        Estás viendo esta pantalla como administrador: puedes editar cada fecha.
       </p>
 
-      <!-- DÍAS RESTANTES -->
-      <p *ngIf="diasRestantes(f.fecha) > 0">
-        ⏳ Faltan <strong>{{ diasRestantes(f.fecha) }}</strong> días
-      </p>
-
-      <!-- FECHA PASADA -->
-      <p *ngIf="diasRestantes(f.fecha) <= 0">
-        ❌ Fecha ya pasada
-      </p>
-
-      <ion-button
-        expand="block"
-        fill="outline"
-        (click)="mostrarAlerta(f)">
-        🔔 Recibir aviso
-      </ion-button>
-
-    </ion-card-content>
-  </ion-card>
-
+    </ng-container>
+  </div>
 </ion-content>

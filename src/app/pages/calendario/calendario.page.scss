@@ -1,0 +1,525 @@
+/* =====================================================================
+   Calendario PAES
+
+   Mismo fondo y velo que Carreras y Favoritos. Los hitos se muestran como
+   una línea de tiempo: el proceso tiene un orden, y una lista de tarjetas
+   sueltas no lo comunicaba.
+   ===================================================================== */
+
+.cabecera-limpia ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+  --color: #fff;
+  --min-height: 44px;
+}
+
+.pantalla-calendario {
+  --background: transparent;
+}
+
+.fondo {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 45%;
+}
+
+.velo {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      72% 62% at 50% 48%,
+      rgba(6, 6, 14, 0.93) 0%,
+      rgba(6, 6, 14, 0.8) 44%,
+      rgba(6, 6, 14, 0.42) 78%,
+      rgba(6, 6, 14, 0.28) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(8, 8, 18, 0.74) 0%,
+      rgba(8, 8, 18, 0.64) 38%,
+      rgba(8, 8, 18, 0.84) 100%
+    ),
+    radial-gradient(
+      90% 55% at 50% -10%,
+      rgba(139, 92, 246, 0.28) 0%,
+      rgba(79, 124, 255, 0.14) 46%,
+      rgba(8, 8, 18, 0) 76%
+    );
+}
+
+.lienzo {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 10px 24px calc(40px + var(--ion-safe-area-bottom, 0px));
+}
+
+/* ---------------------------- Encabezado ---------------------------- */
+.encabezado {
+  text-align: center;
+  margin-bottom: 26px;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.marca-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #8b5cf6, #4f7cff 55%, #22d3ee);
+}
+
+.marca-nombre {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: #fff;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.8);
+
+  em {
+    font-style: normal;
+    color: var(--app-link);
+  }
+}
+
+.titulo {
+  margin: 0 0 8px;
+  font-size: clamp(26px, 5vw, 34px);
+  font-weight: 800;
+  letter-spacing: -1.1px;
+  line-height: 1.12;
+  color: #fff;
+  text-shadow: 0 3px 22px rgba(0, 0, 0, 0.75);
+}
+
+.bajada {
+  margin: 0 auto;
+  max-width: 48ch;
+  font-size: 16px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.84);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+}
+
+/* ----------------------------- Cargando ----------------------------- */
+.cargando {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 50px 20px;
+
+  p {
+    margin: 0;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.72);
+  }
+}
+
+.giro {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.16);
+  border-top-color: #7eb3ff;
+  animation: girar 0.8s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 92, 133, 0.42);
+  background: rgba(255, 92, 133, 0.12);
+  font-size: 14.5px;
+  color: #ffb3c4;
+}
+
+/* --------------------------- Lo que viene ---------------------------
+   La fecha próxima es lo único que una persona busca al abrir esta
+   pantalla, así que va primero y en grande. */
+.destacado {
+  margin-bottom: 26px;
+  padding: 24px 26px;
+  text-align: center;
+
+  border-radius: 22px;
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  background:
+    linear-gradient(
+      100deg,
+      rgba(139, 92, 246, 0.26),
+      rgba(79, 124, 255, 0.18) 55%,
+      rgba(34, 211, 238, 0.14)
+    ),
+    rgba(16, 16, 24, 0.62);
+  backdrop-filter: blur(14px);
+}
+
+.destacado-rotulo {
+  margin: 0 0 8px;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #c4b5fd;
+}
+
+.destacado-titulo {
+  margin: 0 0 10px;
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  color: #fff;
+}
+
+.destacado-cuenta {
+  margin: 0 0 4px;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: #fff;
+}
+
+.destacado-fecha {
+  margin: 0;
+  font-size: 14.5px;
+  color: rgba(255, 255, 255, 0.76);
+  text-transform: capitalize;
+}
+
+/* Cuando todas pasaron: decirlo, en vez de mostrar tarjetas tachadas */
+.aviso-viejo {
+  margin-bottom: 22px;
+  padding: 18px 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(240, 162, 75, 0.42);
+  background: rgba(240, 162, 75, 0.12);
+}
+
+.aviso-titulo {
+  margin: 0 0 5px;
+  font-size: 15.5px;
+  font-weight: 800;
+  color: #ffd9a8;
+}
+
+.aviso-texto {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* -------------------------- Línea de tiempo -------------------------- */
+.linea {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hito {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  padding-bottom: 14px;
+}
+
+.hito:last-child {
+  padding-bottom: 0;
+}
+
+/* Marcador: el punto y la línea vertical que une un hito con el siguiente */
+.marcador {
+  position: relative;
+  flex-shrink: 0;
+  width: 26px;
+  display: flex;
+  justify-content: center;
+}
+
+.punto {
+  position: relative;
+  z-index: 1;
+  margin-top: 22px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(16, 16, 24, 0.95);
+  border: 2px solid rgba(255, 255, 255, 0.26);
+  color: #fff;
+}
+
+/* La línea baja desde el punto hasta el hito siguiente */
+.hito:not(:last-child) .marcador::after {
+  content: '';
+  position: absolute;
+  top: 44px;
+  bottom: -14px;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+/* Estados */
+.hito.pasada .punto {
+  background: rgba(45, 211, 111, 0.2);
+  border-color: rgba(45, 211, 111, 0.6);
+  color: #86efac;
+}
+
+.hito.pasada:not(:last-child) .marcador::after {
+  background: rgba(45, 211, 111, 0.4);
+}
+
+.hito.proxima .punto,
+.hito.hoy .punto {
+  background: linear-gradient(135deg, #8b5cf6, #4f7cff 70%);
+  border-color: rgba(139, 92, 246, 0.9);
+  box-shadow: 0 0 0 5px rgba(139, 92, 246, 0.18);
+}
+
+/* ------------------------------ Tarjeta ------------------------------ */
+.tarjeta {
+  flex: 1;
+  min-width: 0;
+  padding: 18px 20px;
+
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(16, 16, 24, 0.8);
+  backdrop-filter: blur(10px);
+
+  transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+.tarjeta:hover {
+  border-color: rgba(126, 179, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.42);
+}
+
+/* Lo que ya ocurrió se apaga, pero sigue legible */
+.hito.pasada .tarjeta {
+  opacity: 0.62;
+}
+
+.hito.pasada .tarjeta:hover {
+  opacity: 1;
+}
+
+.hito.proxima .tarjeta,
+.hito.hoy .tarjeta {
+  border-color: rgba(139, 92, 246, 0.5);
+}
+
+.tarjeta-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.tarjeta-texto {
+  flex: 1;
+  min-width: 0;
+
+  h3 {
+    margin: 0 0 4px;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    color: #fff;
+  }
+}
+
+.fecha {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.76);
+  text-transform: capitalize;
+}
+
+.descripcion {
+  margin: 8px 0 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.64);
+}
+
+.pastilla {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: 99px;
+  font-size: 12.5px;
+  font-weight: 800;
+  white-space: nowrap;
+
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.hito.proxima .pastilla,
+.hito.hoy .pastilla {
+  color: #ddd6fe;
+  background: rgba(139, 92, 246, 0.22);
+  border-color: rgba(139, 92, 246, 0.55);
+}
+
+/* ----------------------------- Acciones ----------------------------- */
+.tarjeta-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.tarjeta-acciones:empty {
+  display: none;
+}
+
+.btn-agendar,
+.btn-editar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 15px;
+  border-radius: 12px;
+  cursor: pointer;
+
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+
+  transition: background 170ms ease, border-color 170ms ease, transform 170ms ease;
+}
+
+.btn-agendar {
+  border: 1px solid rgba(126, 179, 255, 0.4);
+  background: rgba(79, 124, 255, 0.14);
+  color: #bcd6ff;
+
+  &:hover {
+    background: rgba(79, 124, 255, 0.26);
+    border-color: rgba(126, 179, 255, 0.7);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+}
+
+.btn-editar {
+  border: 1px dashed rgba(255, 255, 255, 0.28);
+  background: none;
+  color: rgba(255, 255, 255, 0.7);
+
+  &:hover {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* ------------------------------- Vacío ------------------------------- */
+.vacio {
+  padding: 44px 24px;
+  text-align: center;
+  border-radius: 20px;
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  background: rgba(16, 16, 24, 0.6);
+}
+
+.vacio-titulo {
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.vacio-texto {
+  margin: 0;
+  font-size: 14.5px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.pie-admin {
+  margin: 22px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ------------------------------- Móvil ------------------------------- */
+@media (max-width: 620px) {
+  .velo {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(8, 8, 18, 0.8) 0%,
+        rgba(8, 8, 18, 0.93) 45%,
+        rgba(8, 8, 18, 0.96) 100%
+      ),
+      radial-gradient(90% 40% at 50% -10%, rgba(139, 92, 246, 0.22) 0%, rgba(8, 8, 18, 0) 70%);
+  }
+
+  .lienzo {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .tarjeta-top {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .pastilla {
+    align-self: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tarjeta,
+  .btn-agendar,
+  .btn-editar {
+    transition: none;
+  }
+
+  .tarjeta:hover,
+  .btn-agendar:hover {
+    transform: none;
+  }
+
+  .giro {
+    animation: none;
+  }
+}
