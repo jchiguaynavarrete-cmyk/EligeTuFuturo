@@ -70,14 +70,44 @@ function aFila(origen) {
     .from('carreras')
     .select('*', { count: 'exact', head: true });
 
+  // Con --rehacer se vacía la tabla antes de cargar.
+  const rehacer = process.argv.includes('--rehacer');
+
   if (yaHay && yaHay > 0) {
+    if (!rehacer) {
+      console.log('');
+      console.log(`La tabla ya tiene ${yaHay} carreras. No se duplica nada.`);
+      console.log('Para rehacer la carga: node scripts/migrar-carreras.js 3000 --rehacer');
+      process.exit(0);
+    }
+
     console.log('');
-    console.log(`La tabla ya tiene ${yaHay} carreras. No se duplica nada.`);
-    console.log('Para rehacer la carga, vacía la tabla primero.');
-    process.exit(0);
+    console.log(`Vaciando las ${yaHay} carreras actuales...`);
+    const { error } = await db.from('carreras').delete().gt('id', 0);
+    if (error) {
+      console.error('No se pudo vaciar:', error.message);
+      process.exit(1);
+    }
   }
 
-  const seleccion = todas.slice(0, CANTIDAD).map(aFila);
+  /**
+   * Muestra repartida a lo largo de TODO el archivo.
+   *
+   * El archivo viene ordenado alfabéticamente, así que tomar las primeras
+   * N dejaría fuera medio abecedario. Tampoco sirve saltar de a un paso
+   * entero: con 8.815 registros y 3.000 deseados el paso sería 2, y al
+   * completar los 3.000 solo se habrían recorrido los primeros 6.000.
+   *
+   * Calculando el índice como proporción se cubre el archivo entero,
+   * de la primera carrera a la última.
+   */
+  const seleccion = [];
+  for (let i = 0; i < CANTIDAD; i++) {
+    const indice = Math.floor((i * todas.length) / CANTIDAD);
+    seleccion.push(aFila(todas[indice]));
+  }
+
+  console.log(`  muestra     : ${CANTIDAD} repartidas entre ${todas.length}`);
 
   let insertadas = 0;
   for (let i = 0; i < seleccion.length; i += TAMANO_LOTE) {

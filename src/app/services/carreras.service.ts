@@ -121,6 +121,8 @@ export class CarrerasService {
     area?: string;
     region?: string;
     institucion?: string;
+    horario?: string;
+    orden?: 'nombre' | 'arancel' | 'duracion';
     pagina?: number;
     tamano?: number;
   }): Promise<PaginaCarreras> {
@@ -128,10 +130,18 @@ export class CarrerasService {
     const pagina = opts.pagina ?? 0;
     const desde = pagina * tamano;
 
+    // Las columnas numéricas las calcula la base a partir del texto:
+    // ordenar por `valor_arancel` compararía "$9.000" con "$10.000.000"
+    // carácter a carácter y daría un orden absurdo.
+    const columnaOrden =
+      opts.orden === 'arancel' ? 'arancel_num'
+      : opts.orden === 'duracion' ? 'duracion_num'
+      : 'carrera';
+
     let consulta = this.supabase
       .from('carreras')
       .select('*', { count: 'exact' })
-      .order('carrera', { ascending: true })
+      .order(columnaOrden, { ascending: true, nullsFirst: false })
       .range(desde, desde + tamano - 1);
 
     if (opts.vista === 'activas') consulta = consulta.eq('activa', true);
@@ -145,6 +155,9 @@ export class CarrerasService {
     }
     if (opts.institucion && opts.institucion !== 'TODAS') {
       consulta = consulta.eq('nombre_institucion', opts.institucion);
+    }
+    if (opts.horario && opts.horario !== 'TODOS') {
+      consulta = consulta.eq('horario', opts.horario);
     }
 
     const termino = (opts.busqueda ?? '').trim();
@@ -166,13 +179,29 @@ export class CarrerasService {
   }
 
   /** Valores únicos para poblar los selectores de filtro. */
-  async getOpcionesFiltro(columna: 'area_cineunesco' | 'region_sede' | 'nombre_institucion'): Promise<string[]> {
-    const { data, error } = await this.supabase
-      .from('carreras')
-      .select(columna)
-      .eq('activa', true);
+  async getOpcionesFiltro(
+    columna: 'area_cineunesco' | 'region_sede' | 'nombre_institucion' | 'horario'
+  ): Promise<string[]> {
+    // Se piden por tramos: PostgREST corta en 1.000 filas y faltarían
+    // opciones de las carreras que quedan fuera de ese primer tramo.
+    const filas: any[] = [];
+    let desde = 0;
 
-    if (error) throw error;
+    for (;;) {
+      const { data, error } = await this.supabase
+        .from('carreras')
+        .select(columna)
+        .eq('activa', true)
+        .range(desde, desde + TAMANO_TRAMO - 1);
+
+      if (error) throw error;
+
+      filas.push(...(data ?? []));
+      if (!data || data.length < TAMANO_TRAMO) break;
+      desde += TAMANO_TRAMO;
+    }
+
+    const data = filas;
 
     const valores = new Set<string>();
     (data ?? []).forEach((f: any) => {

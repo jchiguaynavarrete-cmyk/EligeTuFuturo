@@ -79,20 +79,13 @@ export class CarrerasPage implements OnInit {
 
   favoritosIds: Set<string> = new Set<string>();
 
+  /** Total de carreras que cumplen los filtros, según la base. */
+  total = 0;
+  cargando = false;
+
   ngOnInit() {
-    this.carrerasService.getCarreras().subscribe({
-      next: (data) => {
-        this.carreras = (data ?? []).filter((c) => c.activa !== false);
-
-        this.areas = this.buildOptions(this.carreras.map((c) => c.area_cineunesco), 'TODAS');
-        this.regiones = this.buildOptions(this.carreras.map((c) => c.region_sede), 'TODAS');
-        this.instituciones = this.buildOptions(this.carreras.map((c) => c.nombre_institucion), 'TODAS');
-        this.horarios = this.buildOptions(this.carreras.map((c) => c.horario), 'TODOS');
-
-        this.aplicarFiltros();
-      },
-      error: (err) => console.error('Error cargando carreras:', err),
-    });
+    this.cargarOpciones();
+    this.aplicarFiltros();
 
     this.favoritosService.getFavoritosIds().subscribe({
       next: (ids) => (this.favoritosIds = ids),
@@ -100,46 +93,74 @@ export class CarrerasPage implements OnInit {
     });
   }
 
+  /**
+   * Valores de los selectores de filtro.
+   *
+   * Se piden aparte, una sola vez: antes se deducían del catálogo
+   * completo, que es justamente lo que dejamos de traer.
+   */
+  private async cargarOpciones(): Promise<void> {
+    try {
+      const [areas, regiones, instituciones, horarios] = await Promise.all([
+        this.carrerasService.getOpcionesFiltro('area_cineunesco'),
+        this.carrerasService.getOpcionesFiltro('region_sede'),
+        this.carrerasService.getOpcionesFiltro('nombre_institucion'),
+        this.carrerasService.getOpcionesFiltro('horario'),
+      ]);
+
+      this.areas = ['TODAS', ...areas];
+      this.regiones = ['TODAS', ...regiones];
+      this.instituciones = ['TODAS', ...instituciones];
+      this.horarios = ['TODOS', ...horarios];
+    } catch (err) {
+      console.error('Error cargando filtros:', err);
+    }
+  }
+
   irAlSimulador() {
     this.router.navigateByUrl('/tabs/simulador');
   }
 
-  aplicarFiltros() {
-    const term = (this.searchTerm || '').toLowerCase().trim();
+  /**
+   * Pide a la base la página actual ya filtrada y ordenada.
+   *
+   * Antes se traía el catálogo completo y se filtraba en el navegador.
+   * Ahora viajan 20 filas por consulta en vez de 3.000, y el filtro y el
+   * orden los resuelve PostgreSQL con sus índices.
+   */
+  async aplicarFiltros(reiniciarPagina = true): Promise<void> {
+    if (reiniciarPagina) this.pagina = 1;
 
-    this.filtradas = this.carreras.filter((c) => {
-      const coincideArea = this.filtroArea === 'TODAS' || c.area_cineunesco === this.filtroArea;
-      const coincideRegion = this.filtroRegion === 'TODAS' || c.region_sede === this.filtroRegion;
-      const coincideInstitucion =
-        this.filtroInstitucion === 'TODAS' || c.nombre_institucion === this.filtroInstitucion;
-      const coincideHorario = this.filtroHorario === 'TODOS' || c.horario === this.filtroHorario;
+    this.cargando = true;
 
-      const coincideTexto =
-        !term ||
-        (c.carrera || '').toLowerCase().includes(term) ||
-        (c.nombre_institucion || '').toLowerCase().includes(term) ||
-        (c.region_sede || '').toLowerCase().includes(term) ||
-        (c.sede || '').toLowerCase().includes(term);
+    try {
+      const { items, total } = await this.carrerasService.getCarrerasPagina({
+        vista: 'activas',
+        busqueda: this.searchTerm,
+        area: this.filtroArea,
+        region: this.filtroRegion,
+        institucion: this.filtroInstitucion,
+        horario: this.filtroHorario,
+        orden: this.orden,
+        pagina: this.pagina - 1,
+        tamano: this.porPagina,
+      });
 
-      return coincideArea && coincideRegion && coincideInstitucion && coincideHorario && coincideTexto;
-    });
-
-    this.ordenar();
-    this.pagina = 1;
+      this.carreras = items;
+      this.filtradas = items;
+      this.total = total;
+    } catch (err) {
+      console.error('Error cargando carreras:', err);
+      this.carreras = [];
+      this.filtradas = [];
+      this.total = 0;
+    } finally {
+      this.cargando = false;
+    }
   }
 
   ordenar() {
-    this.filtradas.sort((a, b) => {
-      switch (this.orden) {
-        case 'arancel':
-          return this.parseArancel(a.valor_arancel) - this.parseArancel(b.valor_arancel);
-        case 'duracion':
-          return this.parseIntSafe(a.duracion_formal) - this.parseIntSafe(b.duracion_formal);
-        case 'nombre':
-        default:
-          return (a.carrera || '').localeCompare(b.carrera || '');
-      }
-    });
+    this.aplicarFiltros();
   }
 
   limpiarFiltros() {
@@ -153,20 +174,26 @@ export class CarrerasPage implements OnInit {
   }
 
   get totalPaginas(): number {
-    return Math.max(1, Math.ceil(this.filtradas.length / this.porPagina));
+    return Math.max(1, Math.ceil(this.total / this.porPagina));
   }
 
+  /** Lo que llega de la base ya es la página; no hay que recortar nada. */
   get paginaActualCarreras(): CarreraDoc[] {
-    const inicio = (this.pagina - 1) * this.porPagina;
-    return this.filtradas.slice(inicio, inicio + this.porPagina);
+    return this.carreras;
   }
 
   paginaAnterior() {
-    if (this.pagina > 1) this.pagina--;
+    if (this.pagina > 1) {
+      this.pagina--;
+      this.aplicarFiltros(false);
+    }
   }
 
   paginaSiguiente() {
-    if (this.pagina < this.totalPaginas) this.pagina++;
+    if (this.pagina < this.totalPaginas) {
+      this.pagina++;
+      this.aplicarFiltros(false);
+    }
   }
 
   esFavorito(carrera: CarreraDoc): boolean {
