@@ -1,135 +1,432 @@
-ion-content {
-  --background: linear-gradient(180deg, var(--app-bg-top), var(--app-bg-bottom));
+/* =====================================================================
+   Usuarios registrados
+
+   Mismo fondo, velo y colores que el resto. El rol se muestra en cada
+   fila: es lo que explica qué puede hacer cada persona, y antes solo se
+   distinguía al administrador.
+   ===================================================================== */
+
+.cabecera-limpia ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+  --color: #fff;
+  --min-height: 44px;
 }
 
-ion-searchbar {
+.pantalla-usuarios {
+  --background: transparent;
+}
+
+.fondo {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 45%;
+}
+
+.velo {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      72% 62% at 50% 46%,
+      rgba(6, 6, 14, 0.93) 0%,
+      rgba(6, 6, 14, 0.8) 44%,
+      rgba(6, 6, 14, 0.42) 78%,
+      rgba(6, 6, 14, 0.28) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(8, 8, 18, 0.74) 0%,
+      rgba(8, 8, 18, 0.64) 38%,
+      rgba(8, 8, 18, 0.84) 100%
+    ),
+    radial-gradient(
+      90% 55% at 50% -10%,
+      rgba(139, 92, 246, 0.28) 0%,
+      rgba(79, 124, 255, 0.14) 46%,
+      rgba(8, 8, 18, 0) 76%
+    );
+}
+
+.lienzo {
+  position: relative;
+  z-index: 1;
   max-width: 820px;
-  margin: 0 auto 4px auto;
+  margin: 0 auto;
+  padding: 6px 24px calc(40px + var(--ion-safe-area-bottom, 0px));
+}
 
-  --background: var(--app-surface);
-  --color: var(--app-text);
-  --placeholder-color: var(--app-text-muted);
-  --icon-color: var(--app-text-muted);
+/* ----------------------------- Estados ----------------------------- */
+.cargando {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 56px 20px;
 
-  border: 1px solid var(--app-border);
-  border-radius: 14px;
+  p {
+    margin: 0;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.72);
+  }
+}
+
+.giro {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.16);
+  border-top-color: #7eb3ff;
+  animation: girar 0.8s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.aviso-error {
+  padding: 20px 22px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 92, 133, 0.42);
+  background: rgba(255, 92, 133, 0.12);
+}
+
+.error-titulo {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffb3c4;
+}
+
+.error-texto {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* ---------------------------- Encabezado ---------------------------- */
+.encabezado {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.titulo {
+  margin: 0 0 8px;
+  font-size: clamp(25px, 4.8vw, 32px);
+  font-weight: 800;
+  letter-spacing: -1.1px;
+  line-height: 1.12;
+  color: #fff;
+  text-shadow: 0 3px 22px rgba(0, 0, 0, 0.75);
+}
+
+.bajada {
+  margin: 0 auto;
+  max-width: 54ch;
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.82);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+}
+
+/* ------------------------------- Panel ------------------------------- */
+.panel {
+  margin-bottom: 16px;
+  padding: 18px 20px;
+
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(16, 16, 24, 0.78);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.48);
+}
+
+.buscador {
+  --background: rgba(255, 255, 255, 0.07);
+  --color: #fff;
+  --placeholder-color: rgba(255, 255, 255, 0.45);
+  --placeholder-opacity: 1;
+  --icon-color: rgba(255, 255, 255, 0.55);
+  --clear-button-color: rgba(255, 255, 255, 0.6);
+  --border-radius: 15px;
+  --box-shadow: none;
+
+  padding: 0;
+  min-height: 52px;
 }
 
 .conteo {
-  max-width: 820px;
-  margin: 8px auto 12px auto;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--app-text-muted);
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.72);
+
+  b {
+    color: #fff;
+    font-weight: 800;
+  }
 }
 
-/* Tarjeta por usuario */
-.tarjeta-usuario {
+/* ------------------------------- Lista ------------------------------- */
+.lista {
   display: flex;
-  align-items: flex-start;
-  gap: 14px;
+  flex-direction: column;
+  gap: 10px;
+}
 
-  max-width: 820px;
-  margin: 0 auto 10px auto;
-  padding: 14px;
+.usuario {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
 
-  background: var(--app-surface);
-  border: 1px solid var(--app-border);
-  border-radius: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(16, 16, 24, 0.78);
+  backdrop-filter: blur(10px);
+
+  transition: border-color 170ms ease, transform 170ms ease;
+
+  &:hover {
+    border-color: rgba(126, 179, 255, 0.45);
+    transform: translateY(-1px);
+  }
+}
+
+/* La propia cuenta se marca: en una lista todas las filas se parecen */
+.usuario.yo {
+  border-color: rgba(126, 179, 255, 0.4);
+  background: rgba(79, 124, 255, 0.1);
 }
 
 .avatar {
   flex-shrink: 0;
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
-  display: grid;
-  place-items: center;
-
-  font-weight: 900;
-  font-size: 15px;
-
-  color: #dbeafe;
-  background: rgba(59, 130, 246, 0.18);
-  border: 1px solid rgba(59, 130, 246, 0.35);
-}
-
-.avatar.admin {
-  color: #fde68a;
-  background: rgba(245, 158, 11, 0.16);
-  border-color: rgba(245, 158, 11, 0.4);
-}
-
-.datos {
-  min-width: 0;
-  flex: 1;
-}
-
-.linea-nombre {
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
+  justify-content: center;
 
-.nombre {
+  border-radius: 16px;
   font-size: 16px;
   font-weight: 800;
-  color: var(--app-text);
+  letter-spacing: 0.4px;
+  color: #fff;
+
+  background: linear-gradient(135deg, #4f7cff, #22d3ee);
+
+  &[data-rol='admin'] {
+    background: linear-gradient(135deg, #f0a24b, #d97757);
+  }
+
+  &[data-rol='institucion'] {
+    background: linear-gradient(135deg, #8b5cf6, #4f7cff);
+  }
+}
+
+.usuario-datos {
+  flex: 1;
+  min-width: 0;
+}
+
+.usuario-top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-bottom: 3px;
+
+  h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    color: #fff;
+  }
 }
 
 .chip-rol {
-  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 10.5px;
   font-weight: 800;
+  letter-spacing: 0.7px;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
-  padding: 2px 8px;
-  border-radius: 999px;
 
-  color: #fde68a;
-  background: rgba(245, 158, 11, 0.16);
-  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #a9ccff;
+  background: rgba(59, 130, 246, 0.16);
+  border: 1px solid rgba(59, 130, 246, 0.45);
+
+  &[data-rol='admin'] {
+    color: #fde68a;
+    background: rgba(240, 162, 75, 0.16);
+    border-color: rgba(240, 162, 75, 0.48);
+  }
+
+  &[data-rol='institucion'] {
+    color: #c4b5fd;
+    background: rgba(139, 92, 246, 0.18);
+    border-color: rgba(139, 92, 246, 0.5);
+  }
+}
+
+.chip-yo {
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.24);
 }
 
 .correo {
-  margin-top: 3px;
-  font-size: 14px;
-  color: var(--app-text-muted);
-  word-break: break-all;
+  margin: 0 0 10px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.72);
+  overflow-wrap: anywhere;
 }
 
-.meta {
+.datos {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 14px;
-  margin-top: 8px;
-
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--app-text-muted);
+  gap: 7px;
 }
 
-/* Estados */
-.estado-centro {
-  max-width: 820px;
-  margin: 40px auto;
+.dato {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 5px 10px;
+
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 12.5px;
+
+  span {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  b {
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+  }
+}
+
+/* ----------------------------- Eliminar -----------------------------
+   Discreto por defecto y rojo al acercarse: es definitivo, así que no
+   debe invitar, pero tampoco esconderse. */
+.btn-eliminar {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 15px;
+
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.64);
+
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+
+  &:hover:not([disabled]) {
+    color: #ff9db3;
+    background: rgba(255, 92, 133, 0.16);
+    border-color: rgba(255, 92, 133, 0.6);
+  }
+
+  &[disabled] {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+/* ------------------------------- Vacío ------------------------------- */
+.vacio {
+  padding: 46px 24px;
   text-align: center;
-  color: var(--app-text-muted);
+
+  border-radius: 20px;
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  background: rgba(16, 16, 24, 0.62);
 }
 
-.aviso-error {
-  max-width: 820px;
-  margin: 20px auto;
-  padding: 14px 16px;
-
-  border-radius: 14px;
-  background: rgba(235, 68, 90, 0.12);
-  border: 1px solid rgba(235, 68, 90, 0.4);
-  color: var(--app-text);
+.vacio-titulo {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  color: #fff;
+  overflow-wrap: anywhere;
 }
 
-.aviso-error p {
-  margin: 6px 0 0 0;
-  font-size: 14px;
-  color: var(--app-text-muted);
+/* ------------------------------- Móvil ------------------------------- */
+@media (max-width: 680px) {
+  .velo {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(8, 8, 18, 0.8) 0%,
+        rgba(8, 8, 18, 0.93) 45%,
+        rgba(8, 8, 18, 0.96) 100%
+      ),
+      radial-gradient(90% 40% at 50% -10%, rgba(139, 92, 246, 0.22) 0%, rgba(8, 8, 18, 0) 70%);
+  }
+
+  .lienzo {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .usuario {
+    flex-wrap: wrap;
+  }
+
+  .btn-eliminar {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .usuario,
+  .btn-eliminar {
+    transition: none;
+  }
+
+  .usuario:hover {
+    transform: none;
+  }
+
+  .giro {
+    animation: none;
+  }
 }

@@ -3,6 +3,8 @@ import { Observable, from, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import { SupabaseClientService } from '../core/supabase.client';
+import { AuthService } from './auth.service';
+import { environment } from 'src/environments/environment';
 
 /**
  * Perfil de una persona.
@@ -29,6 +31,7 @@ export interface UsuarioPerfil {
 @Injectable({ providedIn: 'root' })
 export class UsuarioService {
   private supabase = inject(SupabaseClientService).cliente;
+  private authService = inject(AuthService);
 
   private limpiarRut(rut: string): string {
     return (rut || '').replace(/\./g, '').replace(/-/g, '').trim().toUpperCase();
@@ -142,6 +145,41 @@ export class UsuarioService {
         return data ? this.aPerfil(data) : null;
       })
     );
+  }
+
+  /**
+   * Elimina una cuenta por completo.
+   *
+   * Pasa por el backend porque borrar en Supabase Auth exige la llave de
+   * servicio, que nunca viaja al navegador. Se lleva el perfil, los
+   * favoritos y la institución con su plan; deja las solicitudes y los
+   * pagos, que son respaldo de operaciones reales.
+   */
+  async eliminarUsuario(uid: string): Promise<void> {
+    const token = await this.authService.getToken();
+    if (!token) throw new Error('SIN_SESION');
+
+    const r = await fetch(`${environment.apiPagosUrl}/usuarios/${uid}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!r.ok) {
+      const cuerpo = await r.json().catch(() => ({}));
+      const codigo = (cuerpo as any)?.error || 'ERROR_ELIMINANDO';
+
+      const explicacion: Record<string, string> = {
+        NO_PUEDES_BORRARTE:
+          'No puedes eliminar tu propia cuenta: quedarías fuera del sistema.',
+        ULTIMO_ADMINISTRADOR:
+          'Es el último administrador. Si lo eliminas, nadie podría gestionar ' +
+          'usuarios, solicitudes ni planes. Crea otro administrador primero.',
+        SIN_PERMISO: 'Solo un administrador puede eliminar cuentas.',
+        USUARIO_NO_ENCONTRADO: 'Esa cuenta ya no existe.',
+      };
+
+      throw new Error(explicacion[codigo] || codigo);
+    }
   }
 
   /** Todos los perfiles. Solo administración: lo exige la política. */

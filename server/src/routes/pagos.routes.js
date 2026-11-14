@@ -7,6 +7,7 @@ const {
   activarSolicitud,
   habilitarCuenta,
 } = require('../controllers/solicitudes.controller');
+const { eliminarUsuario } = require('../controllers/usuarios.controller');
 
 const router = express.Router();
 
@@ -28,6 +29,12 @@ router.post('/solicitudes/reclamar', requiereSesion, reclamarSolicitudes);
  * Solo administración: el rol de institución no se puede auto-asignar.
  */
 router.post('/solicitudes/habilitar-cuenta', requiereSesion, requiereAdmin, habilitarCuenta);
+
+/**
+ * Elimina una cuenta por completo. Solo administración: borrar en
+ * Supabase Auth exige la llave de servicio, que no viaja al navegador.
+ */
+router.delete('/usuarios/:id', requiereSesion, requiereAdmin, eliminarUsuario);
 
 /** Activa un plan sin pago (el Piloto). Solo administración. */
 router.post('/solicitudes/activar', requiereSesion, requiereAdmin, activarSolicitud);

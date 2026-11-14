@@ -1,73 +1,143 @@
-<ion-header>
-  <ion-toolbar color="primary">
+<!--
+  Usuarios registrados.
+
+  Mismo lenguaje que el resto. Cada persona muestra su rol, porque es lo
+  que explica qué puede hacer dentro de la aplicación, y desde aquí se
+  puede eliminar una cuenta.
+-->
+<ion-header class="cabecera-limpia">
+  <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/admin"></ion-back-button>
+      <ion-back-button defaultHref="/tabs/admin" text=""></ion-back-button>
     </ion-buttons>
-    <ion-title>Usuarios</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <ng-container *ngIf="estado$ | async as estado">
-    <!-- CARGANDO -->
-    <div class="estado-centro" *ngIf="estado.cargando">
-      <ion-spinner></ion-spinner>
-      <p>Cargando usuarios...</p>
-    </div>
+<ion-content fullscreen="true" class="pantalla-usuarios">
+  <div class="fondo" aria-hidden="true">
+    <img class="foto" src="/assets/estudiantes-biblioteca.jpg" alt="" decoding="async" />
+    <span class="velo"></span>
+  </div>
 
-    <!-- ERROR -->
-    <div class="aviso-error" *ngIf="!estado.cargando && estado.error">
-      <strong>No se pudieron cargar los usuarios</strong>
-      <p>{{ estado.error }}</p>
-    </div>
+  <div class="lienzo">
+    <ng-container *ngIf="estado$ | async as estado">
 
-    <ng-container *ngIf="!estado.cargando && !estado.error">
-      <ion-searchbar
-        [(ngModel)]="busqueda"
-        name="busqueda"
-        placeholder="Buscar por nombre, correo o RUT"
-        [debounce]="200">
-      </ion-searchbar>
+      <!-- Cargando -->
+      <div class="cargando" *ngIf="estado.cargando">
+        <span class="giro" aria-hidden="true"></span>
+        <p>Cargando usuarios…</p>
+      </div>
 
-      <ng-container *ngIf="filtrar(estado.usuarios) as lista">
-        <p class="conteo">
-          {{ lista.length }}
-          {{ lista.length === 1 ? 'usuario' : 'usuarios' }}
-          <span *ngIf="busqueda.trim()">de {{ estado.usuarios.length }}</span>
-        </p>
+      <!-- Error -->
+      <div class="aviso-error" *ngIf="!estado.cargando && estado.error">
+        <p class="error-titulo">No se pudieron cargar los usuarios</p>
+        <p class="error-texto">{{ estado.error }}</p>
+      </div>
 
-        <!-- VACIO -->
-        <div class="estado-centro" *ngIf="lista.length === 0">
-          <p *ngIf="busqueda.trim(); else sinUsuarios">
-            Ningún usuario coincide con «{{ busqueda }}».
+      <ng-container *ngIf="!estado.cargando && !estado.error">
+
+        <!-- ======================== Encabezado ======================== -->
+        <div class="encabezado">
+          <h1 class="titulo">Usuarios registrados</h1>
+          <p class="bajada">
+            Quién tiene cuenta y con qué rol. Eliminar una cuenta es
+            definitivo y no se puede deshacer.
           </p>
-          <ng-template #sinUsuarios>
-            <p>Todavía no hay usuarios registrados.</p>
-          </ng-template>
         </div>
 
-        <!-- LISTA -->
-        <div class="tarjeta-usuario" *ngFor="let u of lista; trackBy: trackPorUid">
-          <div class="avatar" [class.admin]="u.rol === 'admin'">
-            {{ getIniciales(u.nombre) }}
+        <!-- ========================== Búsqueda ========================== -->
+        <section class="panel">
+          <ion-searchbar
+            class="buscador"
+            [(ngModel)]="busqueda"
+            name="busqueda"
+            placeholder="Buscar por nombre, correo o RUT"
+            [debounce]="200">
+          </ion-searchbar>
+
+          <ng-container *ngIf="filtrar(estado.usuarios) as lista">
+            <p class="conteo">
+              <b>{{ lista.length }}</b>
+              {{ lista.length === 1 ? 'persona' : 'personas' }}
+              <span *ngIf="busqueda.trim()">de {{ estado.usuarios.length }}</span>
+            </p>
+          </ng-container>
+        </section>
+
+        <!-- =========================== Lista =========================== -->
+        <ng-container *ngIf="filtrar(estado.usuarios) as lista">
+
+          <div class="vacio" *ngIf="lista.length === 0">
+            <p class="vacio-titulo" *ngIf="busqueda.trim()">
+              Nadie coincide con «{{ busqueda }}»
+            </p>
+            <p class="vacio-titulo" *ngIf="!busqueda.trim()">
+              Todavía no hay usuarios registrados
+            </p>
           </div>
 
-          <div class="datos">
-            <div class="linea-nombre">
-              <span class="nombre">{{ u.nombre || 'Sin nombre' }}</span>
-              <span class="chip-rol" *ngIf="u.rol === 'admin'">admin</span>
-            </div>
+          <div class="lista" *ngIf="lista.length > 0">
+            <article
+              class="usuario"
+              *ngFor="let u of lista; trackBy: trackPorUid"
+              [class.yo]="u.uid === miUid">
 
-            <div class="correo">{{ u.email }}</div>
+              <span class="avatar" [attr.data-rol]="u.rol" aria-hidden="true">
+                {{ getIniciales(u.nombre) }}
+              </span>
 
-            <div class="meta">
-              <span>{{ u.rut || '—' }}</span>
-              <span *ngIf="u.edad">{{ u.edad }} años</span>
-              <span>Registro: {{ fechaRegistro(u.creadoEn) }}</span>
-            </div>
+              <div class="usuario-datos">
+                <div class="usuario-top">
+                  <h2>{{ u.nombre || 'Sin nombre' }}</h2>
+
+                  <span class="chip-rol" [attr.data-rol]="u.rol">
+                    {{
+                      u.rol === 'admin'
+                        ? 'Administrador'
+                        : u.rol === 'institucion'
+                          ? 'Institución'
+                          : 'Estudiante'
+                    }}
+                  </span>
+
+                  <span class="chip-yo" *ngIf="u.uid === miUid">Tú</span>
+                </div>
+
+                <p class="correo">{{ u.email }}</p>
+
+                <div class="datos">
+                  <span class="dato"><span>RUT</span><b>{{ u.rut || '—' }}</b></span>
+                  <span class="dato" *ngIf="u.edad"><span>Edad</span><b>{{ u.edad }} años</b></span>
+                  <span class="dato"><span>Registro</span><b>{{ fechaRegistro(u.creadoEn) }}</b></span>
+                </div>
+              </div>
+
+              <!--
+                No se ofrece borrar la propia cuenta: el backend igual lo
+                rechaza, pero mostrar un botón que siempre falla es peor
+                que no mostrarlo.
+              -->
+              <button
+                type="button"
+                class="btn-eliminar"
+                *ngIf="u.uid !== miUid"
+                [disabled]="eliminando === u.uid"
+                [attr.aria-label]="'Eliminar la cuenta de ' + u.nombre"
+                (click)="eliminarUsuario(u)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3 6h18" />
+                  <path d="M8 6V4h8v2" />
+                  <path d="M19 6l-1 14H6L5 6" />
+                  <path d="M10 11v6M14 11v6" />
+                </svg>
+                {{ eliminando === u.uid ? 'Eliminando…' : 'Eliminar' }}
+              </button>
+            </article>
           </div>
-        </div>
+        </ng-container>
+
       </ng-container>
     </ng-container>
-  </ng-container>
+  </div>
 </ion-content>
