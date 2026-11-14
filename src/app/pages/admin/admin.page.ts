@@ -53,11 +53,19 @@ export class AdminPage {
         'Red Educativa queda desactivado. Las solicitudes ya enviadas no cambian.',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
-        { text: 'Actualizar', handler: () => this.ejecutarSincronizacion() },
+        { text: 'Actualizar', role: 'actualizar' },
       ],
     });
 
     await alert.present();
+
+    // El trabajo va después del cierre: si se lanza desde el botón, el
+    // cartel de carga choca con el diálogo que aún se cierra y la espera
+    // no termina nunca.
+    const { role } = await alert.onDidDismiss();
+    if (role !== 'actualizar') return;
+
+    await this.ejecutarSincronizacion();
   }
 
   private async ejecutarSincronizacion(): Promise<void> {

@@ -167,22 +167,25 @@ export class AdminSolicitudesPage {
       cssClass: 'alerta-texto',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Ajustar monto',
-          handler: () => {
-            this.pedirMonto(s, plan, monto);
-          },
-        },
-        {
-          text: 'Aprobar',
-          handler: () => {
-            this.guardarAprobacion(s, plan, `${monto}`);
-          },
-        },
+        { text: 'Ajustar monto', role: 'ajustar' },
+        { text: 'Aprobar', role: 'aprobar' },
       ],
     });
 
     await alert.present();
+
+    // El trabajo va FUERA del botón, después de que el diálogo se cerró.
+    // Si se lanza desde dentro, el cartel de "Aprobando..." intenta
+    // abrirse mientras el diálogo aún se cierra, Ionic no permite las dos
+    // ventanas a la vez y la espera nunca termina: la escritura en la
+    // base jamás se ejecuta, sin error ni aviso.
+    const { role } = await alert.onDidDismiss();
+
+    if (role === 'ajustar') {
+      await this.pedirMonto(s, plan, monto);
+    } else if (role === 'aprobar') {
+      await this.guardarAprobacion(s, plan, `${monto}`);
+    }
   }
 
   /** Cuando el valor es a medida o el plan no tiene precio definido. */
@@ -208,16 +211,16 @@ export class AdminSolicitudesPage {
       ],
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Aprobar',
-          handler: (data) => {
-            this.guardarAprobacion(s, plan, data?.monto);
-          },
-        },
+        { text: 'Aprobar', role: 'aprobar' },
       ],
     });
 
     await alert.present();
+
+    const { role, data } = await alert.onDidDismiss();
+    if (role !== 'aprobar') return;
+
+    await this.guardarAprobacion(s, plan, data?.values?.monto);
   }
 
   private async confirmarAprobacionSinPago(s: Solicitud, plan: any): Promise<void> {
@@ -228,16 +231,16 @@ export class AdminSolicitudesPage {
         'Este plan no requiere pago, así que se activará de inmediato al aprobarlo.',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Aprobar y activar',
-          handler: () => {
-            this.guardarAprobacion(s, plan, '0');
-          },
-        },
+        { text: 'Aprobar y activar', role: 'aprobar' },
       ],
     });
 
     await alert.present();
+
+    const { role } = await alert.onDidDismiss();
+    if (role !== 'aprobar') return;
+
+    await this.guardarAprobacion(s, plan, '0');
   }
 
   private async guardarAprobacion(
@@ -294,17 +297,16 @@ export class AdminSolicitudesPage {
       ],
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Rechazar',
-          role: 'destructive',
-          handler: (data) => {
-            this.guardarRechazo(s, data?.motivo ?? '');
-          },
-        },
+        { text: 'Rechazar', role: 'rechazar', cssClass: 'boton-peligro' },
       ],
     });
 
     await alert.present();
+
+    const { role, data } = await alert.onDidDismiss();
+    if (role !== 'rechazar') return;
+
+    await this.guardarRechazo(s, data?.values?.motivo ?? '');
   }
 
   private async guardarRechazo(s: Solicitud, motivo: string): Promise<void> {

@@ -120,3 +120,10 @@ ion-item.campo-valido {
   text-align: left;
   line-height: 1.6;
 }
+
+/* Botón destructivo dentro de un diálogo.
+   Antes lo pintaba el rol `destructive`, que ahora se usa para saber
+   qué botón se apretó. */
+.boton-peligro {
+  color: var(--ion-color-danger) !important;
+}

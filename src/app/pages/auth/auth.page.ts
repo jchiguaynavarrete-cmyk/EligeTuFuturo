@@ -710,16 +710,18 @@ export class AuthPage implements OnInit {
       ],
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Enviar enlace',
-          handler: (data) => {
-            this.enviarCorreoRecuperacion(data?.email ?? '');
-          },
-        },
+        { text: 'Enviar enlace', role: 'enviar' },
       ],
     });
 
     await alert.present();
+
+    // Igual que en el panel de administración: el envío ocurre una vez
+    // cerrado el diálogo, para que el cartel de carga no choque con él.
+    const { role, data } = await alert.onDidDismiss();
+    if (role !== 'enviar') return;
+
+    await this.enviarCorreoRecuperacion(data?.values?.email ?? '');
   }
 
   private async enviarCorreoRecuperacion(email: string) {
