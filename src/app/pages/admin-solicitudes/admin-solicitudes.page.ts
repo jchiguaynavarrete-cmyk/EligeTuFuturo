@@ -136,9 +136,9 @@ export class AdminSolicitudesPage {
 
     const sugerido = s.monto ?? plan.precio ?? null;
 
-    // El plan ya trae su precio: no hay por qué hacer teclearlo de nuevo.
-    // Solo se pide escribirlo cuando el valor es a medida (cotización) o
-    // cuando el plan todavía no tiene precio definido.
+    // El plan ya trae su precio y no se negocia: solo se confirma.
+    // Escribir el monto a mano queda reservado para los planes que se
+    // cotizan caso a caso o que todavía no tienen precio definido.
     if (!plan.requiereCotizacion && sugerido !== null) {
       await this.confirmarAprobacionConPrecioFijo(s, plan, sugerido);
       return;
@@ -147,7 +147,7 @@ export class AdminSolicitudesPage {
     await this.pedirMonto(s, plan, sugerido);
   }
 
-  /** Precio fijo: un clic para aprobar, con la opción de ajustarlo. */
+  /** Precio fijo: el monto lo define el plan, así que solo se confirma. */
   private async confirmarAprobacionConPrecioFijo(
     s: Solicitud,
     plan: any,
@@ -167,7 +167,6 @@ export class AdminSolicitudesPage {
       cssClass: 'alerta-texto',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
-        { text: 'Ajustar monto', role: 'ajustar' },
         { text: 'Aprobar', role: 'aprobar' },
       ],
     });
@@ -181,11 +180,9 @@ export class AdminSolicitudesPage {
     // base jamás se ejecuta, sin error ni aviso.
     const { role } = await alert.onDidDismiss();
 
-    if (role === 'ajustar') {
-      await this.pedirMonto(s, plan, monto);
-    } else if (role === 'aprobar') {
-      await this.guardarAprobacion(s, plan, `${monto}`);
-    }
+    if (role !== 'aprobar') return;
+
+    await this.guardarAprobacion(s, plan, `${monto}`);
   }
 
   /** Cuando el valor es a medida o el plan no tiene precio definido. */
