@@ -1,0 +1,72 @@
+# =====================================================================
+# Despliegue en Render
+#
+# Dos servicios desde este mismo repositorio:
+#   - la app (sitio estático, lo que abre la gente)
+#   - el backend de pagos (servicio web Node)
+#
+# Render los crea solos al leer este archivo: Dashboard → New → Blueprint
+# → elegir este repositorio.
+#
+# Los secretos NO van aquí: se cargan en el panel de Render, que los
+# guarda cifrados. Este archivo sí se versiona.
+# =====================================================================
+
+services:
+  # -------------------------------------------------------------------
+  # App Ionic/Angular
+  # -------------------------------------------------------------------
+  - type: web
+    name: eligetufuturo-app
+    runtime: static
+    buildCommand: npm ci && npm run build -- --configuration production
+    staticPublishPath: ./www
+
+    # La app resuelve sus rutas en el navegador. Sin esto, abrir
+    # /institucional directamente o recargar daría 404: el servidor
+    # buscaría un archivo en esa ruta y no existe.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+
+  # -------------------------------------------------------------------
+  # Backend de pagos
+  # -------------------------------------------------------------------
+  - type: web
+    name: eligetufuturo-backend
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/salud
+
+    envVars:
+      - key: TBK_ENVIRONMENT
+        value: integration
+
+      # Credenciales públicas de integración de Transbank: no son
+      # secretas, Transbank las publica para que cualquiera pruebe.
+      - key: TBK_COMMERCE_CODE
+        value: '597055555532'
+      - key: TBK_API_KEY
+        value: 579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C
+
+      # Estas se completan en el panel de Render una vez que existan
+      # las URL de los dos servicios.
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: TBK_RETURN_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false

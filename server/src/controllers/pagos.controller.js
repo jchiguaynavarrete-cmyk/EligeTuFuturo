@@ -1,4 +1,4 @@
-const { admin, db } = require('../config/firebase');
+const { db } = require('../config/supabase');
 const { crearTransaccion } = require('../config/transbank');
 
 const URL_FRONTEND = process.env.FRONTEND_URL || 'http://localhost:8101';
@@ -19,7 +19,7 @@ function generarSessionId(uid) {
  * POST /api/pagos/crear
  *
  * Crea la transacción en Webpay. El monto NO llega desde el navegador:
- * se lee de la solicitud en Firestore, que solo el administrador puede fijar.
+ * se lee de la solicitud en la base, que solo el administrador puede fijar.
  */
 async function crearPago(req, res) {
   const { solicitudId } = req.body || {};
@@ -30,17 +30,19 @@ async function crearPago(req, res) {
   }
 
   try {
-    const ref = db.collection('solicitudes').doc(solicitudId);
-    const snap = await ref.get();
+    const { data: solicitud, error } = await db
+      .from('solicitudes')
+      .select('*')
+      .eq('id', solicitudId)
+      .maybeSingle();
 
-    if (!snap.exists) {
+    if (error) throw error;
+    if (!solicitud) {
       return res.status(404).json({ error: 'SOLICITUD_NO_ENCONTRADA' });
     }
 
-    const solicitud = snap.data();
-
     // Solo el dueño de la solicitud puede pagarla.
-    if (solicitud.uidSolicitante !== uid) {
+    if (solicitud.solicitante_id !== uid) {
       return res.status(403).json({ error: 'SIN_PERMISO' });
     }
 
@@ -48,7 +50,7 @@ async function crearPago(req, res) {
       return res.status(409).json({ error: 'SOLICITUD_NO_APROBADA' });
     }
 
-    if (solicitud.estadoPago === 'pagado') {
+    if (solicitud.estado_pago === 'pagado') {
       return res.status(409).json({ error: 'PAGO_YA_AUTORIZADO' });
     }
 
@@ -57,15 +59,15 @@ async function crearPago(req, res) {
       return res.status(409).json({ error: 'MONTO_NO_ASIGNADO' });
     }
 
-    // Idempotencia: si ya hay un pago autorizado para esta solicitud, no se crea otro.
-    const autorizados = await db
-      .collection('pagos')
-      .where('solicitudId', '==', solicitudId)
-      .where('estado', '==', 'autorizado')
-      .limit(1)
-      .get();
+    // Idempotencia: si ya hay un pago autorizado, no se crea otro.
+    const { data: autorizados } = await db
+      .from('pagos')
+      .select('id')
+      .eq('solicitud_id', solicitudId)
+      .eq('estado', 'autorizado')
+      .limit(1);
 
-    if (!autorizados.empty) {
+    if (autorizados && autorizados.length > 0) {
       return res.status(409).json({ error: 'PAGO_YA_AUTORIZADO' });
     }
 
@@ -85,22 +87,17 @@ async function crearPago(req, res) {
 
     console.log('[WEBPAY] Transacción creada');
 
-    const pagoRef = db.collection('pagos').doc();
-    await pagoRef.set({
-      solicitudId,
-      uidSolicitante: uid,
-      buyOrder,
-      sessionId,
+    const { error: errPago } = await db.from('pagos').insert({
+      solicitud_id: solicitudId,
+      solicitante_id: uid,
+      buy_order: buyOrder,
+      session_id: sessionId,
       amount: monto,
       token: respuesta.token,
       estado: 'iniciado',
-      authorizationCode: null,
-      paymentTypeCode: null,
-      responseCode: null,
-      transactionDate: null,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
+
+    if (errPago) throw errPago;
 
     return res.json({
       url: respuesta.url,
@@ -125,10 +122,13 @@ async function retornoWebpay(req, res) {
   const tokenWs = datos.token_ws;
   const tokenAnulado = datos.TBK_TOKEN;
 
-  // Anulación: la persona apretó "Anular compra" en Webpay.
   if (tokenAnulado && !tokenWs) {
     console.log('[WEBPAY] Pago anulado por el usuario');
-    await marcarPorToken(tokenAnulado, { estado: 'cancelado' });
+    await db
+      .from('pagos')
+      .update({ estado: 'cancelado', actualizado_en: new Date().toISOString() })
+      .eq('token', tokenAnulado);
+
     return redirigir(res, { resultado: 'cancelado' });
   }
 
@@ -138,19 +138,23 @@ async function retornoWebpay(req, res) {
   }
 
   try {
-    const pagoSnap = await buscarPagoPorToken(tokenWs);
+    const { data: pago } = await db
+      .from('pagos')
+      .select('*')
+      .eq('token', tokenWs)
+      .maybeSingle();
 
-    if (!pagoSnap) {
+    if (!pago) {
       console.error('[WEBPAY] Token desconocido');
       return redirigir(res, { resultado: 'error', motivo: 'TOKEN_INVALIDO' });
     }
 
     // Si ya se procesó, no se vuelve a confirmar.
-    if (pagoSnap.data().estado !== 'iniciado') {
+    if (pago.estado !== 'iniciado') {
       console.log('[WEBPAY] Transacción ya procesada');
       return redirigir(res, {
-        resultado: pagoSnap.data().estado === 'autorizado' ? 'ok' : 'rechazado',
-        pagoId: pagoSnap.id,
+        resultado: pago.estado === 'autorizado' ? 'ok' : 'rechazado',
+        pagoId: pago.id,
       });
     }
 
@@ -161,89 +165,86 @@ async function retornoWebpay(req, res) {
 
     const autorizado = r.response_code === 0 && r.status === 'AUTHORIZED';
 
-    await pagoSnap.ref.update({
-      estado: autorizado ? 'autorizado' : 'rechazado',
-      authorizationCode: r.authorization_code ?? null,
-      paymentTypeCode: r.payment_type_code ?? null,
-      responseCode: r.response_code ?? null,
-      transactionDate: r.transaction_date ?? null,
-      amount: r.amount ?? pagoSnap.data().amount,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    await db
+      .from('pagos')
+      .update({
+        estado: autorizado ? 'autorizado' : 'rechazado',
+        authorization_code: r.authorization_code ?? null,
+        payment_type_code: r.payment_type_code ?? null,
+        response_code: r.response_code ?? null,
+        transaction_date: r.transaction_date ?? null,
+        amount: r.amount ?? pago.amount,
+        actualizado_en: new Date().toISOString(),
+      })
+      .eq('id', pago.id);
 
     if (!autorizado) {
       console.log(`[WEBPAY] Transacción rechazada (código ${r.response_code})`);
-      await db.collection('solicitudes').doc(pagoSnap.data().solicitudId).update({
-        estadoPago: 'fallido',
-      });
-      return redirigir(res, { resultado: 'rechazado', pagoId: pagoSnap.id });
+      await db
+        .from('solicitudes')
+        .update({ estado_pago: 'fallido' })
+        .eq('id', pago.solicitud_id);
+
+      return redirigir(res, { resultado: 'rechazado', pagoId: pago.id });
     }
 
     console.log('[WEBPAY] Transacción autorizada');
-    await activarPlan(pagoSnap.data().solicitudId, pagoSnap.id);
+    await activarPlanDeSolicitud(pago.solicitud_id, pago.id);
 
-    return redirigir(res, { resultado: 'ok', pagoId: pagoSnap.id });
+    return redirigir(res, { resultado: 'ok', pagoId: pago.id });
   } catch (err) {
     console.error('[WEBPAY] Error confirmando transacción:', err.message);
     return redirigir(res, { resultado: 'error', motivo: 'ERROR_CONFIRMANDO' });
   }
 }
 
-async function buscarPagoPorToken(token) {
-  const q = await db.collection('pagos').where('token', '==', token).limit(1).get();
-  return q.empty ? null : q.docs[0];
-}
-
-async function marcarPorToken(token, cambios) {
-  const snap = await buscarPagoPorToken(token);
-  if (!snap) return;
-
-  await snap.ref.update({
-    ...cambios,
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-  });
-}
-
 /**
  * Marca la solicitud como pagada y deja el plan vigente.
  * Se hace aquí, en el backend, para que no dependa del navegador.
  */
-async function activarPlan(solicitudId, pagoId) {
-  const solicitudRef = db.collection('solicitudes').doc(solicitudId);
-  const solicitudSnap = await solicitudRef.get();
-  if (!solicitudSnap.exists) return;
+async function activarPlanDeSolicitud(solicitudId, pagoId) {
+  const { data: s } = await db
+    .from('solicitudes')
+    .select('*')
+    .eq('id', solicitudId)
+    .maybeSingle();
 
-  const s = solicitudSnap.data();
+  if (!s) return;
 
-  const planSnap = await db.collection('planes').doc(s.planId).get();
-  const duracionMeses = planSnap.exists ? planSnap.data().duracionMeses || 12 : 12;
+  const { data: plan } = await db
+    .from('planes')
+    .select('duracion_meses')
+    .eq('id', s.plan_id)
+    .maybeSingle();
+
+  const duracionMeses = plan?.duracion_meses || 12;
 
   const inicio = new Date();
   const termino = new Date(inicio);
   termino.setMonth(termino.getMonth() + duracionMeses);
 
-  await solicitudRef.update({
-    estadoPago: 'pagado',
-    pagoId,
-  });
+  const cambios = { estado_pago: 'pagado' };
+  if (pagoId) cambios.pago_id = pagoId;
 
-  await db.collection('instituciones').doc(s.uidSolicitante).set(
+  await db.from('solicitudes').update(cambios).eq('id', solicitudId);
+
+  await db.from('instituciones').upsert(
     {
-      uid: s.uidSolicitante,
-      nombreInstitucion: s.nombreInstitucion,
+      id: s.solicitante_id,
+      nombre_institucion: s.nombre_institucion,
       rbd: s.rbd,
       correo: s.correo,
-      planId: s.planId,
-      planNombre: s.planNombre,
-      estadoPlan: 'activo',
-      solicitudId,
-      fechaInicio: admin.firestore.Timestamp.fromDate(inicio),
-      fechaTermino: admin.firestore.Timestamp.fromDate(termino),
+      plan_id: s.plan_id,
+      plan_nombre: s.plan_nombre,
+      estado_plan: 'activo',
+      solicitud_id: solicitudId,
+      fecha_inicio: inicio.toISOString(),
+      fecha_termino: termino.toISOString(),
     },
-    { merge: true }
+    { onConflict: 'id' }
   );
 
-  console.log(`[WEBPAY] Plan activado para ${s.nombreInstitucion}`);
+  console.log(`[WEBPAY] Plan activado para ${s.nombre_institucion}`);
 }
 
 /** Devuelve a la app con el resultado en la URL. */
@@ -258,4 +259,4 @@ function redirigir(res, params) {
   );
 }
 
-module.exports = { crearPago, retornoWebpay };
+module.exports = { crearPago, retornoWebpay, activarPlanDeSolicitud };

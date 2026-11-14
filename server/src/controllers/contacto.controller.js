@@ -1,4 +1,4 @@
-const { admin, db } = require('../config/firebase');
+const { db } = require('../config/supabase');
 
 /** Ventana para frenar envíos repetidos desde el mismo correo. */
 const MINUTOS_ENTRE_ENVIOS = 10;
@@ -44,84 +44,93 @@ async function crearContacto(req, res) {
 
   try {
     // Freno simple contra envíos repetidos: un correo cada 10 minutos.
-    const desde = admin.firestore.Timestamp.fromMillis(
-      Date.now() - MINUTOS_ENTRE_ENVIOS * 60 * 1000
-    );
+    const desde = new Date(Date.now() - MINUTOS_ENTRE_ENVIOS * 60 * 1000).toISOString();
 
-    const recientes = await db
-      .collection('contactos')
-      .where('correo', '==', correo)
-      .where('creadoEn', '>', desde)
-      .limit(1)
-      .get();
+    const { data: recientes } = await db
+      .from('contactos')
+      .select('id')
+      .eq('correo', correo)
+      .gt('creado_en', desde)
+      .limit(1);
 
-    if (!recientes.empty) {
+    if (recientes && recientes.length > 0) {
       console.log(`[CONTACTO] Envío repetido de ${correo}, rechazado`);
       return res.status(429).json({ error: 'DEMASIADAS_SOLICITUDES' });
     }
 
-    // Guarda el contacto tal cual llegó, para tener el dato en bruto.
-    const ref = db.collection('contactos').doc();
-    await ref.set({
-      nombre,
-      cargo,
-      institucion,
-      correo,
-      telefono,
-      cantidadAlumnos,
+    // Se guarda el contacto tal cual llegó, para tener el dato en bruto.
+    const { data: contacto, error: errContacto } = await db
+      .from('contactos')
+      .insert({
+        nombre,
+        cargo,
+        institucion,
+        correo,
+        telefono,
+        cantidad_alumnos: cantidadAlumnos,
+        plan_id: d.planId || null,
+        plan_nombre: d.planNombre || null,
+        estado: 'nuevo',
+      })
+      .select('id')
+      .single();
 
-      planId: d.planId || null,
-      planNombre: d.planNombre || null,
-
-      estado: 'nuevo',
-      creadoEn: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    if (errContacto) throw errContacto;
 
     /**
-     * Y crea la solicitud, para que caiga en el panel de administración
+     * Y se crea la solicitud, para que caiga en el panel de administración
      * junto a las demás. Nace sin dueño porque quien la envió todavía no
      * tiene cuenta: se le enlaza cuando se registre con este mismo correo.
      */
-    const plan = d.planId
-      ? (await db.collection('planes').doc(d.planId).get()).data()
-      : null;
+    let requierePago = true;
+    let planNombre = d.planNombre || null;
 
-    const requierePago = plan ? plan.requierePago !== false : true;
+    if (d.planId) {
+      const { data: plan } = await db
+        .from('planes')
+        .select('nombre, requiere_pago')
+        .eq('id', d.planId)
+        .maybeSingle();
 
-    const solRef = db.collection('solicitudes').doc();
-    await solRef.set({
-      nombreInstitucion: institucion,
-      rbd: '',
-      encargado: nombre,
-      cargo,
-      correo,
-      telefono,
-      cantidadEstudiantes: cantidadAlumnos,
+      if (plan) {
+        requierePago = plan.requiere_pago !== false;
+        planNombre = planNombre || plan.nombre;
+      }
+    }
 
-      planId: d.planId || null,
-      planNombre: d.planNombre || (plan ? plan.nombre : null),
+    const { data: solicitud, error: errSolicitud } = await db
+      .from('solicitudes')
+      .insert({
+        nombre_institucion: institucion,
+        rbd: null,
+        encargado: nombre,
+        cargo,
+        correo,
+        telefono,
+        cantidad_estudiantes: cantidadAlumnos,
 
-      uidSolicitante: null,
-      origen: 'publico',
+        plan_id: d.planId || null,
+        plan_nombre: planNombre,
 
-      estado: 'pendiente',
-      fechaSolicitud: admin.firestore.FieldValue.serverTimestamp(),
-      fechaResolucion: null,
-      adminUid: null,
-      motivoRechazo: null,
+        solicitante_id: null,
+        origen: 'publico',
 
-      monto: null,
-      estadoPago: requierePago ? 'pendiente' : 'no_aplica',
-      pagoId: null,
+        estado: 'pendiente',
+        monto: null,
+        estado_pago: requierePago ? 'pendiente' : 'no_aplica',
 
-      contactoId: ref.id,
-    });
+        contacto_id: contacto.id,
+      })
+      .select('id')
+      .single();
+
+    if (errSolicitud) throw errSolicitud;
 
     console.log(
-      `[CONTACTO] Nueva solicitud de ${institucion} (${correo}) · solicitud ${solRef.id}`
+      `[CONTACTO] Nueva solicitud de ${institucion} (${correo}) · solicitud ${solicitud.id}`
     );
 
-    return res.json({ id: ref.id, solicitudId: solRef.id });
+    return res.json({ id: contacto.id, solicitudId: solicitud.id });
   } catch (err) {
     console.error('[CONTACTO] Error guardando:', err.message);
     return res.status(500).json({ error: 'ERROR_INTERNO' });

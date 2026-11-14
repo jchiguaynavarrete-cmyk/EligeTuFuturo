@@ -1,8 +1,8 @@
 const express = require('express');
-const { requiereSesion } = require('../middleware/auth');
+const { requiereSesion, requiereAdmin } = require('../middleware/auth');
 const { crearPago, retornoWebpay } = require('../controllers/pagos.controller');
 const { crearContacto } = require('../controllers/contacto.controller');
-const { reclamarSolicitudes } = require('../controllers/solicitudes.controller');
+const { reclamarSolicitudes, activarSolicitud } = require('../controllers/solicitudes.controller');
 
 const router = express.Router();
 
@@ -18,6 +18,9 @@ router.post('/contacto', crearContacto);
  * de crear. Exige sesión: el correo se toma del token, no del cuerpo.
  */
 router.post('/solicitudes/reclamar', requiereSesion, reclamarSolicitudes);
+
+/** Activa un plan sin pago (el Piloto). Solo administración. */
+router.post('/solicitudes/activar', requiereSesion, requiereAdmin, activarSolicitud);
 
 // Crear la transacción: exige sesión, porque se valida el dueño de la solicitud.
 router.post('/pagos/crear', requiereSesion, crearPago);
