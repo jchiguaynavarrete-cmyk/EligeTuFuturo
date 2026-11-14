@@ -75,7 +75,17 @@ export class FavoritosService {
   }
 
   /** Agrega o quita, según cómo esté. */
-  async toggleFavorito(carrera: CarreraDoc): Promise<void> {
+  /**
+   * Marca o desmarca, y devuelve cómo quedó.
+   *
+   * Devolver el estado final permite a la pantalla pintar el corazón al
+   * instante, sin volver a preguntarle a la base. Antes no devolvía nada:
+   * el favorito se guardaba bien, pero el corazón no se pintaba hasta
+   * recargar, y parecía que el clic no había hecho nada.
+   *
+   * @returns `true` si quedó marcada como favorita.
+   */
+  async toggleFavorito(carrera: CarreraDoc): Promise<boolean> {
     const uid = this.authService.getUid();
     if (!uid) throw new Error('SIN_SESION');
     if (!carrera?.id) throw new Error('CARRERA_SIN_ID');
@@ -99,7 +109,7 @@ export class FavoritosService {
         .eq('carrera_id', carreraId);
 
       if (errBorrar) throw errBorrar;
-      return;
+      return false;
     }
 
     const { error: errCrear } = await this.supabase
@@ -107,6 +117,7 @@ export class FavoritosService {
       .insert({ usuario_id: uid, carrera_id: carreraId });
 
     if (errCrear) throw errCrear;
+    return true;
   }
 
   async quitarFavorito(carrera: CarreraDoc): Promise<void> {

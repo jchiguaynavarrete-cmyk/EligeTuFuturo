@@ -1,13 +1,512 @@
-h2 {
-  font-weight: 800;
-  margin: 0;
+/* =====================================================================
+   Carreras guardadas
+
+   Mismo fondo y mismo velo que Carreras: al cambiar de pestaña no debe
+   sentirse que se cambió de aplicación. Las insignias conservan sus
+   colores, verde para técnicas y azul para profesionales.
+   ===================================================================== */
+
+.cabecera-limpia ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+  --color: #fff;
+  --min-height: 44px;
 }
 
-h4 {
-  font-weight: 800;
+.pantalla-favoritos {
+  --background: transparent;
 }
 
-p {
-  margin: 6px 0;
-  opacity: 0.95;
+.fondo {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 45%;
+}
+
+.velo {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      72% 62% at 50% 48%,
+      rgba(6, 6, 14, 0.93) 0%,
+      rgba(6, 6, 14, 0.8) 44%,
+      rgba(6, 6, 14, 0.42) 78%,
+      rgba(6, 6, 14, 0.28) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(8, 8, 18, 0.74) 0%,
+      rgba(8, 8, 18, 0.64) 38%,
+      rgba(8, 8, 18, 0.84) 100%
+    ),
+    radial-gradient(
+      90% 55% at 50% -10%,
+      rgba(139, 92, 246, 0.28) 0%,
+      rgba(79, 124, 255, 0.14) 46%,
+      rgba(8, 8, 18, 0) 76%
+    );
+}
+
+.lienzo {
+  position: relative;
+  z-index: 1;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 10px 24px calc(40px + var(--ion-safe-area-bottom, 0px));
+}
+
+/* ---------------------------- Encabezado ---------------------------- */
+.encabezado {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.marca-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #8b5cf6, #4f7cff 55%, #22d3ee);
+}
+
+.marca-nombre {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: #fff;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.8);
+
+  em {
+    font-style: normal;
+    color: var(--app-link);
+  }
+}
+
+.titulo {
+  margin: 0 0 8px;
+  font-size: clamp(26px, 5vw, 34px);
+  font-weight: 800;
+  letter-spacing: -1.1px;
+  line-height: 1.12;
+  color: #fff;
+  text-shadow: 0 3px 22px rgba(0, 0, 0, 0.75);
+}
+
+.bajada {
+  margin: 0 auto;
+  max-width: 52ch;
+  font-size: 16px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.84);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+
+  b {
+    font-weight: 800;
+    color: #fff;
+  }
+}
+
+/* ----------------------------- Cargando ----------------------------- */
+.cargando {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 50px 20px;
+
+  p {
+    margin: 0;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.72);
+  }
+}
+
+.giro {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.16);
+  border-top-color: #7eb3ff;
+  animation: girar 0.8s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ------------------------------ Acciones ------------------------------
+   Imprimir no es la acción principal de la pantalla: mirar las carreras
+   sí. Por eso va discreto y no como una barra azul a todo el ancho. */
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 14px;
+}
+
+.btn-imprimir {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 42px;
+  padding: 0 18px;
+
+  border-radius: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #fff;
+
+  transition: background 170ms ease, border-color 170ms ease, transform 170ms ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.13);
+    border-color: rgba(255, 255, 255, 0.34);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
+  }
+}
+
+/* ------------------------------- Lista ------------------------------- */
+ion-accordion-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: transparent;
+}
+
+.carrera {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(16, 16, 24, 0.8);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+
+  transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+
+  &:hover {
+    border-color: rgba(126, 179, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.42);
+  }
+}
+
+ion-accordion ion-item[slot='header'] {
+  --background: transparent;
+  --background-hover: transparent;
+  --color: #fff;
+  --padding-start: 18px;
+  --inner-padding-end: 14px;
+  --min-height: 76px;
+}
+
+ion-accordion ion-label {
+  h2 {
+    margin: 0 0 4px;
+    font-size: 16.5px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    text-transform: capitalize;
+    color: #fff;
+  }
+
+  p {
+    margin: 0 0 8px;
+    font-size: 13.5px;
+    line-height: 1.45;
+    text-transform: capitalize;
+    color: rgba(255, 255, 255, 0.72);
+  }
+}
+
+/* Los colores de siempre: verde técnica, azul profesional */
+.insignia {
+  display: inline-block;
+  padding: 4px 11px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.9px;
+
+  &.tecnica {
+    color: #86efac;
+    background: rgba(45, 211, 111, 0.18);
+    border: 1px solid rgba(45, 211, 111, 0.48);
+  }
+
+  &.profesional {
+    color: #a9ccff;
+    background: rgba(59, 130, 246, 0.18);
+    border: 1px solid rgba(59, 130, 246, 0.5);
+  }
+}
+
+/*
+ * Quitar lleva corazón lleno y texto: solo el texto rojo se lee como un
+ * botón peligroso, y aquí no se está borrando nada grave.
+ */
+.quitar {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 13px;
+
+  border-radius: 12px;
+  border: 1px solid rgba(255, 92, 133, 0.4);
+  background: rgba(255, 92, 133, 0.1);
+  color: #ff8aa8;
+  cursor: pointer;
+
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+
+  &:hover {
+    background: rgba(255, 92, 133, 0.2);
+    border-color: rgba(255, 92, 133, 0.7);
+    color: #ffa7bd;
+    transform: scale(1.03);
+  }
+}
+
+/* ------------------------------ Detalle ------------------------------ */
+.detalle {
+  padding: 4px 18px 20px;
+}
+
+.titulo-seccion {
+  margin: 18px 0 10px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+
+  &:first-child {
+    margin-top: 6px;
+  }
+}
+
+.datos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dato {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 7px 12px;
+
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 13px;
+
+  span {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  b {
+    font-weight: 700;
+    color: #fff;
+    text-transform: capitalize;
+  }
+}
+
+.ponderaciones {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+@media (min-width: 700px) {
+  .ponderaciones {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 16px;
+  }
+}
+
+.pond {
+  padding: 11px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pond-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+
+  span {
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  b {
+    font-weight: 800;
+    color: #fff;
+  }
+}
+
+.bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #4f7cff, #22d3ee);
+  transition: width 320ms ease;
+}
+
+/* --------------------------- Sin favoritas --------------------------- */
+.vacio {
+  padding: 50px 28px;
+  text-align: center;
+
+  border-radius: 24px;
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  background: rgba(16, 16, 24, 0.66);
+  backdrop-filter: blur(12px);
+}
+
+.vacio-icono {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 122, 154, 0.85);
+}
+
+.vacio-titulo {
+  margin: 0 0 8px;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: #fff;
+}
+
+.vacio-texto {
+  margin: 0 auto 22px;
+  max-width: 44ch;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.btn-ir {
+  height: 50px;
+  padding: 0 26px;
+  border: 0;
+  border-radius: 15px;
+  cursor: pointer;
+
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(100deg, #8b5cf6, #4f7cff 55%, #22d3ee);
+  box-shadow: 0 14px 32px rgba(79, 124, 255, 0.42);
+
+  transition: transform 180ms ease, filter 180ms ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    filter: saturate(1.12);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.985);
+  }
+}
+
+/* ------------------------------- Móvil ------------------------------- */
+@media (max-width: 620px) {
+  .velo {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(8, 8, 18, 0.8) 0%,
+        rgba(8, 8, 18, 0.93) 45%,
+        rgba(8, 8, 18, 0.96) 100%
+      ),
+      radial-gradient(90% 40% at 50% -10%, rgba(139, 92, 246, 0.22) 0%, rgba(8, 8, 18, 0) 70%);
+  }
+
+  .lienzo {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carrera,
+  .quitar,
+  .btn-imprimir,
+  .btn-ir,
+  .fill {
+    transition: none;
+  }
+
+  .carrera:hover,
+  .btn-imprimir:hover,
+  .btn-ir:hover {
+    transform: none;
+  }
+
+  .giro {
+    animation: none;
+  }
 }

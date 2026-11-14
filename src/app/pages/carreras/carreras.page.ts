@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -74,11 +75,30 @@ export class CarrerasPage implements OnInit {
   ngOnInit() {
     this.cargarOpciones();
     this.aplicarFiltros();
+    this.cargarFavoritos();
+  }
 
-    this.favoritosService.getFavoritosIds().subscribe({
-      next: (ids) => (this.favoritosIds = ids),
-      error: (err) => console.error('Error cargando favoritos:', err),
-    });
+  /**
+   * Al volver a esta pestaña se vuelven a pedir los favoritos.
+   *
+   * Ionic mantiene las pestañas montadas, así que sin esto la pantalla se
+   * quedaba con la lista del momento en que se abrió: quitar un favorito
+   * desde la otra pestaña no despintaba el corazón aquí.
+   */
+  ionViewWillEnter() {
+    this.cargarFavoritos();
+  }
+
+  private async cargarFavoritos(): Promise<void> {
+    try {
+      // `firstValueFrom` cierra la suscripción al primer valor. Suscribirse
+      // sin cerrar dejaba una abierta por cada entrada a la pestaña.
+      this.favoritosIds = await firstValueFrom(
+        this.favoritosService.getFavoritosIds()
+      );
+    } catch (err) {
+      console.error('Error cargando favoritos:', err);
+    }
   }
 
   /**
@@ -192,7 +212,26 @@ export class CarrerasPage implements OnInit {
 
   async toggleFavorito(carrera: CarreraDoc, ev: Event) {
     ev.stopPropagation();
-    await this.favoritosService.toggleFavorito(carrera);
+
+    /*
+     * El corazón se pinta con lo que devuelve la base, no antes.
+     *
+     * Pintar primero y corregir después se vería más rápido, pero si la
+     * operación falla el corazón se devolvería solo y nadie entendería
+     * por qué. Son décimas de segundo: no vale el engaño.
+     */
+    try {
+      const esFavorita = await this.favoritosService.toggleFavorito(carrera);
+      const id = String(carrera.id);
+
+      if (esFavorita) {
+        this.favoritosIds.add(id);
+      } else {
+        this.favoritosIds.delete(id);
+      }
+    } catch (err) {
+      console.error('No se pudo cambiar el favorito:', err);
+    }
   }
 
   /** Carreras del catálogo completo. Se cuenta una vez, sin traer filas. */

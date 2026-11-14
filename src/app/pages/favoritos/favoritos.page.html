@@ -1,94 +1,194 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Favoritos</ion-title>
-  </ion-toolbar>
+<!--
+  Carreras guardadas.
+
+  Mismo lenguaje que Carreras: la foto fija detrás y el contenido encima.
+  Se conservan los colores de las insignias, verde para técnicas y azul
+  para profesionales, que es como se distinguen de un vistazo.
+-->
+<ion-header class="cabecera-limpia">
+  <ion-toolbar></ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content fullscreen="true" class="pantalla-favoritos">
+  <div class="fondo" aria-hidden="true">
+    <img class="foto" src="/assets/estudiantes-biblioteca.jpg" alt="" decoding="async" />
+    <span class="velo"></span>
+  </div>
 
-  <ion-button
-    expand="block"
-    color="primary"
-    (click)="imprimirFavoritos()"
-    style="margin-bottom: 16px;">
-    Imprimir informe
-  </ion-button>
+  <div class="lienzo">
 
-  <p *ngIf="cargando">Cargando favoritos...</p>
+    <!-- ========================= Encabezado ========================= -->
+    <div class="encabezado">
+      <div class="marca">
+        <span class="marca-logo" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="23" height="23">
+            <path d="M24 14 L37 20 L24 26 L11 20 Z" fill="#fff" opacity="0.96" />
+            <path
+              d="M16.5 22.5 V29 c0 0 3.2 3.2 7.5 3.2 S31.5 29 31.5 29 V22.5"
+              fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity="0.96" />
+            <path d="M37 20 V30" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.8" />
+          </svg>
+        </span>
+        <span class="marca-nombre">Elige<em>Tu</em>Futuro</span>
+      </div>
 
-  <ng-container *ngIf="!cargando && favoritas.length > 0; else sinFavoritos">
-    <p>Actualmente tienes {{ favoritas.length }} carrera(s) guardada(s).</p>
+      <h1 class="titulo">Tus carreras guardadas</h1>
+      <p class="bajada" *ngIf="!cargando">
+        <ng-container *ngIf="favoritas.length > 0">
+          Tienes <b>{{ favoritas.length }}</b>
+          {{ favoritas.length === 1 ? 'carrera guardada' : 'carreras guardadas' }}.
+          Ábrelas para comparar aranceles, vacantes y ponderaciones.
+        </ng-container>
+        <ng-container *ngIf="favoritas.length === 0">
+          Aquí se guardan las carreras que marques con el corazón.
+        </ng-container>
+      </p>
+    </div>
 
-    <ion-accordion-group>
-      <ion-accordion *ngFor="let c of favoritas" [value]="c.id || c.codigo_carrera">
+    <!-- Cargando -->
+    <div class="cargando" *ngIf="cargando">
+      <span class="giro" aria-hidden="true"></span>
+      <p>Buscando tus carreras…</p>
+    </div>
 
-        <!-- HEADER -->
-        <ion-item slot="header">
-          <ion-label>
-            <h2>{{ c.carrera }}</h2>
-            <p>{{ c.nombre_institucion }} · {{ c.region_sede }}</p>
+    <ng-container *ngIf="!cargando">
 
-            <ion-badge [color]="esTecnica(c) ? 'success' : 'primary'">
-              {{ esTecnica(c) ? 'TÉCNICA' : 'PROFESIONAL' }}
-            </ion-badge>
-          </ion-label>
+      <!-- ====================== Con favoritas ====================== -->
+      <ng-container *ngIf="favoritas.length > 0">
 
-          <ion-button slot="end" fill="clear" color="danger" (click)="quitarFavorito(c, $event)">
-            Quitar
-          </ion-button>
-        </ion-item>
-
-        <!-- CONTENIDO -->
-        <div slot="content" style="padding: 14px;">
-
-          <h4 style="margin: 0 0 8px 0;">Resumen</h4>
-          <p><b>Jornada:</b> {{ v(c.horario) }}</p>
-          <p><b>Sede:</b> {{ v(c.sede) }}</p>
-          <p><b>Duración:</b> {{ v(c.duracion_formal) }} semestres</p>
-          <p><b>Vacantes (1er semestre):</b> {{ v(c.vacantes_primer_semestre) }}</p>
-          <p><b>Arancel:</b> {{ v(c.valor_arancel) }}</p>
-          <p><b>Costo titulación:</b> {{ v(c.costo_titulacion) }}</p>
-
-          <hr style="opacity:.25; margin: 12px 0;" />
-
-          <h4 style="margin: 0 0 8px 0;">Matrícula</h4>
-          <p>
-            <b>Total matriculados:</b>
-            {{ num(c.total_matriculados) }}
-            (F: {{ num(c.total_femenino_matriculados) }} · M: {{ num(c.total_masculino_matriculados) }})
-          </p>
-          <p>
-            <b>Primer año:</b>
-            {{ num(c.total_matriculados_primer_anyo) }}
-            (F: {{ num(c.matriculados_femeninos_primer_anyo) }} · M: {{ num(c.matriculados_masculinos_primer_anyo) }})
-          </p>
-
-          <hr style="opacity:.25; margin: 12px 0;" />
-
-          <h4 style="margin: 0 0 8px 0;">Titulados</h4>
-          <p>
-            <b>Total titulados:</b>
-            {{ num(c.total_titulados) }}
-            (F: {{ num(c.total_femenino) }} · M: {{ num(c.total_masculino) }})
-          </p>
-
-          <hr style="opacity:.25; margin: 12px 0;" />
-
-          <h4 style="margin: 0 0 8px 0;">Ponderaciones</h4>
-          <p><b>NEM:</b> {{ pNemPct(c) }}</p>
-          <p><b>Ranking:</b> {{ pRankingPct(c) }}</p>
-          <p><b>Lenguaje:</b> {{ pLenguajePct(c) }}</p>
-          <p><b>Matemáticas:</b> {{ pMatematicasPct(c) }}</p>
-          <p><b>Ciencias:</b> {{ pCienciasPct(c) }}</p>
-          <p><b>Historia:</b> {{ pHistoriaPct(c) }}</p>
-
+        <div class="acciones">
+          <button type="button" class="btn-imprimir" (click)="imprimirFavoritos()">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 9V3h12v6" />
+              <rect x="4" y="9" width="16" height="7" rx="2" />
+              <path d="M8 16h8v5H8z" />
+            </svg>
+            Imprimir informe
+          </button>
         </div>
-      </ion-accordion>
-    </ion-accordion-group>
-  </ng-container>
 
-  <ng-template #sinFavoritos>
-    <p *ngIf="!cargando">Aún no tienes carreras favoritas.</p>
-  </ng-template>
+        <div class="lista">
+          <ion-accordion-group>
+            <ion-accordion
+              *ngFor="let c of favoritas"
+              [value]="c.id || c.codigo_carrera"
+              class="carrera">
 
+              <ion-item slot="header" lines="none">
+                <ion-label>
+                  <h2>{{ c.carrera }}</h2>
+                  <p>{{ c.nombre_institucion }} · {{ c.region_sede }}</p>
+                  <span class="insignia" [class.tecnica]="esTecnica(c)" [class.profesional]="!esTecnica(c)">
+                    {{ esTecnica(c) ? 'TÉCNICA' : 'PROFESIONAL' }}
+                  </span>
+                </ion-label>
+
+                <button
+                  type="button"
+                  slot="end"
+                  class="quitar"
+                  [attr.aria-label]="'Quitar ' + c.carrera + ' de favoritos'"
+                  (click)="quitarFavorito(c, $event)">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M12 20s-7-4.3-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.7-7 9-7 9z" />
+                  </svg>
+                  Quitar
+                </button>
+              </ion-item>
+
+              <!-- ======================= Detalle ======================= -->
+              <div slot="content" class="detalle">
+
+                <h3 class="titulo-seccion">Resumen</h3>
+                <div class="datos">
+                  <span class="dato"><span>Jornada</span><b>{{ v(c.horario) }}</b></span>
+                  <span class="dato"><span>Sede</span><b>{{ v(c.sede) }}</b></span>
+                  <span class="dato"><span>Duración</span><b>{{ v(c.duracion_formal) }} semestres</b></span>
+                  <span class="dato"><span>Vacantes</span><b>{{ v(c.vacantes_primer_semestre) }}</b></span>
+                  <span class="dato"><span>Arancel</span><b>{{ v(c.valor_arancel) }}</b></span>
+                  <span class="dato"><span>Titulación</span><b>{{ v(c.costo_titulacion) }}</b></span>
+                </div>
+
+                <h3 class="titulo-seccion">Matrícula</h3>
+                <div class="datos">
+                  <span class="dato">
+                    <span>Total</span>
+                    <b>{{ num(c.total_matriculados) }}</b>
+                  </span>
+                  <span class="dato">
+                    <span>Mujeres</span>
+                    <b>{{ num(c.total_femenino_matriculados) }}</b>
+                  </span>
+                  <span class="dato">
+                    <span>Hombres</span>
+                    <b>{{ num(c.total_masculino_matriculados) }}</b>
+                  </span>
+                  <span class="dato">
+                    <span>Primer año</span>
+                    <b>{{ num(c.total_matriculados_primer_anyo) }}</b>
+                  </span>
+                </div>
+
+                <h3 class="titulo-seccion">Titulados</h3>
+                <div class="datos">
+                  <span class="dato"><span>Total</span><b>{{ num(c.total_titulados) }}</b></span>
+                  <span class="dato"><span>Mujeres</span><b>{{ num(c.total_femenino) }}</b></span>
+                  <span class="dato"><span>Hombres</span><b>{{ num(c.total_masculino) }}</b></span>
+                </div>
+
+                <h3 class="titulo-seccion">Ponderaciones</h3>
+                <div class="ponderaciones">
+                  <div class="pond">
+                    <div class="pond-top"><span>NEM</span><b>{{ pNemPct(c) }}</b></div>
+                    <div class="bar"><div class="fill" [style.width.%]="pesoNum(c.notas_em)"></div></div>
+                  </div>
+                  <div class="pond">
+                    <div class="pond-top"><span>Ranking</span><b>{{ pRankingPct(c) }}</b></div>
+                    <div class="bar"><div class="fill" [style.width.%]="pesoNum(c.ranking)"></div></div>
+                  </div>
+                  <div class="pond">
+                    <div class="pond-top"><span>Lenguaje</span><b>{{ pLenguajePct(c) }}</b></div>
+                    <div class="bar"><div class="fill" [style.width.%]="pesoNum(c.psu_lenguaje)"></div></div>
+                  </div>
+                  <div class="pond">
+                    <div class="pond-top"><span>Matemáticas</span><b>{{ pMatematicasPct(c) }}</b></div>
+                    <div class="bar"><div class="fill" [style.width.%]="pesoNum(c.psu_matematicas)"></div></div>
+                  </div>
+                  <div class="pond">
+                    <div class="pond-top"><span>Ciencias</span><b>{{ pCienciasPct(c) }}</b></div>
+                    <div class="bar"><div class="fill" [style.width.%]="pesoNum(c.psu_ciencias)"></div></div>
+                  </div>
+                  <div class="pond">
+                    <div class="pond-top"><span>Historia</span><b>{{ pHistoriaPct(c) }}</b></div>
+                    <div class="bar"><div class="fill" [style.width.%]="pesoNum(c.psu_historia)"></div></div>
+                  </div>
+                </div>
+              </div>
+
+            </ion-accordion>
+          </ion-accordion-group>
+        </div>
+      </ng-container>
+
+      <!-- ======================= Sin favoritas ======================= -->
+      <div class="vacio" *ngIf="favoritas.length === 0">
+        <span class="vacio-icono" aria-hidden="true">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20s-7-4.3-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.7-7 9-7 9z" />
+          </svg>
+        </span>
+        <p class="vacio-titulo">Todavía no guardas ninguna carrera</p>
+        <p class="vacio-texto">
+          Busca en Carreras y aprieta el corazón de las que te interesen.
+          Aquí las vas a poder comparar lado a lado.
+        </p>
+        <button type="button" class="btn-ir" (click)="irACarreras()">
+          Explorar carreras
+        </button>
+      </div>
+
+    </ng-container>
+  </div>
 </ion-content>

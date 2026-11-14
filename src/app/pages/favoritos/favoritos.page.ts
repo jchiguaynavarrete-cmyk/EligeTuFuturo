@@ -1,22 +1,19 @@
 import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 import {
   IonContent,
   IonHeader,
-  IonTitle,
   IonToolbar,
   IonAccordionGroup,
   IonAccordion,
   IonItem,
   IonLabel,
-  IonButton,
-  IonBadge,
 } from '@ionic/angular/standalone';
 
-import { CarrerasService, CarreraDoc } from '../../services/carreras.service';
+import { CarreraDoc } from '../../services/carreras.service';
 import { FavoritosService } from '../../services/favoritos.service';
-import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'app-favoritos',
@@ -27,20 +24,17 @@ import { combineLatest } from 'rxjs';
     CommonModule,
     IonContent,
     IonHeader,
-    IonTitle,
     IonToolbar,
     IonAccordionGroup,
     IonAccordion,
     IonItem,
     IonLabel,
-    IonButton,
-    IonBadge,
   ],
 })
 export class FavoritosPage implements OnInit {
-  private carrerasService = inject(CarrerasService);
   private favoritosService = inject(FavoritosService);
   private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
 
   favoritas: CarreraDoc[] = [];
   cargando = true;
@@ -49,20 +43,53 @@ export class FavoritosPage implements OnInit {
     this.cargarFavoritos();
   }
 
+  /** Al volver a la pestaña puede haber favoritos nuevos marcados en Carreras. */
+  ionViewWillEnter() {
+    this.cargarFavoritos();
+  }
+
+  /**
+   * Trae las carreras guardadas en una sola consulta.
+   *
+   * Antes se bajaba el catálogo entero y se cruzaba en el navegador: tres
+   * mil carreras descargadas para mostrar cinco. La consulta con join ya
+   * existía en el servicio, pero esta pantalla no la usaba.
+   */
   cargarFavoritos() {
     this.cargando = true;
 
-    combineLatest([
-      this.carrerasService.getCarrerasTodas(),
-      this.favoritosService.getFavoritosIds(),
-    ]).subscribe(([carreras, favIds]) => {
-      this.favoritas = carreras.filter((c: any) =>
-        favIds.has(c.id ?? c.codigo_carrera)
-      );
-
-      this.cargando = false;
-      this.cdr.detectChanges();
+    this.favoritosService.getFavoritos().subscribe({
+      next: (carreras) => {
+        this.favoritas = carreras;
+        this.cargando = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('No se pudieron cargar los favoritos:', err);
+        this.favoritas = [];
+        this.cargando = false;
+        this.cdr.detectChanges();
+      },
     });
+  }
+
+  irACarreras() {
+    this.router.navigateByUrl('/tabs/carreras');
+  }
+
+  /** El ancho de la barra de ponderación, de 0 a 100. */
+  pesoNum(x: any): number {
+    if (x === null || x === undefined) return 0;
+
+    const s = String(x).trim();
+    if (!s || s === '-' || s.toLowerCase() === 's/i') return 0;
+
+    const n = Number(s.replace(',', '.'));
+    if (Number.isNaN(n)) return 0;
+
+    // Vienen como 0.20 o como 20 según la fila; se normalizan a 0-100.
+    const pct = n <= 1 ? n * 100 : n;
+    return Math.max(0, Math.min(100, Math.round(pct)));
   }
 
   esTecnica(c: any): boolean {
