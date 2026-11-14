@@ -1,17 +1,26 @@
 <ion-tabs>
   <ion-tab-bar slot="bottom">
 
-    <ion-tab-button tab="inicio">
+    <!--
+      Una institución que todavía no paga ve solo su plan, el calendario
+      y su cuenta. Lo que está contratando no se le entrega antes.
+    -->
+    <ion-tab-button tab="institucion" *ngIf="esInstitucionSinPlan">
+      <ion-icon name="business-outline"></ion-icon>
+      <ion-label>Mi plan</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="inicio" *ngIf="!esInstitucionSinPlan">
       <ion-icon name="heart-outline"></ion-icon>
       <ion-label>Favoritos</ion-label>
     </ion-tab-button>
 
-    <ion-tab-button tab="carreras">
+    <ion-tab-button tab="carreras" *ngIf="!esInstitucionSinPlan">
       <ion-icon name="school"></ion-icon>
       <ion-label>Carreras</ion-label>
     </ion-tab-button>
 
-    <!-- ✅ CALENDARIO -->
+    <!-- El calendario PAES es información pública: lo ve cualquiera. -->
     <ion-tab-button tab="calendario">
       <ion-icon name="calendar-outline"></ion-icon>
       <ion-label>Calendario</ion-label>
@@ -22,9 +31,7 @@
       <ion-label>Cuenta</ion-label>
     </ion-tab-button>
 
-    <ion-tab-button
-      *ngIf="esAdmin"
-      tab="admin">
+    <ion-tab-button tab="admin" *ngIf="esAdmin">
       <ion-icon name="shield-checkmark"></ion-icon>
       <ion-label>Admin</ion-label>
     </ion-tab-button>

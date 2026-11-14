@@ -17,6 +17,7 @@ import {
   heartOutline,
   shieldCheckmark,
   calendarOutline,
+  businessOutline,
 } from 'ionicons/icons';
 
 import { AuthService } from '../services/auth.service';
@@ -41,6 +42,14 @@ export class TabsPage implements OnInit {
 
   esAdmin = false;
 
+  /**
+   * Una institución que todavía no paga ve otras pestañas.
+   *
+   * Si se le dejaran las de siempre, al tocarlas el guardia la devolvería
+   * a su solicitud, y la aplicación parecería rota.
+   */
+  esInstitucionSinPlan = false;
+
   private authService = inject(AuthService);
   private usuarioService = inject(UsuarioService);
 
@@ -52,7 +61,8 @@ export class TabsPage implements OnInit {
       personCircle,
       'heart-outline': heartOutline,
       'shield-checkmark': shieldCheckmark,
-      'calendar-outline': calendarOutline, // ✅ CALENDARIO
+      'calendar-outline': calendarOutline,
+      'business-outline': businessOutline,
     });
   }
 
@@ -64,9 +74,13 @@ export class TabsPage implements OnInit {
       return;
     }
 
-    // 🔐 Traer rol desde la base
+    // El rol se lee de la base, no de la sesión.
     this.usuarioService.getUsuario(user.id).subscribe((perfil) => {
       this.esAdmin = perfil?.rol === 'admin';
     });
+
+    this.usuarioService
+      .institucionConPlanPendiente(user.id)
+      .subscribe((pendiente) => (this.esInstitucionSinPlan = pendiente));
   }
 }

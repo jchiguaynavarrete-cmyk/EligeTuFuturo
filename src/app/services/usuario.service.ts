@@ -275,6 +275,38 @@ export class UsuarioService {
    * la app. Un estudiante pasa solo si su establecimiento tiene el plan
    * activo.
    */
+  /**
+   * Qué puede ver esta persona dentro de la aplicación.
+   *
+   * Una institución que todavía no paga solo accede a sus solicitudes y
+   * al pago: mostrarle el catálogo y el simulador sería entregarle justo
+   * lo que está contratando.
+   *
+   * Estudiantes y administradores pasan siempre.
+   */
+  institucionConPlanPendiente(uid: string): Observable<boolean> {
+    return this.getUsuario(uid).pipe(
+      switchMap((perfil) => {
+        if (!perfil) return of(false);
+        if (perfil.rol !== 'institucion') return of(false);
+
+        /*
+         * La fila de `instituciones` se crea recién al confirmarse el
+         * pago, así que no existir equivale a no haber pagado.
+         */
+        const consulta = this.supabase
+          .from('instituciones')
+          .select('estado_plan')
+          .eq('id', uid)
+          .maybeSingle();
+
+        return from(consulta).pipe(
+          map(({ data }) => data?.estado_plan !== 'activo')
+        );
+      })
+    );
+  }
+
   tieneAccesoConConvenio(uid: string): Observable<boolean> {
     return this.getUsuario(uid).pipe(
       switchMap((perfil) => {

@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { TabsPage } from './tabs.page';
 import { adminGuard } from '../guards/admin.guard';
+import { institucionPagadaGuard } from '../guards/institucion-pagada.guard';
 
 export const routes: Routes = [
   {
@@ -9,18 +10,21 @@ export const routes: Routes = [
     children: [
       {
         path: 'inicio',
+        canActivate: [institucionPagadaGuard],
         loadComponent: () =>
           import('../pages/favoritos/favoritos.page')
             .then(m => m.FavoritosPage),
       },
       {
         path: 'carreras',
+        canActivate: [institucionPagadaGuard],
         loadComponent: () =>
           import('../pages/carreras/carreras.page')
             .then(m => m.CarrerasPage),
       },
       {
         path: 'simulador',
+        canActivate: [institucionPagadaGuard],
         loadComponent: () =>
           import('../pages/simulador/simulador.page')
             .then(m => m.SimuladorPage),
