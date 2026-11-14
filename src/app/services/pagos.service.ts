@@ -1,7 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { Auth } from '@angular/fire/auth';
-import { Firestore, doc, docData } from '@angular/fire/firestore';
-import { Observable, map } from 'rxjs';
+import { Observable, from } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+import { SupabaseClientService } from '../core/supabase.client';
+import { AuthService } from './auth.service';
 
 import { environment } from 'src/environments/environment';
 import { Pago } from '../models/planes.model';
@@ -20,20 +22,19 @@ export type ResultadoRetorno = 'ok' | 'rechazado' | 'cancelado' | 'error';
  *
  * El frontend nunca habla con Transbank ni conoce la API Key: solo pide al
  * backend que cree la transacción y lo redirige al formulario de Webpay.
- * El monto tampoco se envía desde aquí; el backend lo lee de Firestore.
+ * El monto tampoco se envía desde aquí; el backend lo lee de la base.
  */
 @Injectable({ providedIn: 'root' })
 export class PagosService {
-  private auth = inject(Auth);
-  private firestore = inject(Firestore);
+  private supabase = inject(SupabaseClientService).cliente;
+  private authService = inject(AuthService);
   private readonly api = environment.apiPagosUrl;
 
   /** El backend valida el token para saber quién pide el pago. */
   private async cabeceras(): Promise<HeadersInit> {
-    const user = this.auth.currentUser;
-    if (!user) throw new Error('SIN_SESION');
+    const token = await this.authService.getToken();
+    if (!token) throw new Error('SIN_SESION');
 
-    const token = await user.getIdToken();
     return {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
@@ -75,9 +76,35 @@ export class PagosService {
    * aquí solo se consulta el resultado que quedó guardado.
    */
   getPago(pagoId: string): Observable<Pago | null> {
-    const ref = doc(this.firestore, `pagos/${pagoId}`);
-    return docData(ref, { idField: 'id' }).pipe(
-      map((d) => (d ? (d as Pago) : null))
+    const consulta = this.supabase
+      .from('pagos')
+      .select('*')
+      .eq('id', pagoId)
+      .maybeSingle();
+
+    return from(consulta).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        if (!data) return null;
+
+        // Los nombres de columna de PostgreSQL a los que usan las páginas.
+        return {
+          id: data.id,
+          solicitudId: data.solicitud_id,
+          uidSolicitante: data.solicitante_id,
+          buyOrder: data.buy_order,
+          sessionId: data.session_id,
+          amount: data.amount,
+          token: data.token,
+          estado: data.estado,
+          authorizationCode: data.authorization_code,
+          paymentTypeCode: data.payment_type_code,
+          responseCode: data.response_code,
+          transactionDate: data.transaction_date,
+          createdAt: data.creado_en,
+          updatedAt: data.actualizado_en,
+        } as Pago;
+      })
     );
   }
 

@@ -51,12 +51,12 @@ export class BienvenidaPage implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.sub = this.authService.user$
       .pipe(
-        filter((user) => !!user?.uid),
+        filter((user) => !!user?.id),
         take(1),
       )
       .subscribe((user) => {
         this.router.navigateByUrl(
-          user!.emailVerified ? '/tabs/carreras' : '/verificar-cuenta',
+          this.authService.correoVerificado() ? '/tabs/carreras' : '/verificar-cuenta',
           { replaceUrl: true },
         );
       });

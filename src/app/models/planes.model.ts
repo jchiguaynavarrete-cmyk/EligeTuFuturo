@@ -1,7 +1,11 @@
-import { Timestamp } from '@angular/fire/firestore';
+/**
+ * Marca de tiempo. PostgreSQL las entrega como texto ISO; se mantiene
+ * `Date` para los valores que la app arma en memoria.
+ */
+export type Timestamp = string | Date;
 
 /**
- * Identificadores de los planes. Coinciden con el id del documento en Firestore.
+ * Identificadores de los planes. Coinciden con el id del documento en la base.
  * 'redEducativa' ya no se ofrece: se mantiene solo para leer solicitudes antiguas.
  */
 export type PlanId =
@@ -33,7 +37,7 @@ export type EstadoPlanInstitucion = 'inactivo' | 'activo' | 'vencido';
 
 /**
  * Plan comercial. Vive en `planes/{id}` para que los precios y textos se
- * administren desde Firestore y no queden escritos en el frontend.
+ * administren desde la base y no queden escritos en el frontend.
  */
 export interface Plan {
   id: PlanId;

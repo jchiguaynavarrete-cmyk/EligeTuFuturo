@@ -17,7 +17,6 @@ import {
 import { RouterModule } from '@angular/router';
 
 import { CarrerasService, CarreraDoc } from '../../services/carreras.service';
-import { QueryDocumentSnapshot } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-admin-carreras',
@@ -53,7 +52,7 @@ export class AdminCarrerasPage implements OnInit {
   pageSize = 50;
 
   // ✅ TIPADO COMPATIBLE CON getDocs() / AngularFire
-  cursor: QueryDocumentSnapshot<any> | null = null;
+  cursor: number | null = null;
 
   cargando = false;
 

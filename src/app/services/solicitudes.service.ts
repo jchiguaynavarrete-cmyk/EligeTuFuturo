@@ -1,30 +1,11 @@
 import { Injectable, inject } from '@angular/core';
-import {
-  Firestore,
-  collection,
-  collectionData,
-  doc,
-  docData,
-  addDoc,
-  setDoc,
-  updateDoc,
-  getDoc,
-  query,
-  orderBy,
-  where,
-  serverTimestamp,
-} from '@angular/fire/firestore';
-import { Observable, map } from 'rxjs';
+import { Observable, from } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-import { Auth } from '@angular/fire/auth';
 import { environment } from 'src/environments/environment';
-
-import {
-  Solicitud,
-  EstadoSolicitud,
-  Plan,
-  Institucion,
-} from '../models/planes.model';
+import { SupabaseClientService } from '../core/supabase.client';
+import { AuthService } from './auth.service';
+import { Institucion, Plan, Solicitud } from '../models/planes.model';
 
 /** Lo que llena la institución en el formulario. Nada más que esto. */
 export interface DatosSolicitud {
@@ -38,84 +19,137 @@ export interface DatosSolicitud {
 
 @Injectable({ providedIn: 'root' })
 export class SolicitudesService {
-  private firestore = inject(Firestore);
-  private auth = inject(Auth);
+  private supabase = inject(SupabaseClientService).cliente;
+  private authService = inject(AuthService);
+
+  /** Traduce una fila a la forma que usan las páginas. */
+  private aSolicitud(f: any): Solicitud {
+    return {
+      id: f.id,
+      nombreInstitucion: f.nombre_institucion,
+      rbd: f.rbd ?? '',
+      encargado: f.encargado,
+      cargo: f.cargo ?? undefined,
+      correo: f.correo,
+      telefono: f.telefono ?? '',
+      cantidadEstudiantes: f.cantidad_estudiantes,
+      planId: f.plan_id,
+      planNombre: f.plan_nombre,
+      uidSolicitante: f.solicitante_id,
+      origen: f.origen,
+      estado: f.estado,
+      fechaSolicitud: f.fecha_solicitud,
+      fechaResolucion: f.fecha_resolucion,
+      adminUid: f.admin_id,
+      motivoRechazo: f.motivo_rechazo,
+      monto: f.monto,
+      estadoPago: f.estado_pago,
+      pagoId: f.pago_id,
+    } as Solicitud;
+  }
+
+  private aInstitucion(f: any): Institucion {
+    return {
+      uid: f.id,
+      nombreInstitucion: f.nombre_institucion,
+      rbd: f.rbd ?? '',
+      correo: f.correo ?? '',
+      planId: f.plan_id,
+      planNombre: f.plan_nombre,
+      estadoPlan: f.estado_plan,
+      solicitudId: f.solicitud_id,
+      fechaInicio: f.fecha_inicio,
+      fechaTermino: f.fecha_termino,
+    } as Institucion;
+  }
 
   /**
    * Crea la solicitud en estado pendiente.
    *
-   * El monto y el estado los fija después el administrador: aquí se escriben
-   * con valores neutros a propósito, para que el formulario no pueda
-   * proponer un precio ni darse por aprobado.
+   * El monto y el estado los fija después el administrador: aquí van con
+   * valores neutros a propósito, y la política de la tabla lo exige, así
+   * que nadie puede llegar con su solicitud ya aprobada.
    */
-  async crearSolicitud(
-    uid: string,
-    plan: Plan,
-    datos: DatosSolicitud
-  ): Promise<string> {
-    const colRef = collection(this.firestore, 'solicitudes');
+  async crearSolicitud(uid: string, plan: Plan, datos: DatosSolicitud): Promise<string> {
+    const { data, error } = await this.supabase
+      .from('solicitudes')
+      .insert({
+        nombre_institucion: datos.nombreInstitucion.trim(),
+        rbd: datos.rbd.trim(),
+        encargado: datos.encargado.trim(),
+        correo: datos.correo.trim().toLowerCase(),
+        telefono: datos.telefono.trim(),
+        cantidad_estudiantes: datos.cantidadEstudiantes,
 
-    const ref = await addDoc(colRef, {
-      nombreInstitucion: datos.nombreInstitucion.trim(),
-      rbd: datos.rbd.trim(),
-      encargado: datos.encargado.trim(),
-      correo: datos.correo.trim().toLowerCase(),
-      telefono: datos.telefono.trim(),
-      cantidadEstudiantes: datos.cantidadEstudiantes,
+        plan_id: plan.id,
+        plan_nombre: plan.nombre,
 
-      planId: plan.id,
-      planNombre: plan.nombre,
+        solicitante_id: uid,
+        origen: 'app',
 
-      uidSolicitante: uid,
-      origen: 'app' as const,
+        estado: 'pendiente',
+        monto: null,
+        estado_pago: plan.requierePago ? 'pendiente' : 'no_aplica',
+        pago_id: null,
+        admin_id: null,
+      })
+      .select('id')
+      .single();
 
-      estado: 'pendiente' as EstadoSolicitud,
-      fechaSolicitud: serverTimestamp(),
-      fechaResolucion: null,
-      adminUid: null,
-      motivoRechazo: null,
-
-      monto: null,
-      estadoPago: plan.requierePago ? 'pendiente' : 'no_aplica',
-      pagoId: null,
-    });
-
-    return ref.id;
+    if (error) throw error;
+    return data.id;
   }
 
-  /** Solicitudes de una institución, de la más reciente a la más antigua. */
   listarMisSolicitudes(uid: string): Observable<Solicitud[]> {
-    const colRef = collection(this.firestore, 'solicitudes');
-    const qRef = query(
-      colRef,
-      where('uidSolicitante', '==', uid),
-      orderBy('fechaSolicitud', 'desc')
-    );
+    const consulta = this.supabase
+      .from('solicitudes')
+      .select('*')
+      .eq('solicitante_id', uid)
+      .order('fecha_solicitud', { ascending: false });
 
-    return collectionData(qRef, { idField: 'id' }) as Observable<Solicitud[]>;
+    return from(consulta).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? []).map((f) => this.aSolicitud(f));
+      })
+    );
   }
 
-  /** Todas las solicitudes. Solo administración. */
+  /** Todas. Solo administración: lo exige la política. */
   listarTodas(): Observable<Solicitud[]> {
-    const colRef = collection(this.firestore, 'solicitudes');
-    const qRef = query(colRef, orderBy('fechaSolicitud', 'desc'));
+    const consulta = this.supabase
+      .from('solicitudes')
+      .select('*')
+      .order('fecha_solicitud', { ascending: false });
 
-    return collectionData(qRef, { idField: 'id' }) as Observable<Solicitud[]>;
+    return from(consulta).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? []).map((f) => this.aSolicitud(f));
+      })
+    );
   }
 
   getSolicitud(id: string): Observable<Solicitud | null> {
-    const ref = doc(this.firestore, `solicitudes/${id}`);
-    return docData(ref, { idField: 'id' }).pipe(
-      map((d) => (d ? (d as Solicitud) : null))
+    const consulta = this.supabase
+      .from('solicitudes')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    return from(consulta).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        return data ? this.aSolicitud(data) : null;
+      })
     );
   }
 
   /**
-   * Aprueba la solicitud y fija el monto a pagar.
+   * Aprueba y fija el monto a pagar.
    *
-   * Si el plan no requiere pago (Piloto), se activa de inmediato y el
-   * estado de pago queda en "no_aplica": esa decisión viene de la
-   * configuración del plan, no de cada pantalla.
+   * Si el plan no requiere pago (Piloto), se activa de inmediato: esa
+   * decisión viene de la configuración del plan, no de cada pantalla.
    */
   async aprobarSolicitud(
     solicitudId: string,
@@ -123,85 +157,93 @@ export class SolicitudesService {
     monto: number,
     plan: Plan
   ): Promise<void> {
-    const ref = doc(this.firestore, `solicitudes/${solicitudId}`);
+    const { error } = await this.supabase
+      .from('solicitudes')
+      .update({
+        estado: 'aprobada',
+        monto: plan.requierePago ? monto : 0,
+        estado_pago: plan.requierePago ? 'pendiente' : 'no_aplica',
+        fecha_resolucion: new Date().toISOString(),
+        admin_id: adminUid,
+        motivo_rechazo: null,
+      })
+      .eq('id', solicitudId);
 
-    await updateDoc(ref, {
-      estado: 'aprobada' as EstadoSolicitud,
-      monto: plan.requierePago ? monto : 0,
-      estadoPago: plan.requierePago ? 'pendiente' : 'no_aplica',
-      fechaResolucion: serverTimestamp(),
-      adminUid,
-      motivoRechazo: null,
-    });
+    if (error) throw error;
 
     if (!plan.requierePago) {
       await this.activarPlan(solicitudId, plan);
     }
   }
 
-  async rechazarSolicitud(
-    solicitudId: string,
-    adminUid: string,
-    motivo: string
-  ): Promise<void> {
-    const ref = doc(this.firestore, `solicitudes/${solicitudId}`);
+  async rechazarSolicitud(solicitudId: string, adminUid: string, motivo: string): Promise<void> {
+    const { error } = await this.supabase
+      .from('solicitudes')
+      .update({
+        estado: 'rechazada',
+        fecha_resolucion: new Date().toISOString(),
+        admin_id: adminUid,
+        motivo_rechazo: motivo.trim() || null,
+      })
+      .eq('id', solicitudId);
 
-    await updateDoc(ref, {
-      estado: 'rechazada' as EstadoSolicitud,
-      fechaResolucion: serverTimestamp(),
-      adminUid,
-      motivoRechazo: motivo.trim() || null,
-    });
+    if (error) throw error;
   }
 
   /**
-   * Deja el plan vigente en `instituciones/{uid}`.
+   * Deja el plan vigente. Se usa para el Plan Piloto, que es gratuito.
    *
-   * Se usa para el Plan Piloto (gratuito) desde el panel de administración.
-   * Para los planes pagados lo hace el backend al confirmar la transacción,
-   * para que la activación no dependa del navegador.
+   * Va por el backend porque la tabla `instituciones` no acepta
+   * escrituras desde el navegador: el plan de una institución no debe
+   * depender de lo que diga el cliente.
    */
   async activarPlan(solicitudId: string, plan: Plan): Promise<void> {
-    const snap = await getDoc(doc(this.firestore, `solicitudes/${solicitudId}`));
-    if (!snap.exists()) throw new Error('SOLICITUD_NO_ENCONTRADA');
+    const token = await this.authService.getToken();
+    if (!token) throw new Error('SIN_SESION');
 
-    const s = snap.data() as Solicitud;
+    const r = await fetch(`${environment.apiPagosUrl}/solicitudes/activar`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ solicitudId, planId: plan.id }),
+    });
 
-    const inicio = new Date();
-    const termino = new Date(inicio);
-    termino.setMonth(termino.getMonth() + plan.duracionMeses);
+    if (!r.ok) {
+      const cuerpo = await r.json().catch(() => ({}));
+      throw new Error((cuerpo as any)?.error || 'ERROR_ACTIVANDO');
+    }
+  }
 
-    const institucion: Omit<Institucion, 'uid'> = {
-      nombreInstitucion: s.nombreInstitucion,
-      rbd: s.rbd,
-      correo: s.correo,
-      planId: plan.id,
-      planNombre: plan.nombre,
-      estadoPlan: 'activo',
-      solicitudId,
-      fechaInicio: inicio as any,
-      fechaTermino: termino as any,
-    };
+  getInstitucion(uid: string): Observable<Institucion | null> {
+    const consulta = this.supabase
+      .from('instituciones')
+      .select('*')
+      .eq('id', uid)
+      .maybeSingle();
 
-    // merge: sirve tanto si la institución ya existía como si es la primera vez.
-    const ref = doc(this.firestore, `instituciones/${s.uidSolicitante}`);
-    await setDoc(ref, { uid: s.uidSolicitante, ...institucion }, { merge: true });
+    return from(consulta).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        return data ? this.aInstitucion(data) : null;
+      })
+    );
   }
 
   /**
    * Pide al backend que enlace a esta cuenta las solicitudes que llegaron
    * por el formulario público con el mismo correo.
    *
-   * Se hace en el backend porque el correo se toma del token verificado:
-   * si viniera del navegador, cualquiera podría reclamar las solicitudes
-   * de otra institución.
+   * Va por el backend porque el correo se toma del token verificado: si
+   * viniera del navegador, cualquiera podría reclamar las solicitudes de
+   * otra institución.
    */
   async reclamarSolicitudesPublicas(): Promise<number> {
-    const user = this.auth.currentUser;
-    if (!user) return 0;
+    const token = await this.authService.getToken();
+    if (!token) return 0;
 
     try {
-      const token = await user.getIdToken();
       const r = await fetch(`${environment.apiPagosUrl}/solicitudes/reclamar`, {
         method: 'POST',
         headers: {
@@ -214,15 +256,8 @@ export class SolicitudesService {
       const datos = await r.json();
       return datos?.enlazadas ?? 0;
     } catch {
-      // Sin backend disponible el panel igual funciona: solo no enlaza.
+      // Sin backend el panel igual funciona: solo no enlaza.
       return 0;
     }
-  }
-
-  getInstitucion(uid: string): Observable<Institucion | null> {
-    const ref = doc(this.firestore, `instituciones/${uid}`);
-    return docData(ref, { idField: 'uid' }).pipe(
-      map((d) => (d ? (d as Institucion) : null))
-    );
   }
 }

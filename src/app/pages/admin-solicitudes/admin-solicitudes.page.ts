@@ -54,7 +54,7 @@ export class AdminSolicitudesPage {
           cargando: false,
           solicitudes: [] as Solicitud[],
           error: sinPermiso
-            ? 'Firestore rechazó la lectura. Revisa que las reglas permitan a un admin leer la colección "solicitudes".'
+            ? 'La base rechazó la lectura. Revisa que las reglas permitan a un admin leer la colección "solicitudes".'
             : 'No se pudieron cargar las solicitudes.',
         });
       }),

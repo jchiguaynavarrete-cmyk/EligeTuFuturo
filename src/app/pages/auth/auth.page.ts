@@ -133,8 +133,8 @@ export class AuthPage implements OnInit {
     }
 
     this.authService.user$.pipe(take(1)).subscribe((user) => {
-      if (user?.uid) {
-        if (!user.emailVerified) {
+      if (user?.id) {
+        if (!this.authService.correoVerificado()) {
           this.router.navigateByUrl('/verificar-cuenta', { replaceUrl: true });
         } else {
           this.router.navigateByUrl(this.rutaTrasLogin, { replaceUrl: true });
@@ -587,46 +587,20 @@ export class AuthPage implements OnInit {
 
     try {
       if (this.modo === 'login') {
-        const cred = await this.authService.login(this.email, this.password);
+        await this.authService.login(this.email, this.password);
         await this.authService.recargarUsuario();
 
-        const user = cred.user;
-
-        if (!user.emailVerified) {
+        if (!this.authService.correoVerificado()) {
           await this.authService.logout();
           await this.mostrarToast('Debes verificar tu correo antes de entrar. Revisa tu email 📩');
           this.router.navigateByUrl('/verificar-cuenta', { replaceUrl: true });
           return;
         }
 
-        // Si hay registro pendiente, crear perfil si falta
-        const pending = this.getPendingRegistro();
-        const existePerfil = await this.usuarioService.perfilExiste(user.uid);
-
-        if (!existePerfil) {
-          const nombre = pending?.nombre ?? 'Usuario';
-          const rut = pending?.rut ?? '';
-          const fechaStr = pending?.fechaNacimientoStr ?? '';
-
-          if (!rut || !fechaStr) {
-            await this.mostrarToast('Tu perfil no está completo. Regístrate nuevamente.');
-            await this.authService.logout();
-            this.router.navigateByUrl('/auth', { replaceUrl: true });
-            return;
-          }
-
-          await this.usuarioService.crearPerfilSiNoExiste(user.uid, {
-            email: user.email ?? this.email,
-            nombre,
-            nombres: pending?.nombres ?? '',
-            apellidoPaterno: pending?.apellidoPaterno ?? '',
-            apellidoMaterno: pending?.apellidoMaterno ?? '',
-            rut,
-            fechaNacimiento: new Date(fechaStr),
-          });
-
-          this.clearPendingRegistro();
-        }
+        // El perfil ya existe: lo crea el disparador `al_crear_usuario`
+        // con los datos que viajaron en el registro. Ya no hace falta
+        // guardarlos en localStorage ni crearlos desde aquí.
+        this.clearPendingRegistro();
 
         this.mostrarToast('Login exitoso ✅');
         this.router.navigateByUrl(this.rutaTrasLogin, { replaceUrl: true });
@@ -677,13 +651,29 @@ export class AuthPage implements OnInit {
         return;
       }
 
-      const cred = await this.authService.registrar(this.email, this.password);
+      // El RUT se comprueba antes para dar un mensaje claro; la base lo
+      // garantiza igual con una restricción unique si dos registros
+      // llegaran a la vez.
+      const rutLibre = await this.usuarioService.rutDisponible(this.rut);
+      if (!rutLibre) {
+        await this.mostrarToast('Este RUT ya está registrado.');
+        return;
+      }
 
-      // guardar datos para crear perfil cuando vuelva verificado
-      this.savePendingRegistro();
+      // Los datos del perfil viajan con la cuenta: el disparador
+      // `al_crear_usuario` crea la fila en `perfiles`. Así no puede quedar
+      // una cuenta sin perfil si el navegador se cierra a medio camino.
+      await this.authService.registrar(this.email, this.password, {
+        nombre: this.nombreCompleto,
+        nombres: this.nombres,
+        apellidoPaterno: this.apellidoPaterno,
+        apellidoMaterno: this.apellidoMaterno,
+        rut: this.rut,
+        rutLimpio: this.limpiarRut(this.rut),
+        fechaNacimiento: this.fechaNacimientoStr.slice(0, 10),
+        edad: this.edad ?? 0,
+      });
 
-      // enviar verificación + cerrar sesión
-      await this.authService.enviarVerificacion(cred.user);
       await this.authService.logout();
 
       await this.mostrarToast('Te enviamos un correo de verificación 📩. Verifica y luego inicia sesión.');
@@ -691,33 +681,7 @@ export class AuthPage implements OnInit {
     } catch (err: any) {
       console.error(err);
 
-      let mensaje = 'Ocurrió un error';
-      if (err?.message === 'RUT_DUPLICADO') {
-        mensaje = 'Este RUT ya está registrado.';
-      } else if (err.code === 'auth/email-already-in-use') {
-        mensaje = 'Este correo ya está registrado. Intenta iniciar sesión.';
-      } else if (err.code === 'auth/invalid-email') {
-        mensaje = 'El correo no es válido.';
-      } else if (err.code === 'auth/weak-password') {
-        // fallback por si algo pasa
-        mensaje = 'La contraseña es débil.';
-      } else if (err.code === 'auth/operation-not-allowed') {
-        // El proveedor Email/Password está apagado en la consola de Firebase.
-        mensaje = 'El inicio de sesión con correo está deshabilitado en el servidor.';
-      } else if (
-        err.code === 'auth/invalid-credential' ||
-        err.code === 'auth/wrong-password' ||
-        err.code === 'auth/user-not-found'
-      ) {
-        mensaje = 'Correo o contraseña incorrectos.';
-      } else if (err.code === 'auth/too-many-requests') {
-        mensaje = 'Demasiados intentos fallidos. Espera unos minutos.';
-      } else if (err.code === 'auth/network-request-failed') {
-        mensaje = 'Sin conexión con el servidor. Revisa tu internet.';
-      } else if (err.code) {
-        // Cualquier otro caso: mostrar el código ayuda a diagnosticar.
-        mensaje = 'Error: ' + err.code;
-      }
+      const mensaje = this.authService.mensajeDeError(err);
 
       this.mostrarToast(mensaje);
     } finally {

@@ -40,7 +40,7 @@ export class AdminPage {
   private loadingCtrl = inject(LoadingController);
 
   /**
-   * Crea o actualiza en Firestore los cinco planes de la evaluación del
+   * Crea o actualiza en la base los cinco planes de la evaluación del
    * proyecto y desactiva el antiguo Plan Red Educativa.
    */
   async sincronizarPlanes(): Promise<void> {
@@ -76,7 +76,7 @@ export class AdminPage {
       console.error(err);
       await loading.dismiss();
       await this.mostrarToast(
-        'No se pudieron actualizar los planes. Revisa las reglas de Firestore.'
+        'No se pudieron actualizar los planes. Revisa las políticas de la base.'
       );
     }
   }

@@ -15,7 +15,7 @@ export interface DatosContacto {
 /**
  * Envía el formulario público de contacto institucional.
  *
- * Va al backend en vez de escribir en Firestore: el formulario no exige
+ * Va al backend en vez de escribir en la base: el formulario no exige
  * sesión, y abrir escritura anónima permitiría llenar la base de basura.
  * El backend valida y guarda con el Admin SDK.
  */

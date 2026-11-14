@@ -22,7 +22,7 @@ export interface CarreraDemo {
 /**
  * Datos y guion de la demo pública.
  *
- * Todo es ficticio y vive en el código: la demo no toca Firestore ni la
+ * Todo es ficticio y vive en el código: la demo no toca PostgreSQL ni la
  * sesión real. Así puede abrirse sin registro y no hay riesgo de que datos
  * de demostración lleguen a la base de producción.
  */

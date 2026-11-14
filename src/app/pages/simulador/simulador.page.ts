@@ -145,13 +145,13 @@ export class SimuladorPage implements OnInit {
 
     // Convenio del establecimiento: decide si el simulador se muestra.
     this.authService.user$.subscribe((user) => {
-      if (!user?.uid) {
+      if (!user?.id) {
         this.tieneConvenio = false;
         return;
       }
 
       this.usuarioService
-        .tieneAccesoConConvenio(user.uid)
+        .tieneAccesoConConvenio(user.id)
         .subscribe((puede) => (this.tieneConvenio = puede));
     });
 

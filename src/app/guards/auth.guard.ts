@@ -1,28 +1,29 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router, UrlTree } from '@angular/router';
-import { Auth, onAuthStateChanged } from '@angular/fire/auth';
+import { firstValueFrom } from 'rxjs';
+import { filter, take } from 'rxjs/operators';
 
-export const authGuard: CanActivateFn = (): Promise<boolean | UrlTree> => {
-  const auth = inject(Auth);
+import { AuthService } from '../services/auth.service';
+
+/**
+ * Exige sesión iniciada y correo verificado.
+ *
+ * Espera a que el servicio resuelva la sesión guardada: si se consultara
+ * de inmediato, una recarga de página expulsaría a quien sí tiene sesión,
+ * porque todavía no se ha leído del almacenamiento.
+ */
+export const authGuard: CanActivateFn = async (): Promise<boolean | UrlTree> => {
+  const authService = inject(AuthService);
   const router = inject(Router);
 
-  return new Promise<boolean | UrlTree>((resolve) => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      unsubscribe();
+  await authService.recargarUsuario();
+  const user = authService.getCurrentUser();
 
-      if (!user) {
-        resolve(router.createUrlTree(['/auth']));
-        return;
-      }
+  if (!user) return router.createUrlTree(['/auth']);
 
-      // ✅ logueado pero NO verificado
-      if (!user.emailVerified) {
-        resolve(router.createUrlTree(['/verificar-cuenta']));
-        return;
-      }
+  if (!authService.correoVerificado()) {
+    return router.createUrlTree(['/verificar-cuenta']);
+  }
 
-      // ✅ logueado y verificado
-      resolve(true);
-    });
-  });
+  return true;
 };

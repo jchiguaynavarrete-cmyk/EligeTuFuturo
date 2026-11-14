@@ -1,42 +1,34 @@
 import { Injectable, inject } from '@angular/core';
-import {
-  Firestore,
-  doc,
-  setDoc,
-  docData,
-  getDoc,
-  serverTimestamp,
-  collection,
-  collectionData,
-  query,
-  orderBy,
-} from '@angular/fire/firestore';
-import { Observable, map, of, switchMap } from 'rxjs';
+import { Observable, from, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 
+import { SupabaseClientService } from '../core/supabase.client';
+
+/**
+ * Perfil de una persona.
+ *
+ * Las propiedades mantienen los nombres que ya usaban las páginas; la
+ * conversión desde los nombres de columna de PostgreSQL se hace aquí.
+ */
 export interface UsuarioPerfil {
   uid: string;
   email: string;
-  nombre: string;           // nombre completo armado, para mostrar e iniciales
-  nombres?: string;         // uno o dos nombres
-  apellidoPaterno?: string; // primer apellido
-  apellidoMaterno?: string; // segundo apellido (puede venir vacío)
-  rut: string;              // guardado formateado (ej: 11.111.111-1)
-  rut_limpio?: string;      // extra: 111111111 (opcional)
+  nombre: string;
+  nombres?: string;
+  apellidoPaterno?: string;
+  apellidoMaterno?: string;
+  rut: string;
+  rut_limpio?: string;
   fechaNacimiento: any;
   edad: number;
   rol: 'user' | 'admin' | 'institucion';
-
-  /**
-   * Establecimiento al que pertenece el estudiante. Mientras no exista,
-   * se considera que su colegio no tiene convenio.
-   */
   institucionId?: string;
   creadoEn: any;
 }
 
 @Injectable({ providedIn: 'root' })
 export class UsuarioService {
-  private firestore = inject(Firestore);
+  private supabase = inject(SupabaseClientService).cliente;
 
   private limpiarRut(rut: string): string {
     return (rut || '').replace(/\./g, '').replace(/-/g, '').trim().toUpperCase();
@@ -50,17 +42,61 @@ export class UsuarioService {
     return edad;
   }
 
+  /** Traduce una fila de `perfiles` a la forma que usan las páginas. */
+  private aPerfil(f: any): UsuarioPerfil {
+    return {
+      uid: f.id,
+      email: f.email,
+      nombre: f.nombre,
+      nombres: f.nombres ?? undefined,
+      apellidoPaterno: f.apellido_paterno ?? undefined,
+      apellidoMaterno: f.apellido_materno ?? undefined,
+      rut: f.rut,
+      rut_limpio: f.rut_limpio ?? undefined,
+      fechaNacimiento: f.fecha_nacimiento,
+      edad: f.edad,
+      rol: f.rol,
+      institucionId: f.institucion_id ?? undefined,
+      creadoEn: f.creado_en,
+    };
+  }
+
   async perfilExiste(uid: string): Promise<boolean> {
-    const ref = doc(this.firestore, `usuarios/${uid}`);
-    const snap = await getDoc(ref);
-    return snap.exists();
+    const { data, error } = await this.supabase
+      .from('perfiles')
+      .select('id')
+      .eq('id', uid)
+      .maybeSingle();
+
+    if (error) throw error;
+    return !!data;
   }
 
   /**
-   * Crea el perfil SOLO si no existe (ideal para después de verificar email).
-   * Además asegura RUT único con rut_index/{rut_limpio}.
+   * Comprueba si un RUT ya está tomado.
+   *
+   * Ya no hace falta la colección `rut_index`: la columna `rut_limpio`
+   * tiene una restricción `unique`, así que la base rechaza el duplicado
+   * aunque dos registros lleguen a la vez.
    */
-  async crearPerfilSiNoExiste(
+  async rutDisponible(rut: string): Promise<boolean> {
+    const { data, error } = await this.supabase
+      .from('perfiles')
+      .select('id')
+      .eq('rut_limpio', this.limpiarRut(rut))
+      .maybeSingle();
+
+    if (error) throw error;
+    return !data;
+  }
+
+  /**
+   * Completa el perfil si el disparador no alcanzó a recibir algún dato.
+   *
+   * En el camino normal el perfil ya existe: lo crea `al_crear_usuario`
+   * con los metadatos del registro.
+   */
+  async completarPerfil(
     uid: string,
     data: {
       email: string;
@@ -71,65 +107,64 @@ export class UsuarioService {
       rut: string;
       fechaNacimiento: Date;
     }
-  ) {
-    const userRef = doc(this.firestore, `usuarios/${uid}`);
-    const userSnap = await getDoc(userRef);
-    if (userSnap.exists()) return; // ya creado
-
+  ): Promise<void> {
     const rutLimpio = this.limpiarRut(data.rut);
 
-    // índice anti-duplicados
-    const rutRef = doc(this.firestore, `rut_index/${rutLimpio}`);
-    const rutSnap = await getDoc(rutRef);
+    const { error } = await this.supabase.from('perfiles').upsert(
+      {
+        id: uid,
+        email: data.email,
+        nombre: data.nombre,
+        nombres: data.nombres ?? null,
+        apellido_paterno: data.apellidoPaterno ?? null,
+        apellido_materno: data.apellidoMaterno ?? null,
+        rut: data.rut,
+        rut_limpio: rutLimpio,
+        fecha_nacimiento: data.fechaNacimiento.toISOString().slice(0, 10),
+        edad: this.calcularEdad(data.fechaNacimiento),
+      },
+      { onConflict: 'id' }
+    );
 
-    if (rutSnap.exists()) {
-      const dueño = (rutSnap.data() as any)?.uid;
-      if (dueño && dueño !== uid) {
-        throw new Error('RUT_DUPLICADO');
-      }
-    }
-
-    const edad = this.calcularEdad(data.fechaNacimiento);
-
-    const perfil: UsuarioPerfil = {
-      uid,
-      email: data.email,
-      nombre: data.nombre,
-      nombres: data.nombres ?? '',
-      apellidoPaterno: data.apellidoPaterno ?? '',
-      apellidoMaterno: data.apellidoMaterno ?? '',
-      rut: data.rut,
-      rut_limpio: rutLimpio,
-      fechaNacimiento: data.fechaNacimiento,
-      edad,
-      rol: 'user',
-      creadoEn: serverTimestamp(),
-    };
-
-    // 1) Reservar rut_index (si no existía)
-    // 2) Crear usuarios/{uid}
-    // Nota: sin transaction para ir rápido, pero reglas impedirán colisiones por create si ya existe.
-    await setDoc(rutRef, { uid, creadoEn: serverTimestamp() }, { merge: false });
-    await setDoc(userRef, perfil, { merge: false });
+    if (error) throw error;
   }
 
-  /**
-   * Todos los perfiles, del más reciente al más antiguo.
-   * Solo para el panel de administración: las reglas de Firestore deben
-   * permitir leer la colección completa a quien tenga rol admin.
-   */
+  getUsuario(uid: string): Observable<UsuarioPerfil | null> {
+    const consulta = this.supabase
+      .from('perfiles')
+      .select('*')
+      .eq('id', uid)
+      .maybeSingle();
+
+    return from(consulta).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        return data ? this.aPerfil(data) : null;
+      })
+    );
+  }
+
+  /** Todos los perfiles. Solo administración: lo exige la política. */
   listarUsuarios(): Observable<UsuarioPerfil[]> {
-    const colRef = collection(this.firestore, 'usuarios');
-    const qRef = query(colRef, orderBy('creadoEn', 'desc'));
+    const consulta = this.supabase
+      .from('perfiles')
+      .select('*')
+      .order('creado_en', { ascending: false });
 
-    return collectionData(qRef, { idField: 'uid' }) as Observable<UsuarioPerfil[]>;
+    return from(consulta).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? []).map((f) => this.aPerfil(f));
+      })
+    );
   }
 
   /**
-   * Indica si el estudiante puede usar las funciones que requieren convenio.
+   * Si la persona puede usar las funciones que requieren convenio.
    *
-   * Un administrador siempre pasa: si no, no podría revisar ni demostrar la
-   * app. Un estudiante pasa solo si su establecimiento tiene el plan activo.
+   * Un administrador siempre pasa: si no, no podría revisar ni demostrar
+   * la app. Un estudiante pasa solo si su establecimiento tiene el plan
+   * activo.
    */
   tieneAccesoConConvenio(uid: string): Observable<boolean> {
     return this.getUsuario(uid).pipe(
@@ -138,16 +173,16 @@ export class UsuarioService {
         if (perfil.rol === 'admin') return of(true);
         if (!perfil.institucionId) return of(false);
 
-        const ref = doc(this.firestore, `instituciones/${perfil.institucionId}`);
-        return docData(ref).pipe(
-          map((inst: any) => inst?.estadoPlan === 'activo')
+        const consulta = this.supabase
+          .from('instituciones')
+          .select('estado_plan')
+          .eq('id', perfil.institucionId)
+          .maybeSingle();
+
+        return from(consulta).pipe(
+          map(({ data }) => data?.estado_plan === 'activo')
         );
       })
     );
-  }
-
-  getUsuario(uid: string): Observable<UsuarioPerfil | null> {
-    const ref = doc(this.firestore, `usuarios/${uid}`);
-    return docData(ref).pipe(map((data) => (data ? (data as UsuarioPerfil) : null)));
   }
 }

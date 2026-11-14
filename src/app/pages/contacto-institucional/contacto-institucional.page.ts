@@ -21,9 +21,9 @@ type Campo =
 /**
  * Formulario corto de contacto para instituciones.
  *
- * Es público, así que no escribe en Firestore directamente: lo envía al
+ * Es público, así que no escribe en la base directamente: lo envía al
  * backend, que valida y guarda con el Admin SDK. Abrir escritura anónima
- * en Firestore dejaría la puerta para llenar la base de basura.
+ * en la base dejaría la puerta para llenar la base de basura.
  */
 @Component({
   selector: 'app-contacto-institucional',

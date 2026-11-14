@@ -54,14 +54,14 @@ export class AdminUsuariosPage {
         console.error(err);
 
         // El caso más probable no es un bug, sino que las reglas de
-        // Firestore no dejen leer la colección completa.
+        // la base no dejen leer la tabla completa.
         const sinPermiso = err?.code === 'permission-denied';
 
         return of({
           cargando: false,
           usuarios: [],
           error: sinPermiso
-            ? 'Firestore rechazó la lectura. Revisa que las reglas permitan a un admin leer la colección "usuarios".'
+            ? 'La base rechazó la lectura. Revisa que las reglas permitan a un admin leer la colección "usuarios".'
             : 'No se pudo cargar la lista de usuarios.',
         });
       }),
@@ -90,7 +90,7 @@ export class AdminUsuariosPage {
     return (a + b).toUpperCase();
   }
 
-  /** `creadoEn` viene como Timestamp de Firestore, no como Date. */
+  /** `creadoEn` viene como Timestamp de la base, no como Date. */
   fechaRegistro(valor: any): string {
     const fecha = valor?.toDate?.() ?? (valor ? new Date(valor) : null);
     if (!fecha || isNaN(fecha.getTime())) return '—';

@@ -49,7 +49,7 @@ export class CuentaPage {
 
   constructor() {
     this.perfil$ = this.authService.user$.pipe(
-      switchMap((u) => (u?.uid ? this.usuarioService.getUsuario(u.uid) : of(null)))
+      switchMap((u) => (u?.id ? this.usuarioService.getUsuario(u.id) : of(null)))
     );
   }
 

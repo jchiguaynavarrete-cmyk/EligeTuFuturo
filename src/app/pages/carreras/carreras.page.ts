@@ -91,12 +91,12 @@ export class CarrerasPage implements OnInit {
 
         this.aplicarFiltros();
       },
-      error: (err) => console.error('❌ Firestore carreras error:', err),
+      error: (err) => console.error('Error cargando carreras:', err),
     });
 
     this.favoritosService.getFavoritosIds().subscribe({
       next: (ids) => (this.favoritosIds = ids),
-      error: (err) => console.error('❌ Firestore favoritos error:', err),
+      error: (err) => console.error('Error cargando favoritos:', err),
     });
   }
 

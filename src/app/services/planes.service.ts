@@ -1,104 +1,153 @@
 import { Injectable, inject } from '@angular/core';
-import {
-  Firestore,
-  collection,
-  collectionData,
-  doc,
-  docData,
-  setDoc,
-  updateDoc,
-  getDocs,
-  query,
-  orderBy,
-} from '@angular/fire/firestore';
-import { Observable, map } from 'rxjs';
+import { Observable, from } from 'rxjs';
+import { map } from 'rxjs/operators';
 
+import { SupabaseClientService } from '../core/supabase.client';
 import { Plan, PlanId } from '../models/planes.model';
 
 /** Planes que ya no se ofrecen. Se desactivan al sincronizar, sin borrarlos. */
-const PLANES_RETIRADOS: PlanId[] = ['redEducativa'];
+const PLANES_RETIRADOS: string[] = ['redEducativa'];
 
 /**
  * Catálogo de planes institucionales.
  *
- * Los precios y textos viven en Firestore (`planes/{id}`) para poder
- * cambiarlos sin recompilar la app. `sincronizarPlanes()` crea o actualiza
- * la colección con la estructura definida en la evaluación del proyecto.
+ * Los precios y textos viven en la base para poder cambiarlos sin
+ * recompilar la app.
  */
 @Injectable({ providedIn: 'root' })
 export class PlanesService {
-  private firestore = inject(Firestore);
+  private supabase = inject(SupabaseClientService).cliente;
 
-  /**
-   * Planes activos, ordenados para la vitrina.
-   *
-   * El filtro y el orden se hacen en el cliente a propósito: combinar
-   * `where('activo')` con `orderBy('orden')` obliga a Firestore a tener un
-   * índice compuesto, y son apenas un puñado de documentos. Así la vitrina
-   * no depende de un índice que haya que crear y esperar que se construya.
-   */
+  /** Traduce una fila de `planes` a la forma que usan las páginas. */
+  private aPlan(f: any): Plan {
+    return {
+      id: f.id,
+      nombre: f.nombre,
+      descripcion: f.descripcion ?? '',
+      caracteristicas: f.caracteristicas ?? [],
+      textoBoton: f.texto_boton,
+      precio: f.precio,
+      requierePago: f.requiere_pago,
+      requiereCotizacion: f.requiere_cotizacion,
+      duracionMeses: f.duracion_meses,
+      establecimientos: f.establecimientos,
+      cobertura: f.cobertura ?? undefined,
+      idealPara: f.ideal_para ?? undefined,
+      categoria: f.categoria ?? undefined,
+      destacado: f.destacado,
+      activo: f.activo,
+      orden: f.orden,
+    } as Plan;
+  }
+
+  /** Planes activos, ordenados para la vitrina. Lectura pública. */
   listarPlanesActivos(): Observable<Plan[]> {
-    const colRef = collection(this.firestore, 'planes');
+    const consulta = this.supabase
+      .from('planes')
+      .select('*')
+      .eq('activo', true)
+      .order('orden', { ascending: true });
 
-    return (collectionData(colRef, { idField: 'id' }) as Observable<Plan[]>).pipe(
-      map((planes) =>
-        planes
-          .filter((p) => p.activo)
-          .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0))
-      )
+    return from(consulta).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? []).map((f) => this.aPlan(f));
+      })
     );
   }
 
-  /** Todos los planes, incluidos los desactivados (para administración). */
+  /** Todos, incluidos los desactivados. Para administración. */
   listarTodos(): Observable<Plan[]> {
-    const colRef = collection(this.firestore, 'planes');
-    return collectionData(query(colRef, orderBy('orden')), {
-      idField: 'id',
-    }) as Observable<Plan[]>;
-  }
+    const consulta = this.supabase
+      .from('planes')
+      .select('*')
+      .order('orden', { ascending: true });
 
-  getPlan(id: PlanId): Observable<Plan | null> {
-    const ref = doc(this.firestore, `planes/${id}`);
-    return docData(ref, { idField: 'id' }).pipe(
-      map((d) => (d ? (d as Plan) : null))
+    return from(consulta).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? []).map((f) => this.aPlan(f));
+      })
     );
   }
 
-  /** Solo el administrador puede cambiar precios; lo exigen las reglas. */
-  async actualizarPlan(id: PlanId, cambios: Partial<Plan>): Promise<void> {
-    const ref = doc(this.firestore, `planes/${id}`);
-    await updateDoc(ref, cambios);
+  getPlan(id: PlanId | string): Observable<Plan | null> {
+    const consulta = this.supabase
+      .from('planes')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    return from(consulta).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        return data ? this.aPlan(data) : null;
+      })
+    );
+  }
+
+  /** Solo el administrador puede cambiar precios; lo exige la política. */
+  async actualizarPlan(id: PlanId | string, cambios: Partial<Plan>): Promise<void> {
+    const fila: any = {};
+
+    if (cambios.nombre !== undefined) fila.nombre = cambios.nombre;
+    if (cambios.descripcion !== undefined) fila.descripcion = cambios.descripcion;
+    if (cambios.caracteristicas !== undefined) fila.caracteristicas = cambios.caracteristicas;
+    if (cambios.textoBoton !== undefined) fila.texto_boton = cambios.textoBoton;
+    if (cambios.precio !== undefined) fila.precio = cambios.precio;
+    if (cambios.requierePago !== undefined) fila.requiere_pago = cambios.requierePago;
+    if (cambios.requiereCotizacion !== undefined) fila.requiere_cotizacion = cambios.requiereCotizacion;
+    if (cambios.duracionMeses !== undefined) fila.duracion_meses = cambios.duracionMeses;
+    if (cambios.destacado !== undefined) fila.destacado = cambios.destacado;
+    if (cambios.activo !== undefined) fila.activo = cambios.activo;
+    if (cambios.orden !== undefined) fila.orden = cambios.orden;
+
+    const { error } = await this.supabase.from('planes').update(fila).eq('id', id);
+    if (error) throw error;
   }
 
   /**
    * Crea o reemplaza los cinco planes vigentes y desactiva los retirados.
-   * Las solicitudes ya enviadas no se tocan: guardan su propio planNombre y monto.
+   * Las solicitudes ya enviadas no se tocan: guardan su propio nombre de
+   * plan y su monto.
    */
   async sincronizarPlanes(): Promise<{ actualizados: number; desactivados: number }> {
     const vigentes = this.planesPorDefecto();
 
-    for (const plan of vigentes) {
-      const { id, ...datos } = plan;
-      await setDoc(doc(this.firestore, `planes/${id}`), datos);
-    }
+    const filas = vigentes.map((p) => ({
+      id: p.id,
+      nombre: p.nombre,
+      descripcion: p.descripcion,
+      caracteristicas: p.caracteristicas,
+      texto_boton: p.textoBoton,
+      precio: p.precio,
+      requiere_pago: p.requierePago,
+      requiere_cotizacion: p.requiereCotizacion,
+      duracion_meses: p.duracionMeses,
+      establecimientos: p.establecimientos ?? null,
+      cobertura: p.cobertura ?? null,
+      ideal_para: p.idealPara ?? null,
+      categoria: p.categoria ?? null,
+      destacado: p.destacado,
+      activo: p.activo,
+      orden: p.orden,
+    }));
 
-    const existentes = await getDocs(collection(this.firestore, 'planes'));
-    let desactivados = 0;
+    const { error } = await this.supabase.from('planes').upsert(filas, { onConflict: 'id' });
+    if (error) throw error;
 
-    for (const d of existentes.docs) {
-      if (PLANES_RETIRADOS.includes(d.id as PlanId) && d.data()['activo'] !== false) {
-        await updateDoc(d.ref, { activo: false });
-        desactivados++;
-      }
-    }
+    const { data: retirados, error: errRetirar } = await this.supabase
+      .from('planes')
+      .update({ activo: false })
+      .in('id', PLANES_RETIRADOS)
+      .eq('activo', true)
+      .select('id');
 
-    return { actualizados: vigentes.length, desactivados };
+    if (errRetirar) throw errRetirar;
+
+    return { actualizados: vigentes.length, desactivados: (retirados ?? []).length };
   }
 
-  /**
-   * Estructura de planes de la evaluación del proyecto.
-   * Precios: valores netos anuales (sin IVA) del primer año de contrato.
-   */
   private planesPorDefecto(): Plan[] {
     return [
       {

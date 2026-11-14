@@ -66,7 +66,7 @@ export class EstadoSolicitudPage {
 
     this.estado$ = this.authService.user$.pipe(
       switchMap((user) => {
-        if (!user?.uid) {
+        if (!user?.id) {
           return of({
             cargando: false,
             error: 'Debes iniciar sesión para ver tus solicitudes.',
@@ -76,8 +76,8 @@ export class EstadoSolicitudPage {
         }
 
         return combineLatest([
-          this.solicitudesService.listarMisSolicitudes(user.uid),
-          this.solicitudesService.getInstitucion(user.uid),
+          this.solicitudesService.listarMisSolicitudes(user.id),
+          this.solicitudesService.getInstitucion(user.id),
         ]).pipe(
           map(([solicitudes, institucion]) => ({
             cargando: false,

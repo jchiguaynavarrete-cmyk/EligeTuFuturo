@@ -19,7 +19,7 @@ import {
   calendarOutline,
 } from 'ionicons/icons';
 
-import { Auth } from '@angular/fire/auth';
+import { AuthService } from '../services/auth.service';
 import { UsuarioService } from '../services/usuario.service';
 
 @Component({
@@ -41,7 +41,7 @@ export class TabsPage implements OnInit {
 
   esAdmin = false;
 
-  private auth = inject(Auth);
+  private authService = inject(AuthService);
   private usuarioService = inject(UsuarioService);
 
   constructor() {
@@ -57,15 +57,15 @@ export class TabsPage implements OnInit {
   }
 
   ngOnInit(): void {
-    const user = this.auth.currentUser;
+    const user = this.authService.getCurrentUser();
 
     if (!user) {
       this.esAdmin = false;
       return;
     }
 
-    // 🔐 Traer rol desde Firestore
-    this.usuarioService.getUsuario(user.uid).subscribe((perfil) => {
+    // 🔐 Traer rol desde la base
+    this.usuarioService.getUsuario(user.id).subscribe((perfil) => {
       this.esAdmin = perfil?.rol === 'admin';
     });
   }
