@@ -51,7 +51,7 @@
         <p class="destacado-rotulo">Lo más próximo</p>
         <h2 class="destacado-titulo">{{ p.titulo }}</h2>
         <p class="destacado-cuenta">{{ textoDias(p) }}</p>
-        <p class="destacado-fecha">{{ p.cuando | date:'EEEE d MMMM y' }}</p>
+        <p class="destacado-fecha">{{ p.cuando | date:'fullDate' }}</p>
       </section>
 
       <!-- Todo pasó: decirlo en vez de mostrar cuatro tarjetas tachadas -->
@@ -91,7 +91,7 @@
             <div class="tarjeta-top">
               <div class="tarjeta-texto">
                 <h3>{{ h.titulo }}</h3>
-                <p class="fecha">{{ h.cuando | date:'d MMMM y' }}</p>
+                <p class="fecha">{{ h.cuando | date:'longDate' }}</p>
                 <p class="descripcion" *ngIf="h.descripcion">{{ h.descripcion }}</p>
               </div>
 
