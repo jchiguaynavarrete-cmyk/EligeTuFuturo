@@ -3,12 +3,7 @@ import { CommonModule } from '@angular/common';
 import {
   IonContent,
   IonHeader,
-  IonTitle,
   IonToolbar,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonButton,
 } from '@ionic/angular/standalone';
 import { AlertController, ToastController, LoadingController } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
@@ -23,12 +18,7 @@ import { PlanesService } from 'src/app/services/planes.service';
     RouterModule,
     IonContent,
     IonHeader,
-    IonTitle,
     IonToolbar,
-    IonList,
-    IonItem,
-    IonLabel,
-    IonButton,
   ],
   templateUrl: './admin.page.html',
   styleUrls: ['./admin.page.scss'],

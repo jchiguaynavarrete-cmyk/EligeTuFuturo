@@ -1,59 +1,204 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Panel Administrador</ion-title>
-  </ion-toolbar>
+<!--
+  Panel de administración.
+
+  Mismo lenguaje que el resto de las pestañas. Las opciones se agrupan por
+  lo que administran, y cada una dice qué hace: una lista de nombres
+  sueltos obliga a entrar para averiguarlo.
+-->
+<ion-header class="cabecera-limpia">
+  <ion-toolbar></ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content fullscreen="true" class="pantalla-admin">
+  <div class="fondo" aria-hidden="true">
+    <img class="foto" src="/assets/estudiantes-biblioteca.jpg" alt="" decoding="async" />
+    <span class="velo"></span>
+  </div>
 
-  <h2>👑 Administración</h2>
-  <p>Opciones disponibles solo para administradores.</p>
+  <div class="lienzo">
 
-  <ion-list>
+    <!-- ========================= Encabezado ========================= -->
+    <div class="encabezado">
+      <span class="escudo" aria-hidden="true">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3 4 6v6c0 5 3.4 8.4 8 9 4.6-.6 8-4 8-9V6l-8-3z" />
+          <path d="m9 12 2 2 4-4" />
+        </svg>
+      </span>
 
-    <ion-item button routerLink="/tabs/admin/carreras">
-      <ion-label>📚 Gestionar Carreras</ion-label>
-    </ion-item>
+      <h1 class="titulo">Administración</h1>
+      <p class="bajada">
+        Todo lo que cambia en el tiempo se gestiona desde aquí, sin tocar el
+        programa ni volver a publicar la aplicación.
+      </p>
+    </div>
 
+    <!-- ========================== Contenido ========================== -->
+    <section class="panel">
+      <h2 class="titulo-panel">Contenido</h2>
 
-    <ion-item button routerLink="/tabs/admin/usuarios">
-      <ion-label>
-        👥 Ver Usuarios
-      </ion-label>
-    </ion-item>
+      <div class="opciones">
+        <a class="opcion" routerLink="/tabs/admin/carreras">
+          <span class="opcion-icono" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5 2 10l10 5 10-5-10-5z" />
+              <path d="M6 12v5c0 1 3 3 6 3s6-2 6-3v-5" />
+            </svg>
+          </span>
+          <span class="opcion-texto">
+            <strong>Carreras</strong>
+            <small>Ver y gestionar el catálogo completo</small>
+          </span>
+          <svg class="opcion-flecha" width="17" height="17" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m9 18 6-6-6-6" />
+          </svg>
+        </a>
 
-    <ion-item button routerLink="/tabs/admin/solicitudes">
-      <ion-label>
-        🏛️ Planes y solicitudes
-      </ion-label>
-    </ion-item>
+        <a class="opcion" routerLink="/tabs/calendario">
+          <span class="opcion-icono" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="5" width="18" height="16" rx="2" />
+              <path d="M8 3v4M16 3v4M3 10h18" />
+            </svg>
+          </span>
+          <span class="opcion-texto">
+            <strong>Fechas del proceso PAES</strong>
+            <small>Editarlas desde la pestaña Calendario</small>
+          </span>
+          <svg class="opcion-flecha" width="17" height="17" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m9 18 6-6-6-6" />
+          </svg>
+        </a>
+      </div>
+    </section>
 
-    <ion-item button (click)="sincronizarPlanes()">
-      <ion-label>
-        🌱 Crear o actualizar planes
-        <span class="pendiente">estructura del informe</span>
-      </ion-label>
-    </ion-item>
+    <!-- ======================== Instituciones ======================== -->
+    <section class="panel">
+      <h2 class="titulo-panel">Instituciones</h2>
 
-    <!-- Sin implementar todavía: se marcan para no aparentar que funcionan -->
-    <ion-item button disabled>
-      <ion-label>
-        ⬆️ Cargar Carreras (JSON / CSV)
-        <span class="pendiente">próximamente</span>
-      </ion-label>
-    </ion-item>
+      <div class="opciones">
+        <a class="opcion" routerLink="/tabs/admin/solicitudes">
+          <span class="opcion-icono" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 21h18" />
+              <path d="M5 21V7l7-4 7 4v14" />
+              <path d="M10 21v-6h4v6" />
+            </svg>
+          </span>
+          <span class="opcion-texto">
+            <strong>Planes y solicitudes</strong>
+            <small>Aprobar, rechazar y entregar el acceso</small>
+          </span>
+          <svg class="opcion-flecha" width="17" height="17" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m9 18 6-6-6-6" />
+          </svg>
+        </a>
 
-    <ion-item button disabled>
-      <ion-label>
-        📊 Estadísticas
-        <span class="pendiente">próximamente</span>
-      </ion-label>
-    </ion-item>
+        <button type="button" class="opcion" (click)="sincronizarPlanes()">
+          <span class="opcion-icono" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-7.7-4.4" />
+              <path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 7.7 4.4" />
+              <path d="M21 3v5h-5M3 21v-5h5" />
+            </svg>
+          </span>
+          <span class="opcion-texto">
+            <strong>Crear o actualizar planes</strong>
+            <small>Deja los cinco planes con sus precios y textos</small>
+          </span>
+          <svg class="opcion-flecha" width="17" height="17" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m9 18 6-6-6-6" />
+          </svg>
+        </button>
+      </div>
+    </section>
 
-  </ion-list>
+    <!-- ========================== Personas ========================== -->
+    <section class="panel">
+      <h2 class="titulo-panel">Personas</h2>
 
-  <ion-button expand="full" color="medium" routerLink="/tabs/carreras">
-    Volver
-  </ion-button>
+      <div class="opciones">
+        <a class="opcion" routerLink="/tabs/admin/usuarios">
+          <span class="opcion-icono" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="8" r="3.5" />
+              <path d="M2 21c0-3.6 3.1-5.5 7-5.5s7 1.9 7 5.5" />
+              <path d="M17 8.5a3 3 0 0 0 0-1M18 20c0-2.6-.8-4.3-2-5.3" />
+            </svg>
+          </span>
+          <span class="opcion-texto">
+            <strong>Usuarios registrados</strong>
+            <small>Quién tiene cuenta y con qué rol</small>
+          </span>
+          <svg class="opcion-flecha" width="17" height="17" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m9 18 6-6-6-6" />
+          </svg>
+        </a>
+      </div>
+    </section>
 
+    <!--
+      Sin construir todavía. Se muestran apagadas y rotuladas para no
+      aparentar que funcionan: un botón que no hace nada se prueba una
+      vez y deja la sensación de que la aplicación está rota.
+    -->
+    <section class="panel apagado">
+      <h2 class="titulo-panel">Más adelante</h2>
+
+      <div class="opciones">
+        <div class="opcion inactiva">
+          <span class="opcion-icono" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 16V4" />
+              <path d="m7 9 5-5 5 5" />
+              <path d="M4 20h16" />
+            </svg>
+          </span>
+          <span class="opcion-texto">
+            <strong>Cargar carreras desde archivo</strong>
+            <small>Subir el catálogo en JSON o CSV</small>
+          </span>
+          <span class="insignia">Próximamente</span>
+        </div>
+
+        <div class="opcion inactiva">
+          <span class="opcion-icono" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 20h16" />
+              <rect x="5" y="12" width="3.4" height="6" rx="1" />
+              <rect x="10.3" y="8" width="3.4" height="10" rx="1" />
+              <rect x="15.6" y="4" width="3.4" height="14" rx="1" />
+            </svg>
+          </span>
+          <span class="opcion-texto">
+            <strong>Estadísticas de uso</strong>
+            <small>Carreras más vistas y búsquedas frecuentes</small>
+          </span>
+          <span class="insignia">Próximamente</span>
+        </div>
+      </div>
+    </section>
+
+    <button type="button" class="btn-volver" routerLink="/tabs/carreras">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m15 18-6-6 6-6" />
+      </svg>
+      Volver a la aplicación
+    </button>
+
+  </div>
 </ion-content>

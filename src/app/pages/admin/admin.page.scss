@@ -1,21 +1,321 @@
-h2 {
-  margin-top: 8px;
+/* =====================================================================
+   Panel de administración
+
+   Mismo fondo y velo que el resto. Las opciones se agrupan por lo que
+   administran y cada una dice qué hace: una lista de nombres sueltos
+   obliga a entrar para averiguarlo.
+   ===================================================================== */
+
+.cabecera-limpia ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+  --color: #fff;
+  --min-height: 44px;
 }
 
-ion-item {
-  margin-bottom: 8px;
+.pantalla-admin {
+  --background: transparent;
 }
 
-/* Marca de opción aún no construida */
-.pendiente {
-  margin-left: 8px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 700;
+.fondo {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 45%;
+}
+
+/*
+ * El velo de administración vira al ámbar en vez del morado de las otras
+ * pantallas: el panel maneja datos de todos, y conviene que se note de
+ * inmediato que no se está en la aplicación normal.
+ */
+.velo {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      72% 62% at 50% 46%,
+      rgba(10, 8, 6, 0.93) 0%,
+      rgba(10, 8, 6, 0.81) 44%,
+      rgba(10, 8, 6, 0.44) 78%,
+      rgba(10, 8, 6, 0.3) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(14, 11, 8, 0.76) 0%,
+      rgba(14, 11, 8, 0.66) 38%,
+      rgba(12, 10, 8, 0.86) 100%
+    ),
+    radial-gradient(
+      90% 55% at 50% -10%,
+      rgba(240, 162, 75, 0.24) 0%,
+      rgba(217, 119, 87, 0.12) 46%,
+      rgba(10, 8, 6, 0) 76%
+    );
+}
+
+.lienzo {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 10px 24px calc(40px + var(--ion-safe-area-bottom, 0px));
+}
+
+/* ---------------------------- Encabezado ---------------------------- */
+.encabezado {
+  text-align: center;
+  margin-bottom: 26px;
+}
+
+.escudo {
+  width: 62px;
+  height: 62px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 20px;
+  color: #ffd9a8;
+  background: rgba(240, 162, 75, 0.18);
+  border: 1px solid rgba(240, 162, 75, 0.48);
+}
+
+.titulo {
+  margin: 0 0 8px;
+  font-size: clamp(26px, 5vw, 34px);
+  font-weight: 800;
+  letter-spacing: -1.1px;
+  line-height: 1.12;
+  color: #fff;
+  text-shadow: 0 3px 22px rgba(0, 0, 0, 0.75);
+}
+
+.bajada {
+  margin: 0 auto;
+  max-width: 54ch;
+  font-size: 16px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.84);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+}
+
+/* ------------------------------ Paneles ------------------------------ */
+.panel {
+  margin-bottom: 16px;
+  padding: 20px 22px;
+
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(18, 16, 20, 0.8);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.48);
+}
+
+.panel.apagado {
+  background: rgba(18, 16, 20, 0.6);
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: none;
+}
+
+.titulo-panel {
+  margin: 0 0 14px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.9px;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
-  color: var(--app-text-muted);
-  background: var(--app-surface-hover);
-  border: 1px solid var(--app-border);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ----------------------------- Opciones ----------------------------- */
+.opciones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.opcion {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 15px 16px;
+  text-align: left;
+  text-decoration: none;
+
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+
+  transition: background 170ms ease, border-color 170ms ease, transform 170ms ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(240, 162, 75, 0.5);
+    transform: translateX(3px);
+
+    .opcion-flecha {
+      transform: translateX(3px);
+      opacity: 1;
+    }
+  }
+
+  &:active {
+    transform: translateX(0) scale(0.99);
+  }
+}
+
+.opcion-icono {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 13px;
+  background: rgba(240, 162, 75, 0.14);
+  border: 1px solid rgba(240, 162, 75, 0.34);
+  color: #ffd9a8;
+}
+
+.opcion-texto {
+  flex: 1;
+  min-width: 0;
+
+  strong {
+    display: block;
+    font-size: 15.5px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  small {
+    display: block;
+    margin-top: 3px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.64);
+  }
+}
+
+.opcion-flecha {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.45);
+  opacity: 0.8;
+  transition: transform 170ms ease, opacity 170ms ease;
+}
+
+/* Lo que todavía no existe: visible, pero que no invite a apretarlo */
+.opcion.inactiva {
+  cursor: default;
+  opacity: 0.55;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.14);
+    transform: none;
+  }
+
+  .opcion-icono {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+.insignia {
+  flex-shrink: 0;
+  padding: 4px 11px;
+  border-radius: 99px;
+
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+
+  color: rgba(255, 255, 255, 0.64);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* ------------------------------ Volver ------------------------------ */
+.btn-volver {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  height: 50px;
+  margin-top: 6px;
+
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+
+  font: inherit;
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #fff;
+
+  transition: background 170ms ease, border-color 170ms ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.34);
+  }
+}
+
+/* ------------------------------- Móvil ------------------------------- */
+@media (max-width: 620px) {
+  .velo {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(14, 11, 8, 0.82) 0%,
+        rgba(12, 10, 8, 0.94) 45%,
+        rgba(12, 10, 8, 0.96) 100%
+      ),
+      radial-gradient(90% 40% at 50% -10%, rgba(240, 162, 75, 0.2) 0%, rgba(10, 8, 6, 0) 70%);
+  }
+
+  .lienzo {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .panel {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .insignia {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opcion,
+  .opcion-flecha,
+  .btn-volver {
+    transition: none;
+  }
+
+  .opcion:hover {
+    transform: none;
+  }
 }
