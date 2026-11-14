@@ -13,6 +13,6 @@ export const environment = {
   },
 
   /** Backend de pagos desplegado. Cambiar por la URL real al publicar. */
-  apiPagosUrl: 'https://TU-BACKEND.onrender.com/api',
+  apiPagosUrl: 'https://eligetufuturo-backend.onrender.com/api',
 };
 
