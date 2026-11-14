@@ -1,60 +1,134 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Gestionar Carreras</ion-title>
+<!--
+  Gestionar carreras.
+
+  Mismo lenguaje que el resto. Cada carrera muestra si está activa, que
+  es lo que esta pantalla permite cambiar: antes había que deducirlo del
+  color del botón.
+-->
+<ion-header class="cabecera-limpia">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button routerLink="/tabs/admin" aria-label="Volver al panel">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content fullscreen="true" class="pantalla-admin-carreras">
+  <div class="fondo" aria-hidden="true">
+    <img class="foto" src="/assets/estudiantes-biblioteca.jpg" alt="" decoding="async" />
+    <span class="velo"></span>
+  </div>
 
-  <ion-searchbar
-    placeholder="Buscar carrera, institución, sede…"
-    [debounce]="300"
-    [(ngModel)]="searchTerm"
-    (ionInput)="aplicarFiltros()">
-  </ion-searchbar>
+  <div class="lienzo">
 
-  <ion-segment [(ngModel)]="vista" (ionChange)="onVistaChange()">
-    <ion-segment-button value="activas">Activas</ion-segment-button>
-    <ion-segment-button value="inactivas">Inactivas</ion-segment-button>
-    <ion-segment-button value="todas">Todas</ion-segment-button>
-  </ion-segment>
+    <!-- ========================= Encabezado ========================= -->
+    <div class="encabezado">
+      <h1 class="titulo">Gestionar carreras</h1>
+      <p class="bajada">
+        Desactiva las que ya no se imparten. Dejan de aparecer para los
+        estudiantes, pero no se borran.
+      </p>
+    </div>
 
-  <p style="margin: 10px 0; opacity: 0.8;">
-    Cargadas: {{ totalCargadas }} | Mostrando: {{ filtradas.length }}
-    <span *ngIf="cargando"> · Cargando…</span>
-    <span *ngIf="!cargando && !puedeCargarMas && totalCargadas > 0"> · Fin de lista</span>
-  </p>
+    <!-- ====================== Buscador y vistas ====================== -->
+    <section class="panel">
+      <ion-searchbar
+        class="buscador"
+        placeholder="Buscar carrera, institución o sede"
+        [debounce]="300"
+        [(ngModel)]="searchTerm"
+        (ionInput)="aplicarFiltros()">
+      </ion-searchbar>
 
-  <ion-list>
-    <ion-item *ngFor="let c of filtradas; trackBy: trackById">
-      <ion-label>
-        <h2>{{ c.carrera }}</h2>
-        <p>{{ c.nombre_institucion }} · {{ c.region_sede }} · {{ c.sede }} · {{ c.horario }}</p>
-        <p>Área: {{ c.area_cineunesco }} · Código: {{ c.codigo_carrera }}</p>
-      </ion-label>
+      <div class="vistas" role="group" aria-label="Filtrar por estado">
+        <button
+          type="button"
+          class="vista"
+          [class.activa]="vista === 'activas'"
+          (click)="vista = 'activas'; onVistaChange()">
+          Activas
+        </button>
+        <button
+          type="button"
+          class="vista"
+          [class.activa]="vista === 'inactivas'"
+          (click)="vista = 'inactivas'; onVistaChange()">
+          Inactivas
+        </button>
+        <button
+          type="button"
+          class="vista"
+          [class.activa]="vista === 'todas'"
+          (click)="vista = 'todas'; onVistaChange()">
+          Todas
+        </button>
+      </div>
 
-      <ion-button
-        size="small"
-        [color]="c.activa ? 'danger' : 'success'"
-        (click)="toggleActiva(c, $event)">
-        {{ c.activa ? 'Desactivar' : 'Activar' }}
-      </ion-button>
-    </ion-item>
+      <p class="conteo">
+        <b>{{ filtradas.length }}</b> en pantalla · {{ totalCargadas }} cargadas
+        <span *ngIf="cargando"> · cargando…</span>
+        <span *ngIf="!cargando && !puedeCargarMas && totalCargadas > 0"> · no hay más</span>
+      </p>
+    </section>
 
-    <ion-item *ngIf="!cargando && filtradas.length === 0">
-      <ion-label>No hay resultados con los filtros actuales.</ion-label>
-    </ion-item>
-  </ion-list>
+    <!-- ============================ Lista ============================ -->
+    <div class="lista">
+      <article
+        class="carrera"
+        *ngFor="let c of filtradas; trackBy: trackById"
+        [class.inactiva]="!c.activa">
 
-  <ion-button
-    expand="block"
-    (click)="cargarMas()"
-    [disabled]="cargando || !puedeCargarMas">
-    {{ cargando ? 'Cargando...' : (puedeCargarMas ? 'Cargar más' : 'Sin más resultados') }}
-  </ion-button>
+        <div class="carrera-texto">
+          <div class="carrera-top">
+            <h2>{{ c.carrera }}</h2>
+            <span class="estado" [class.si]="c.activa">
+              {{ c.activa ? 'Activa' : 'Inactiva' }}
+            </span>
+          </div>
 
-  <ion-button expand="block" color="medium" routerLink="/tabs/admin">
-    Volver al Panel
-  </ion-button>
+          <p class="institucion">
+            {{ c.nombre_institucion }} · {{ c.region_sede }}
+          </p>
 
+          <div class="datos">
+            <span class="dato" *ngIf="c.sede"><span>Sede</span><b>{{ c.sede }}</b></span>
+            <span class="dato" *ngIf="c.horario"><span>Jornada</span><b>{{ c.horario }}</b></span>
+            <span class="dato" *ngIf="c.area_cineunesco"><span>Área</span><b>{{ c.area_cineunesco }}</b></span>
+            <span class="dato codigo" *ngIf="c.codigo_carrera"><span>Código</span><b>{{ c.codigo_carrera }}</b></span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="btn-estado"
+          [class.apagar]="c.activa"
+          (click)="toggleActiva(c, $event)">
+          {{ c.activa ? 'Desactivar' : 'Activar' }}
+        </button>
+      </article>
+
+      <!-- Sin resultados -->
+      <div class="vacio" *ngIf="!cargando && filtradas.length === 0">
+        <p class="vacio-titulo">Ninguna carrera calza con esa búsqueda</p>
+        <p class="vacio-texto">
+          Prueba con otra palabra, o cambia de pestaña si la que buscas está
+          desactivada.
+        </p>
+      </div>
+    </div>
+
+    <!-- ========================== Cargar más ========================== -->
+    <button
+      type="button"
+      class="btn-mas"
+      *ngIf="puedeCargarMas || cargando"
+      (click)="cargarMas()"
+      [disabled]="cargando || !puedeCargarMas">
+      <span class="giro" *ngIf="cargando" aria-hidden="true"></span>
+      {{ cargando ? 'Cargando…' : 'Cargar más carreras' }}
+    </button>
+
+  </div>
 </ion-content>

@@ -1,18 +1,16 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { addIcons } from 'ionicons';
+import { arrowBackOutline } from 'ionicons/icons';
 import { FormsModule } from '@angular/forms';
 import {
+  IonButton,
+  IonButtons,
   IonContent,
   IonHeader,
-  IonTitle,
-  IonToolbar,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonButton,
+  IonIcon,
   IonSearchbar,
-  IonSegment,
-  IonSegmentButton,
+  IonToolbar,
 } from '@ionic/angular/standalone';
 import { RouterModule } from '@angular/router';
 
@@ -27,21 +25,21 @@ import { CarrerasService, CarreraDoc } from '../../services/carreras.service';
     RouterModule,
     IonContent,
     IonHeader,
-    IonTitle,
     IonToolbar,
-    IonList,
-    IonItem,
-    IonLabel,
     IonButton,
     IonSearchbar,
-    IonSegment,
-    IonSegmentButton,
+    IonButtons,
+    IonIcon,
   ],
   templateUrl: './admin-carreras.page.html',
   styleUrls: ['./admin-carreras.page.scss'],
 })
 export class AdminCarrerasPage implements OnInit {
   private carrerasService = inject(CarrerasService);
+
+  constructor() {
+    addIcons({ arrowBackOutline });
+  }
 
   carreras: CarreraDoc[] = [];
   filtradas: CarreraDoc[] = [];

@@ -1,0 +1,447 @@
+/* =====================================================================
+   Gestionar carreras
+
+   Mismo fondo, velo y colores que el resto. Cada fila muestra su estado
+   en una insignia: antes había que deducirlo del color del botón, que
+   además decía la acción y no el estado.
+   ===================================================================== */
+
+.cabecera-limpia ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+  --color: #fff;
+  --min-height: 44px;
+}
+
+.pantalla-admin-carreras {
+  --background: transparent;
+}
+
+.fondo {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 45%;
+}
+
+.velo {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      72% 62% at 50% 46%,
+      rgba(6, 6, 14, 0.93) 0%,
+      rgba(6, 6, 14, 0.8) 44%,
+      rgba(6, 6, 14, 0.42) 78%,
+      rgba(6, 6, 14, 0.28) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(8, 8, 18, 0.74) 0%,
+      rgba(8, 8, 18, 0.64) 38%,
+      rgba(8, 8, 18, 0.84) 100%
+    ),
+    radial-gradient(
+      90% 55% at 50% -10%,
+      rgba(139, 92, 246, 0.28) 0%,
+      rgba(79, 124, 255, 0.14) 46%,
+      rgba(8, 8, 18, 0) 76%
+    );
+}
+
+.lienzo {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 6px 24px calc(40px + var(--ion-safe-area-bottom, 0px));
+}
+
+/* ---------------------------- Encabezado ---------------------------- */
+.encabezado {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.titulo {
+  margin: 0 0 8px;
+  font-size: clamp(25px, 4.8vw, 32px);
+  font-weight: 800;
+  letter-spacing: -1.1px;
+  line-height: 1.12;
+  color: #fff;
+  text-shadow: 0 3px 22px rgba(0, 0, 0, 0.75);
+}
+
+.bajada {
+  margin: 0 auto;
+  max-width: 52ch;
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.82);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+}
+
+/* ------------------------------- Panel ------------------------------- */
+.panel {
+  margin-bottom: 16px;
+  padding: 18px 20px;
+
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(16, 16, 24, 0.78);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.48);
+}
+
+.buscador {
+  --background: rgba(255, 255, 255, 0.07);
+  --color: #fff;
+  --placeholder-color: rgba(255, 255, 255, 0.45);
+  --placeholder-opacity: 1;
+  --icon-color: rgba(255, 255, 255, 0.55);
+  --clear-button-color: rgba(255, 255, 255, 0.6);
+  --border-radius: 15px;
+  --box-shadow: none;
+
+  padding: 0;
+  min-height: 52px;
+}
+
+/* ------------------------------ Vistas ------------------------------
+   Tres pestañas propias en vez del segmento de Ionic: sobre el fondo
+   translúcido el segmento se perdía y no se distinguía la activa. */
+.vistas {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.vista {
+  flex: 1;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.72);
+
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+
+  &.activa {
+    color: #fff;
+    background: rgba(79, 124, 255, 0.2);
+    border-color: rgba(79, 124, 255, 0.75);
+  }
+}
+
+.conteo {
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.72);
+
+  b {
+    color: #fff;
+    font-weight: 800;
+  }
+}
+
+/* ------------------------------- Lista ------------------------------- */
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.carrera {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(16, 16, 24, 0.78);
+  backdrop-filter: blur(10px);
+
+  transition: border-color 170ms ease, transform 170ms ease, opacity 170ms ease;
+
+  &:hover {
+    border-color: rgba(126, 179, 255, 0.45);
+    transform: translateY(-1px);
+  }
+}
+
+/* Una carrera desactivada se ve apagada, no solo con otra etiqueta */
+.carrera.inactiva {
+  opacity: 0.6;
+  border-style: dashed;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.carrera-texto {
+  flex: 1;
+  min-width: 0;
+}
+
+.carrera-top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 4px;
+
+  h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    text-transform: capitalize;
+    color: #fff;
+  }
+}
+
+.estado {
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+
+  color: rgba(255, 255, 255, 0.66);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+
+  &.si {
+    color: #86efac;
+    background: rgba(45, 211, 111, 0.16);
+    border-color: rgba(45, 211, 111, 0.45);
+  }
+}
+
+.institucion {
+  margin: 0 0 10px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  text-transform: capitalize;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.datos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.dato {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 5px 10px;
+
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 12.5px;
+
+  span {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  b {
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+    text-transform: capitalize;
+  }
+
+  /* El código es un identificador: se lee mejor sin capitalizar */
+  &.codigo b {
+    font-family: 'Courier New', Courier, monospace;
+    text-transform: none;
+    letter-spacing: 0.3px;
+  }
+}
+
+/* ----------------------- Activar y desactivar ----------------------- */
+.btn-estado {
+  flex-shrink: 0;
+  height: 40px;
+  padding: 0 18px;
+
+  border-radius: 12px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+
+  color: #86efac;
+  background: rgba(45, 211, 111, 0.14);
+  border: 1px solid rgba(45, 211, 111, 0.45);
+
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+
+  &:hover {
+    background: rgba(45, 211, 111, 0.26);
+    border-color: rgba(45, 211, 111, 0.75);
+    transform: scale(1.03);
+  }
+
+  /* Desactivar es la acción destructiva de esta pantalla */
+  &.apagar {
+    color: #ff9db3;
+    background: rgba(255, 92, 133, 0.12);
+    border-color: rgba(255, 92, 133, 0.42);
+
+    &:hover {
+      background: rgba(255, 92, 133, 0.22);
+      border-color: rgba(255, 92, 133, 0.7);
+    }
+  }
+}
+
+/* ------------------------------- Vacío ------------------------------- */
+.vacio {
+  padding: 44px 24px;
+  text-align: center;
+
+  border-radius: 20px;
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  background: rgba(16, 16, 24, 0.62);
+}
+
+.vacio-titulo {
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.vacio-texto {
+  margin: 0 auto;
+  max-width: 44ch;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* ----------------------------- Cargar más ----------------------------- */
+.btn-mas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 50px;
+  margin-top: 16px;
+
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+
+  transition: background 170ms ease, border-color 170ms ease;
+
+  &:hover:not([disabled]) {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.34);
+  }
+
+  &[disabled] {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+
+.giro {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #7eb3ff;
+  animation: girar 0.8s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ------------------------------- Móvil ------------------------------- */
+@media (max-width: 680px) {
+  .velo {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(8, 8, 18, 0.8) 0%,
+        rgba(8, 8, 18, 0.93) 45%,
+        rgba(8, 8, 18, 0.96) 100%
+      ),
+      radial-gradient(90% 40% at 50% -10%, rgba(139, 92, 246, 0.22) 0%, rgba(8, 8, 18, 0) 70%);
+  }
+
+  .lienzo {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .carrera {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .btn-estado {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carrera,
+  .btn-estado,
+  .vista,
+  .btn-mas {
+    transition: none;
+  }
+
+  .carrera:hover,
+  .btn-estado:hover {
+    transform: none;
+  }
+
+  .giro {
+    animation: none;
+  }
+}
