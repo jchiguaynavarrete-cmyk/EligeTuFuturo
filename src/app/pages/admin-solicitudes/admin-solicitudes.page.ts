@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, AlertController, ToastController, LoadingController } from '@ionic/angular';
+import { IonicModule, AlertController, ToastController } from '@ionic/angular';
 
 import { Observable, of, firstValueFrom, BehaviorSubject } from 'rxjs';
 import { catchError, map, startWith, switchMap } from 'rxjs/operators';
@@ -46,9 +46,11 @@ export class AdminSolicitudesPage {
   private authService = inject(AuthService);
   private alertCtrl = inject(AlertController);
   private toastCtrl = inject(ToastController);
-  private loadingCtrl = inject(LoadingController);
 
   estado$: Observable<EstadoPanel>;
+
+  /** Id de la solicitud que se está guardando, para bloquear sus botones. */
+  procesando: string | null = null;
 
   filtro: Filtro = 'todas';
   busqueda = '';
@@ -258,12 +260,13 @@ export class AdminSolicitudesPage {
       return;
     }
 
-    const loading = await this.loadingCtrl.create({ message: 'Aprobando...' });
-    await loading.present();
+    // Sin cartel de carga: superponer otra ventana justo después de
+    // cerrar el diálogo es frágil y la operación dura unas décimas de
+    // segundo. La fila deshabilitada ya indica que algo está pasando.
+    this.procesando = s.id;
 
     try {
       await this.solicitudesService.aprobarSolicitud(s.id, adminUid, monto, plan);
-      await loading.dismiss();
       this.recargar();
 
       await this.mostrarToast(
@@ -273,10 +276,11 @@ export class AdminSolicitudesPage {
       );
     } catch (err: any) {
       console.error(err);
-      await loading.dismiss();
       // Se muestra el motivo real: un mensaje genérico obliga a abrir
       // la consola del navegador para saber qué pasó.
       await this.mostrarToast(err?.message || 'No se pudo aprobar la solicitud.');
+    } finally {
+      this.procesando = null;
     }
   }
 
@@ -313,18 +317,17 @@ export class AdminSolicitudesPage {
       return;
     }
 
-    const loading = await this.loadingCtrl.create({ message: 'Rechazando...' });
-    await loading.present();
+    this.procesando = s.id;
 
     try {
       await this.solicitudesService.rechazarSolicitud(s.id, adminUid, motivo);
-      await loading.dismiss();
       this.recargar();
       await this.mostrarToast('Solicitud rechazada.');
     } catch (err: any) {
       console.error(err);
-      await loading.dismiss();
       await this.mostrarToast(err?.message || 'No se pudo rechazar la solicitud.');
+    } finally {
+      this.procesando = null;
     }
   }
 

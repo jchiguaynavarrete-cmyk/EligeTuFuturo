@@ -119,7 +119,7 @@
                       type="button"
                       class="accion aprobar"
                       title="Aprobar"
-                      [disabled]="s.estado === 'aprobada'"
+                      [disabled]="s.estado === 'aprobada' || procesando === s.id"
                       (click)="aprobar(s)">
                       ✓
                     </button>
@@ -127,7 +127,7 @@
                       type="button"
                       class="accion rechazar"
                       title="Rechazar"
-                      [disabled]="s.estado === 'rechazada'"
+                      [disabled]="s.estado === 'rechazada' || procesando === s.id"
                       (click)="rechazar(s)">
                       ✕
                     </button>
