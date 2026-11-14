@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { firstValueFrom } from 'rxjs';
 import {
   IonContent,
   IonHeader,
@@ -144,9 +145,22 @@ export class SimuladorPage implements OnInit {
       this.cargando = false;
     });
 
-    this.favoritosService.getFavoritosIds().subscribe((ids) => {
-      this.favoritosIds = ids;
-    });
+    this.cargarFavoritos();
+  }
+
+  /** Al volver, puede haber favoritos marcados o quitados en otra pestaña. */
+  ionViewWillEnter() {
+    this.cargarFavoritos();
+  }
+
+  private async cargarFavoritos(): Promise<void> {
+    try {
+      this.favoritosIds = await firstValueFrom(
+        this.favoritosService.getFavoritosIds()
+      );
+    } catch (err) {
+      console.error('Error cargando favoritos:', err);
+    }
   }
 
   // =========================
@@ -282,7 +296,31 @@ export class SimuladorPage implements OnInit {
 
   async toggleFavorito(c: CarreraDoc, ev: Event) {
     ev.stopPropagation();
-    await this.favoritosService.toggleFavorito(c);
+
+    const id = String(c.id);
+    if (this.toggling.has(id)) return;
+
+    /*
+     * `toggling` ya existía y la plantilla lo consultaba, pero nunca se
+     * llenaba: el botón jamás se bloqueaba y dos clics seguidos podían
+     * marcar y desmarcar en desorden.
+     */
+    this.toggling.add(id);
+
+    try {
+      const esFavorita = await this.favoritosService.toggleFavorito(c);
+
+      // El corazón se pinta con lo que devuelve la base, no antes.
+      if (esFavorita) {
+        this.favoritosIds.add(id);
+      } else {
+        this.favoritosIds.delete(id);
+      }
+    } catch (err) {
+      console.error('No se pudo cambiar el favorito:', err);
+    } finally {
+      this.toggling.delete(id);
+    }
   }
 
   // =========================
