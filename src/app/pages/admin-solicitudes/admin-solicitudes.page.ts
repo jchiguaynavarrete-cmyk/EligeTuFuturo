@@ -130,6 +130,18 @@ export class AdminSolicitudesPage {
       return;
     }
 
+    // Un plan sin pago se activa en el acto, y activarlo necesita saber a
+    // qué cuenta. Se avisa antes de aprobar: si no, quedaría aprobada
+    // pero sin plan, que es peor que no haberla tocado.
+    if (!plan.requierePago && !s.uidSolicitante) {
+      await this.mostrarToast(
+        'Esta solicitud llegó por el formulario público y aún no tiene ' +
+          'cuenta asociada. La institución debe iniciar sesión con ese ' +
+          'correo antes de que puedas activarle un plan sin pago.'
+      );
+      return;
+    }
+
     // Un plan sin pago se activa de inmediato; no tiene sentido pedir monto.
     if (!plan.requierePago) {
       await this.confirmarAprobacionSinPago(s, plan);

@@ -233,7 +233,19 @@ export class SolicitudesService {
 
     if (!r.ok) {
       const cuerpo = await r.json().catch(() => ({}));
-      throw new Error((cuerpo as any)?.error || 'ERROR_ACTIVANDO');
+      const codigo = (cuerpo as any)?.error || 'ERROR_ACTIVANDO';
+
+      const explicacion: Record<string, string> = {
+        SOLICITUD_SIN_DUENO:
+          'Esta solicitud llegó por el formulario público y todavía no ' +
+          'tiene cuenta asociada. La institución debe crear su cuenta con ' +
+          'ese mismo correo e iniciar sesión; recién entonces se le puede ' +
+          'activar el plan.',
+        SOLICITUD_NO_APROBADA: 'La solicitud no está aprobada.',
+        PLAN_REQUIERE_PAGO: 'Este plan se activa al confirmarse el pago.',
+      };
+
+      throw new Error(explicacion[codigo] || codigo);
     }
   }
 

@@ -87,6 +87,11 @@ async function activarSolicitud(req, res) {
     return res.json({ activado: true });
   } catch (err) {
     console.error('[SOLICITUDES] Error al activar:', err.message);
+
+    if (err.message === 'SOLICITUD_SIN_DUENO') {
+      return res.status(409).json({ error: 'SOLICITUD_SIN_DUENO' });
+    }
+
     return res.status(500).json({ error: 'ERROR_INTERNO' });
   }
 }

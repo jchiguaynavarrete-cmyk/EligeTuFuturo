@@ -214,6 +214,15 @@ async function activarPlanDeSolicitud(solicitudId, pagoId) {
 
   if (!s) return;
 
+  // Sin dueño no hay a quién activarle el plan: la tabla `instituciones`
+  // se identifica por la cuenta de la institución. Pasaba con las
+  // solicitudes del formulario público que nadie habia reclamado todavia:
+  // la insercion fallaba en silencio y la solicitud quedaba marcada como
+  // pagada sin plan activo.
+  if (!s.solicitante_id) {
+    throw new Error('SOLICITUD_SIN_DUENO');
+  }
+
   const { data: plan } = await db
     .from('planes')
     .select('duracion_meses')
@@ -231,7 +240,7 @@ async function activarPlanDeSolicitud(solicitudId, pagoId) {
 
   await db.from('solicitudes').update(cambios).eq('id', solicitudId);
 
-  await db.from('instituciones').upsert(
+  const { error: errInst } = await db.from('instituciones').upsert(
     {
       id: s.solicitante_id,
       nombre_institucion: s.nombre_institucion,
@@ -246,6 +255,10 @@ async function activarPlanDeSolicitud(solicitudId, pagoId) {
     },
     { onConflict: 'id' }
   );
+
+  // El error no se puede ignorar: la solicitud ya quedó marcada como
+  // pagada y, sin esta fila, la institución no tendría plan alguno.
+  if (errInst) throw errInst;
 
   console.log(`[WEBPAY] Plan activado para ${s.nombre_institucion}`);
 }
