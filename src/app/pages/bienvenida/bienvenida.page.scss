@@ -206,12 +206,23 @@ ion-content.bienvenida {
 /* ---------- Acción ---------- */
 
 .bloque-accion {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
   margin-top: 26px;
   max-width: 420px;
 }
 
-.btn-comenzar {
-  height: 54px;
+/*
+ * Los dos caminos pesan lo mismo.
+ *
+ * Antes la institución iba en botón contorneado, lo que la leía como
+ * opción secundaria. No lo es: son dos públicos distintos, no una opción
+ * principal y su alternativa. Van idénticos a propósito.
+ */
+.btn-ruta {
+  height: 56px;
   margin: 0;
 
   font-size: 17px;
@@ -225,6 +236,83 @@ ion-content.bienvenida {
   --background-focused: var(--background-activated);
   --box-shadow: 0 14px 34px rgba(79, 124, 255, 0.46);
   --color: #fff;
+
+  /* El contenido manda: el texto arranca a la izquierda y la flecha
+     queda pegada al borde derecho, como una señal de "por aquí". */
+  --padding-start: 18px;
+  --padding-end: 18px;
+
+  transition: transform 180ms ease, filter 180ms ease;
+
+  /* El degradado se ve a través del botón, así que el brillo que lo
+     recorre al pasar el mouse va en una capa propia encima. */
+  position: relative;
+  overflow: hidden;
+
+  ion-icon {
+    font-size: 20px;
+  }
+
+  /* La flecha se adelanta al pasar el mouse: insinúa hacia dónde lleva. */
+  ion-icon[slot='end'] {
+    font-size: 18px;
+    opacity: 0.85;
+    transition: transform 180ms ease, opacity 180ms ease;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      100deg,
+      transparent 35%,
+      rgba(255, 255, 255, 0.22) 50%,
+      transparent 65%
+    );
+    transform: translateX(-120%);
+    transition: transform 620ms ease;
+    pointer-events: none;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    filter: saturate(1.12);
+
+    ion-icon[slot='end'] {
+      transform: translateX(4px);
+      opacity: 1;
+    }
+
+    &::after {
+      transform: translateX(120%);
+    }
+  }
+
+  /* Hundirlo al pulsar da la sensación de haber apretado algo real. */
+  &:active {
+    transform: translateY(0) scale(0.985);
+  }
+}
+
+/*
+ * Quien pidió menos movimiento en su sistema no debería recibir brillos
+ * ni desplazamientos. El botón sigue respondiendo, solo que sin animar.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .btn-ruta,
+  .btn-ruta ion-icon[slot='end'],
+  .btn-ruta::after {
+    transition: none;
+  }
+
+  .btn-ruta:hover {
+    transform: none;
+
+    &::after {
+      transform: translateX(-120%);
+    }
+  }
 }
 
 .pie {

@@ -51,6 +51,14 @@
  * escala de elevación de Material para tema oscuro (#121212 base).
  */
 :root {
+  /*
+   * Tipografía de la marca. Ionic usa `--ion-font-family` en todos sus
+   * componentes, así que fijarla aquí basta para toda la app. Las de
+   * respaldo entran si el navegador no alcanza a traer la fuente.
+   */
+  --ion-font-family: 'Plus Jakarta Sans', system-ui, -apple-system,
+    'Segoe UI', Roboto, sans-serif;
+
   --app-bg-top: #16161a;
   --app-bg-bottom: #101012;
 

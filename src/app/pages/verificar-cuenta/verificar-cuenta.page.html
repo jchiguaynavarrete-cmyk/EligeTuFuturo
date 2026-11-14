@@ -1,20 +1,75 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Verificar cuenta</ion-title>
-  </ion-toolbar>
+<!--
+  Último paso del registro.
+
+  Mismo lenguaje que la pantalla de acceso, pero con la foto recortada en
+  otra zona y virada al verde azulado: si fuera idéntica, parecería que no
+  se avanzó de pantalla.
+-->
+<ion-header class="cabecera-limpia">
+  <ion-toolbar></ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Revisa tu correo 📩</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      Para terminar tu registro debes verificar tu email.
-      Revisa también la carpeta de spam.
-    </ion-card-content>
-  </ion-card>
+<ion-content fullscreen="true" class="pantalla-verificar">
+  <div class="fondo" aria-hidden="true">
+    <picture>
+      <source srcset="/assets/bienvenida-estudiantes.webp" type="image/webp" />
+      <img class="foto" src="/assets/bienvenida-estudiantes.jpg" alt="" decoding="async" />
+    </picture>
+    <span class="velo"></span>
+  </div>
 
-  <ion-button expand="block" (click)="reenviar()">Reenviar correo</ion-button>
-  <ion-button expand="block" fill="outline" (click)="irLogin()">Volver a login</ion-button>
+  <div class="lienzo">
+    <div class="tarjeta">
+
+      <!-- Pasos: lo hecho y lo que falta, para que no parezca un callejón -->
+      <ol class="pasos">
+        <li class="paso hecho">
+          <span class="paso-marca" aria-hidden="true">
+            <ion-icon name="checkmark-outline"></ion-icon>
+          </span>
+          <span class="paso-texto">Cuenta creada</span>
+        </li>
+        <li class="paso-linea" aria-hidden="true"></li>
+        <li class="paso actual">
+          <span class="paso-marca" aria-hidden="true">2</span>
+          <span class="paso-texto">Verifica tu correo</span>
+        </li>
+      </ol>
+
+      <!-- El sobre late despacio: indica que algo está en camino -->
+      <div class="sobre" aria-hidden="true">
+        <span class="sobre-halo"></span>
+        <ion-icon name="mail-outline"></ion-icon>
+      </div>
+
+      <h1 class="titulo">Revisa tu correo</h1>
+
+      <p class="bajada">
+        Te enviamos un enlace para confirmar tu cuenta<ng-container *ngIf="correo">
+        a <strong>{{ correo }}</strong></ng-container>. Ábrelo y listo.
+      </p>
+
+      <p class="aviso">
+        <ion-icon name="information-circle-outline" aria-hidden="true"></ion-icon>
+        <span>Si no lo ves en unos minutos, mira en la carpeta de spam.</span>
+      </p>
+
+      <ion-button
+        expand="block"
+        class="btn-reenviar"
+        [disabled]="segundosRestantes > 0"
+        (click)="reenviar()">
+        <ion-icon slot="start" name="refresh-outline" aria-hidden="true"></ion-icon>
+        {{
+          segundosRestantes > 0
+            ? 'Puedes reenviar en ' + segundosRestantes + ' s'
+            : 'Reenviar correo'
+        }}
+      </ion-button>
+
+      <button type="button" class="enlace" (click)="irLogin()">
+        Volver a iniciar sesión
+      </button>
+    </div>
+  </div>
 </ion-content>

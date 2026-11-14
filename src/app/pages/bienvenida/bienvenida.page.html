@@ -75,16 +75,16 @@
         necesidades distintas y conviene separarlos antes de pedir datos.
       -->
       <div class="bloque-accion">
-        <ion-button expand="block" class="btn-comenzar" (click)="comenzar()">
-          Soy Estudiante
+        <ion-button expand="block" class="btn-ruta" (click)="comenzar()">
+          <ion-icon slot="start" name="person-outline" aria-hidden="true"></ion-icon>
+          Estudiante
+          <ion-icon slot="end" name="arrow-forward-outline" aria-hidden="true"></ion-icon>
         </ion-button>
 
-        <ion-button
-          expand="block"
-          fill="outline"
-          class="btn-institucion"
-          (click)="soyInstitucion()">
-          Soy Institución / Sostenedor
+        <ion-button expand="block" class="btn-ruta" (click)="soyInstitucion()">
+          <ion-icon slot="start" name="business-outline" aria-hidden="true"></ion-icon>
+          Institución / Sostenedor
+          <ion-icon slot="end" name="arrow-forward-outline" aria-hidden="true"></ion-icon>
         </ion-button>
 
         <p class="pie">

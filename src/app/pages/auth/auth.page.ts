@@ -24,7 +24,6 @@ import {
   IonItem,
   IonLabel,
   IonText,
-  IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
@@ -34,7 +33,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { take } from 'rxjs/operators';
 
 import { addIcons } from 'ionicons';
-import { arrowBackOutline, calendarOutline, chevronDownOutline } from 'ionicons/icons';
+import {
+  arrowBackOutline,
+  arrowForwardOutline,
+  calendarOutline,
+  chevronDownOutline,
+} from 'ionicons/icons';
 
 type PendingRegistro = {
   email: string;
@@ -65,7 +69,6 @@ type CampoNombre = 'nombres' | 'apellidoPaterno' | 'apellidoMaterno';
     IonItem,
     IonLabel,
     IonText,
-    IonTitle,
     IonToolbar,
   ],
   templateUrl: './auth.page.html',
@@ -121,7 +124,12 @@ export class AuthPage implements OnInit {
   private readonly rutaTrasLogin = '/tabs/carreras';
 
   constructor() {
-    addIcons({ arrowBackOutline, calendarOutline, chevronDownOutline });
+    addIcons({
+      arrowBackOutline,
+      arrowForwardOutline,
+      calendarOutline,
+      chevronDownOutline,
+    });
   }
 
   // 🚀 Auto-login

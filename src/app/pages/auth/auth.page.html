@@ -1,283 +1,365 @@
-<ion-header>
+<!--
+  Login y registro comparten esta pantalla.
+
+  El fondo es el mismo de la bienvenida: quien llega aquí viene de ahí y
+  debe sentir que sigue en el mismo lugar. El velo oscurece el centro,
+  detrás de la tarjeta, y deja respirar los bordes; si fuera parejo, la
+  foto no se vería, y si no existiera, los campos competirían con ella.
+-->
+<ion-header class="cabecera-limpia">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-button (click)="volverAInicio()" aria-label="Volver al inicio">
         <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
-
-    <ion-title>
-      {{ modo === 'login' ? 'Iniciar sesión' : 'Crear cuenta' }}
-    </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <form (ngSubmit)="enviar()">
-    <!-- REGISTRO -->
-    <ng-container *ngIf="modo === 'register'">
-      <ion-item
-        [class.campo-invalido]="campoNombreError('nombres')"
-        [class.campo-valido]="nombreSalido.nombres && campoNombreValido('nombres')">
-        <ion-label position="stacked">
-          Nombres
-          <ion-text color="success" *ngIf="nombreSalido.nombres && campoNombreValido('nombres')">✓</ion-text>
-        </ion-label>
-        <ion-input
-          [(ngModel)]="nombres"
-          name="nombres"
-          placeholder="Nombres"
-          autocomplete="off"
-          autocorrect="off"
-          spellcheck="false"
-          maxlength="40"
-          required
-          (ionInput)="onNombreInput($event, 'nombres')"
-          (ionBlur)="onNombreBlur('nombres')">
-        </ion-input>
-      </ion-item>
+<ion-content fullscreen="true" class="pantalla-auth">
+  <div class="fondo" aria-hidden="true">
+    <picture>
+      <source srcset="/assets/bienvenida-estudiantes.webp" type="image/webp" />
+      <img class="foto" src="/assets/bienvenida-estudiantes.jpg" alt="" decoding="async" />
+    </picture>
+    <span class="velo"></span>
+  </div>
 
-      <p class="campo-error" *ngIf="campoNombreError('nombres')">
-        {{ campoNombreError('nombres') }}
-      </p>
+  <div class="lienzo">
+    <!-- Marca -->
+    <div class="marca">
+      <span class="marca-logo" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="25" height="25">
+          <path d="M24 14 L37 20 L24 26 L11 20 Z" fill="#fff" opacity="0.96" />
+          <path
+            d="M16.5 22.5 V29 c0 0 3.2 3.2 7.5 3.2 S31.5 29 31.5 29 V22.5"
+            fill="none"
+            stroke="#fff"
+            stroke-width="2.6"
+            stroke-linecap="round"
+            opacity="0.96" />
+          <path d="M37 20 V30" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.8" />
+        </svg>
+      </span>
+      <span class="marca-nombre">Elige<em>Tu</em>Futuro</span>
+    </div>
 
-      <ion-item
-        [class.campo-invalido]="campoNombreError('apellidoPaterno')"
-        [class.campo-valido]="nombreSalido.apellidoPaterno && campoNombreValido('apellidoPaterno')">
-        <ion-label position="stacked">
-          Apellido paterno
-          <ion-text color="success" *ngIf="nombreSalido.apellidoPaterno && campoNombreValido('apellidoPaterno')">✓</ion-text>
-        </ion-label>
-        <ion-input
-          [(ngModel)]="apellidoPaterno"
-          name="apellidoPaterno"
-          placeholder="Primer apellido"
-          autocomplete="off"
-          autocorrect="off"
-          spellcheck="false"
-          maxlength="30"
-          required
-          (ionInput)="onNombreInput($event, 'apellidoPaterno')"
-          (ionBlur)="onNombreBlur('apellidoPaterno')">
-        </ion-input>
-      </ion-item>
+    <h1 class="titulo">
+      {{ modo === 'login' ? 'Inicia sesión' : 'Crea tu cuenta' }}
+    </h1>
 
-      <p class="campo-error" *ngIf="campoNombreError('apellidoPaterno')">
-        {{ campoNombreError('apellidoPaterno') }}
-      </p>
+    <p class="bajada">
+      {{
+        modo === 'login'
+          ? 'Entra para volver a tus carreras favoritas y a tu simulación.'
+          : 'Guarda tus carreras favoritas, compáralas y simula tu puntaje cuando quieras.'
+      }}
+    </p>
 
-      <ion-item
-        [class.campo-invalido]="campoNombreError('apellidoMaterno')"
-        [class.campo-valido]="nombreSalido.apellidoMaterno && apellidoMaterno && campoNombreValido('apellidoMaterno')">
-        <ion-label position="stacked">
-          Apellido materno
-          <span class="etiqueta-opcional">opcional</span>
-          <ion-text color="success" *ngIf="nombreSalido.apellidoMaterno && apellidoMaterno && campoNombreValido('apellidoMaterno')">✓</ion-text>
-        </ion-label>
-        <ion-input
-          [(ngModel)]="apellidoMaterno"
-          name="apellidoMaterno"
-          placeholder="Segundo apellido"
-          autocomplete="off"
-          autocorrect="off"
-          spellcheck="false"
-          maxlength="30"
-          (ionInput)="onNombreInput($event, 'apellidoMaterno')"
-          (ionBlur)="onNombreBlur('apellidoMaterno')">
-        </ion-input>
-      </ion-item>
+    <!-- ============================ Tarjeta ============================ -->
+    <form (ngSubmit)="enviar()" class="tarjeta">
 
-      <p class="campo-error" *ngIf="campoNombreError('apellidoMaterno')">
-        {{ campoNombreError('apellidoMaterno') }}
-      </p>
+      <!-- ===================== DATOS PERSONALES ===================== -->
+      <ng-container *ngIf="modo === 'register'">
+        <h2 class="titulo-grupo">¿Quién eres?</h2>
 
-      <ion-item [class.campo-invalido]="rutError" [class.campo-valido]="rutSalido && rutValido">
-        <ion-label position="stacked">
-          RUT
-          <ion-text color="success" *ngIf="rutSalido && rutValido">✓</ion-text>
-        </ion-label>
-        <ion-input
-          [(ngModel)]="rut"
-          name="rut"
-          placeholder="11.111.111-1"
-          inputmode="text"
-          autocomplete="off"
-          maxlength="12"
-          required
-          (ionInput)="onRutInput($event)"
-          (ionBlur)="onRutBlur()">
-        </ion-input>
-      </ion-item>
+        <div class="campos">
+          <!-- Nombres -->
+          <div class="campo">
+            <ion-item
+              [class.campo-invalido]="campoNombreError('nombres')"
+              [class.campo-valido]="nombreSalido.nombres && campoNombreValido('nombres')">
+              <ion-label position="stacked">
+                Nombres
+                <ion-text color="success" *ngIf="nombreSalido.nombres && campoNombreValido('nombres')">✓</ion-text>
+              </ion-label>
+              <ion-input
+                [(ngModel)]="nombres"
+                name="nombres"
+                placeholder="Como aparece en tu cédula"
+                autocomplete="off"
+                autocorrect="off"
+                spellcheck="false"
+                maxlength="40"
+                required
+                (ionInput)="onNombreInput($event, 'nombres')"
+                (ionBlur)="onNombreBlur('nombres')">
+              </ion-input>
+            </ion-item>
 
-      <p class="campo-error" *ngIf="rutError">{{ rutError }}</p>
-
-      <ion-item [class.campo-invalido]="fechaError" [class.campo-valido]="fechaNacimientoStr && !fechaError">
-        <ion-label position="stacked">
-          Fecha de nacimiento
-          <ion-text color="success" *ngIf="fechaNacimientoStr && !fechaError">✓</ion-text>
-        </ion-label>
-
-        <!-- Fila plegable: muestra lo elegido y abre el calendario -->
-        <button
-          type="button"
-          class="fecha-trigger"
-          [class.abierto]="mostrarCalendario"
-          [attr.aria-expanded]="mostrarCalendario"
-          (click)="toggleCalendario()">
-          <ion-icon name="calendar-outline" class="fecha-icono"></ion-icon>
-
-          <span class="fecha-valor" *ngIf="fechaNacimientoTexto">
-            {{ fechaNacimientoTexto }}
-          </span>
-          <span class="fecha-placeholder" *ngIf="!fechaNacimientoTexto">
-            Selecciona tu fecha
-          </span>
-
-          <span class="fecha-edad" *ngIf="edad !== null && !fechaError">
-            {{ edad }} años
-          </span>
-
-          <ion-icon
-            name="chevron-down-outline"
-            class="fecha-chevron"
-            [class.abierto]="mostrarCalendario">
-          </ion-icon>
-        </button>
-
-        <!--
-          Se pliega con CSS en vez de *ngIf: así el componente sigue montado
-          y confirm() no compite con la destrucción del binding.
-        -->
-        <div class="calendario-wrap" [class.abierto]="mostrarCalendario">
-          <div class="calendario-inner">
-            <ion-datetime
-              #calendarioFecha
-              presentation="date"
-              [(ngModel)]="fechaNacimientoStr"
-              name="fechaNacimiento"
-              [max]="fechaMaxima"
-              [min]="fechaMinima"
-              required>
-              <ion-buttons slot="buttons">
-                <ion-button color="medium" (click)="cancelarFecha(calendarioFecha)">
-                  Cancelar
-                </ion-button>
-                <ion-button color="primary" (click)="confirmarFecha(calendarioFecha)">
-                  Listo
-                </ion-button>
-              </ion-buttons>
-            </ion-datetime>
+            <p class="campo-error" *ngIf="campoNombreError('nombres')">
+              {{ campoNombreError('nombres') }}
+            </p>
           </div>
-        </div>
-      </ion-item>
 
-      <p class="campo-error" *ngIf="fechaError">{{ fechaError }}</p>
-    </ng-container>
+          <!-- Apellidos, en dos columnas -->
+          <div class="fila">
+            <div class="campo">
+              <ion-item
+                [class.campo-invalido]="campoNombreError('apellidoPaterno')"
+                [class.campo-valido]="nombreSalido.apellidoPaterno && campoNombreValido('apellidoPaterno')">
+                <ion-label position="stacked">
+                  Apellido paterno
+                  <ion-text color="success" *ngIf="nombreSalido.apellidoPaterno && campoNombreValido('apellidoPaterno')">✓</ion-text>
+                </ion-label>
+                <ion-input
+                  [(ngModel)]="apellidoPaterno"
+                  name="apellidoPaterno"
+                  placeholder="Primer apellido"
+                  autocomplete="off"
+                  autocorrect="off"
+                  spellcheck="false"
+                  maxlength="30"
+                  required
+                  (ionInput)="onNombreInput($event, 'apellidoPaterno')"
+                  (ionBlur)="onNombreBlur('apellidoPaterno')">
+                </ion-input>
+              </ion-item>
 
-    <!-- EMAIL -->
-    <ion-item>
-      <ion-label position="stacked">Email</ion-label>
-      <ion-input [(ngModel)]="email" name="email" type="email" required></ion-input>
-    </ion-item>
+              <p class="campo-error" *ngIf="campoNombreError('apellidoPaterno')">
+                {{ campoNombreError('apellidoPaterno') }}
+              </p>
+            </div>
 
-    <!-- PASSWORD -->
-    <ion-item>
-      <ion-label position="stacked">Contraseña</ion-label>
-      <ion-input
-        [(ngModel)]="password"
-        name="password"
-        type="password"
-        required
-        minlength="8"
-        maxlength="64"
-        (ionFocus)="showPasswordRules = true">
-      </ion-input>
-    </ion-item>
+            <div class="campo">
+              <ion-item
+                [class.campo-invalido]="campoNombreError('apellidoMaterno')"
+                [class.campo-valido]="nombreSalido.apellidoMaterno && apellidoMaterno && campoNombreValido('apellidoMaterno')">
+                <ion-label position="stacked">
+                  Apellido materno
+                  <span class="etiqueta-opcional">opcional</span>
+                  <ion-text color="success" *ngIf="nombreSalido.apellidoMaterno && apellidoMaterno && campoNombreValido('apellidoMaterno')">✓</ion-text>
+                </ion-label>
+                <ion-input
+                  [(ngModel)]="apellidoMaterno"
+                  name="apellidoMaterno"
+                  placeholder="Segundo apellido"
+                  autocomplete="off"
+                  autocorrect="off"
+                  spellcheck="false"
+                  maxlength="30"
+                  (ionInput)="onNombreInput($event, 'apellidoMaterno')"
+                  (ionBlur)="onNombreBlur('apellidoMaterno')">
+                </ion-input>
+              </ion-item>
 
-    <!-- CONFIRM + RULES SOLO EN REGISTER -->
-    <ng-container *ngIf="modo === 'register'">
-      <ion-item>
-        <ion-label position="stacked">Confirmar contraseña</ion-label>
-        <ion-input
-          [(ngModel)]="passwordConfirm"
-          name="passwordConfirm"
-          type="password"
-          required>
-        </ion-input>
-      </ion-item>
-
-      <!--
-        Panel compacto: barra + chips de requisitos. Al cumplirlos todos
-        se reduce a una sola línea en vez de quedar ocupando la pantalla.
-      -->
-      <div class="password-panel" *ngIf="showPasswordRules">
-        <div class="password-top">
-          <div class="password-bar">
-            <div
-              class="password-bar-fill"
-              [class.nivel-media]="passwordStatus.label === 'Media'"
-              [class.nivel-fuerte]="passwordStatus.label === 'Fuerte'"
-              [style.width.%]="passwordStatus.percent">
+              <p class="campo-error" *ngIf="campoNombreError('apellidoMaterno')">
+                {{ campoNombreError('apellidoMaterno') }}
+              </p>
             </div>
           </div>
-          <span
-            class="password-label"
-            [class.nivel-media]="passwordStatus.label === 'Media'"
-            [class.nivel-fuerte]="passwordStatus.label === 'Fuerte'">
-            {{ passwordStatus.label }}
-          </span>
+
+          <!--
+            RUT y fecha, en dos columnas. El campo de la fecha pasa a ocupar
+            el ancho completo cuando se abre el calendario: en media columna
+            el calendario quedaría apretado e ilegible.
+          -->
+          <div class="fila">
+            <div class="campo">
+              <ion-item [class.campo-invalido]="rutError" [class.campo-valido]="rutSalido && rutValido">
+                <ion-label position="stacked">
+                  RUT
+                  <ion-text color="success" *ngIf="rutSalido && rutValido">✓</ion-text>
+                </ion-label>
+                <ion-input
+                  [(ngModel)]="rut"
+                  name="rut"
+                  placeholder="12.345.678-9"
+                  inputmode="text"
+                  autocomplete="off"
+                  maxlength="12"
+                  required
+                  (ionInput)="onRutInput($event)"
+                  (ionBlur)="onRutBlur()">
+                </ion-input>
+              </ion-item>
+
+              <p class="campo-error" *ngIf="rutError">{{ rutError }}</p>
+            </div>
+
+            <div class="campo campo-fecha" [class.expandido]="mostrarCalendario">
+              <ion-item [class.campo-invalido]="fechaError" [class.campo-valido]="fechaNacimientoStr && !fechaError">
+                <ion-label position="stacked">
+                  Fecha de nacimiento
+                  <ion-text color="success" *ngIf="fechaNacimientoStr && !fechaError">✓</ion-text>
+                </ion-label>
+
+                <!-- Fila plegable: muestra lo elegido y abre el calendario -->
+                <button
+                  type="button"
+                  class="fecha-trigger"
+                  [class.abierto]="mostrarCalendario"
+                  [attr.aria-expanded]="mostrarCalendario"
+                  (click)="toggleCalendario()">
+                  <ion-icon name="calendar-outline" class="fecha-icono"></ion-icon>
+
+                  <span class="fecha-valor" *ngIf="fechaNacimientoTexto">
+                    {{ fechaNacimientoTexto }}
+                  </span>
+                  <span class="fecha-placeholder" *ngIf="!fechaNacimientoTexto">
+                    dd / mm / aaaa
+                  </span>
+
+                  <span class="fecha-edad" *ngIf="edad !== null && !fechaError">
+                    {{ edad }} años
+                  </span>
+
+                  <ion-icon
+                    name="chevron-down-outline"
+                    class="fecha-chevron"
+                    [class.abierto]="mostrarCalendario">
+                  </ion-icon>
+                </button>
+
+                <!--
+                  Se pliega con CSS en vez de *ngIf: así el componente sigue montado
+                  y confirm() no compite con la destrucción del binding.
+                -->
+                <div class="calendario-wrap" [class.abierto]="mostrarCalendario">
+                  <div class="calendario-inner">
+                    <ion-datetime
+                      #calendarioFecha
+                      presentation="date"
+                      [(ngModel)]="fechaNacimientoStr"
+                      name="fechaNacimiento"
+                      [max]="fechaMaxima"
+                      [min]="fechaMinima"
+                      required>
+                      <ion-buttons slot="buttons">
+                        <ion-button color="medium" (click)="cancelarFecha(calendarioFecha)">
+                          Cancelar
+                        </ion-button>
+                        <ion-button color="primary" (click)="confirmarFecha(calendarioFecha)">
+                          Listo
+                        </ion-button>
+                      </ion-buttons>
+                    </ion-datetime>
+                  </div>
+                </div>
+              </ion-item>
+
+              <p class="campo-error" *ngIf="fechaError">{{ fechaError }}</p>
+            </div>
+          </div>
         </div>
 
-        <!-- Requisitos pendientes; desaparecen al cumplirse -->
-        <div class="password-chips" *ngIf="!passwordStatus.completa">
-          <span class="chip" [class.ok]="passwordStatus.checks.length">8 a 64</span>
-          <span class="chip" [class.ok]="passwordStatus.checks.upper">Mayúscula</span>
-          <span class="chip" [class.ok]="passwordStatus.checks.lower">Minúscula</span>
-          <span class="chip" [class.ok]="passwordStatus.checks.number">Número</span>
-          <span class="chip" [class.ok]="passwordStatus.checks.symbol">Símbolo</span>
-          <span class="chip" [class.ok]="passwordStatus.checks.noSpaces">Sin espacios</span>
+        <div class="separador-grupos" aria-hidden="true"></div>
+      </ng-container>
+
+      <!-- ========================= ACCESO ========================= -->
+      <h2 class="titulo-grupo" *ngIf="modo === 'register'">Tu acceso</h2>
+
+      <div class="campos">
+        <div class="campo">
+          <ion-item>
+            <ion-label position="stacked">Correo electrónico</ion-label>
+            <ion-input
+              [(ngModel)]="email"
+              name="email"
+              type="email"
+              placeholder="tucorreo@ejemplo.cl"
+              required>
+            </ion-input>
+          </ion-item>
         </div>
 
-        <p class="password-ok" *ngIf="passwordStatus.completa">
-          Cumple todos los requisitos.
-        </p>
+        <!-- En registro las dos contraseñas van juntas; al entrar va sola -->
+        <div [class.fila]="modo === 'register'">
+          <div class="campo">
+            <ion-item>
+              <ion-label position="stacked">Contraseña</ion-label>
+              <ion-input
+                [(ngModel)]="password"
+                name="password"
+                type="password"
+                required
+                minlength="8"
+                maxlength="64"
+                (ionFocus)="showPasswordRules = true">
+              </ion-input>
+            </ion-item>
+          </div>
 
-        <p class="campo-error" *ngIf="passwordConfirm && !passwordsMatch">
-          Las contraseñas no coinciden.
-        </p>
+          <div class="campo" *ngIf="modo === 'register'">
+            <ion-item>
+              <ion-label position="stacked">Repetir contraseña</ion-label>
+              <ion-input
+                [(ngModel)]="passwordConfirm"
+                name="passwordConfirm"
+                type="password"
+                required>
+              </ion-input>
+            </ion-item>
+          </div>
+        </div>
+
+        <!--
+          Panel compacto: barra + chips de requisitos. Al cumplirlos todos
+          se reduce a una sola línea en vez de quedar ocupando la pantalla.
+        -->
+        <div class="password-panel" *ngIf="modo === 'register' && showPasswordRules">
+          <div class="password-top">
+            <div class="password-bar">
+              <div
+                class="password-bar-fill"
+                [class.nivel-media]="passwordStatus.label === 'Media'"
+                [class.nivel-fuerte]="passwordStatus.label === 'Fuerte'"
+                [style.width.%]="passwordStatus.percent">
+              </div>
+            </div>
+            <span
+              class="password-label"
+              [class.nivel-media]="passwordStatus.label === 'Media'"
+              [class.nivel-fuerte]="passwordStatus.label === 'Fuerte'">
+              {{ passwordStatus.label }}
+            </span>
+          </div>
+
+          <!-- Requisitos pendientes; desaparecen al cumplirse -->
+          <div class="password-chips" *ngIf="!passwordStatus.completa">
+            <span class="chip" [class.ok]="passwordStatus.checks.length">8 a 64</span>
+            <span class="chip" [class.ok]="passwordStatus.checks.upper">Mayúscula</span>
+            <span class="chip" [class.ok]="passwordStatus.checks.lower">Minúscula</span>
+            <span class="chip" [class.ok]="passwordStatus.checks.number">Número</span>
+            <span class="chip" [class.ok]="passwordStatus.checks.symbol">Símbolo</span>
+            <span class="chip" [class.ok]="passwordStatus.checks.noSpaces">Sin espacios</span>
+          </div>
+
+          <p class="password-ok" *ngIf="passwordStatus.completa">
+            Cumple todos los requisitos.
+          </p>
+
+          <p class="campo-error" *ngIf="passwordConfirm && !passwordsMatch">
+            Las contraseñas no coinciden.
+          </p>
+        </div>
       </div>
-    </ng-container>
 
-    <!-- BOTONES -->
-    <ion-button
-      expand="block"
-      type="submit"
-      class="btn-primary"
-      [disabled]="modo === 'register' ? !canSubmitRegister : false">
-      {{ modo === 'login' ? 'Entrar' : 'Registrarse' }}
-    </ion-button>
-  </form>
+      <!-- ========================= ACCIÓN ========================= -->
+      <ion-button
+        expand="block"
+        type="submit"
+        class="btn-enviar"
+        [disabled]="modo === 'register' ? !canSubmitRegister : false">
+        {{ modo === 'login' ? 'Entrar' : 'Crear mi cuenta' }}
+        <ion-icon slot="end" name="arrow-forward-outline" aria-hidden="true"></ion-icon>
+      </ion-button>
 
-  <!-- RECUPERAR CONTRASEÑA (solo en login) -->
-  <ion-button
-    *ngIf="modo === 'login'"
-    fill="clear"
-    expand="block"
-    size="small"
-    class="btn-link"
-    (click)="recuperarPassword()">
-    ¿Olvidaste tu contraseña?
-  </ion-button>
+      <!-- Recuperar contraseña: solo tiene sentido al iniciar sesión -->
+      <button
+        type="button"
+        *ngIf="modo === 'login'"
+        class="enlace enlace-olvido"
+        (click)="recuperarPassword()">
+        ¿Olvidaste tu contraseña?
+      </button>
 
-  <ion-button
-    fill="clear"
-    expand="block"
-    class="btn-link"
-    (click)="cambiarModo()">
-    {{
-      modo === 'login'
-        ? '¿No tienes cuenta? Crea una nueva'
-        : '¿Ya tienes cuenta? Inicia sesión'
-    }}
-  </ion-button>
+      <p class="pie">
+        {{ modo === 'login' ? '¿No tienes cuenta?' : '¿Ya tienes una cuenta?' }}
+        <button type="button" class="enlace" (click)="cambiarModo()">
+          {{ modo === 'login' ? 'Crea una nueva' : 'Inicia sesión' }}
+        </button>
+      </p>
+    </form>
+  </div>
 </ion-content>

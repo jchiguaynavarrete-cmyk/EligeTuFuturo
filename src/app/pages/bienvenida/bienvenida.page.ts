@@ -6,8 +6,11 @@ import { Subscription, filter, take } from 'rxjs';
 
 import { addIcons } from 'ionicons';
 import {
+  arrowForwardOutline,
+  businessOutline,
   heartOutline,
   locationOutline,
+  personOutline,
   schoolOutline,
   statsChartOutline,
 } from 'ionicons/icons';
@@ -38,7 +41,15 @@ export class BienvenidaPage implements OnInit, OnDestroy {
   ];
 
   constructor() {
-    addIcons({ heartOutline, locationOutline, schoolOutline, statsChartOutline });
+    addIcons({
+      arrowForwardOutline,
+      businessOutline,
+      heartOutline,
+      locationOutline,
+      personOutline,
+      schoolOutline,
+      statsChartOutline,
+    });
   }
 
   /**
