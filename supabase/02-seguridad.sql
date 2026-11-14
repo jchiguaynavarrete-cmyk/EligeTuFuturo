@@ -39,7 +39,8 @@ create policy perfiles_actualizar on public.perfiles
   with check (
     public.es_admin()
     -- Quien no es admin puede editar su perfil, pero no ascenderse.
-    or (id = auth.uid() and rol = (select rol from public.perfiles where id = auth.uid()))
+    -- mi_rol() es security definer: no vuelve a disparar esta política.
+    or (id = auth.uid() and rol = public.mi_rol())
   );
 
 

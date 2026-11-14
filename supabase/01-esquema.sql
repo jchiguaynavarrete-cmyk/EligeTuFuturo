@@ -13,24 +13,6 @@
 
 
 -- =====================================================================
--- FUNCIÓN AUXILIAR: ¿quien consulta es administrador?
--- Equivale a isAdmin() de las reglas de Firestore.
--- =====================================================================
-create or replace function public.es_admin()
-returns boolean
-language sql
-security definer
-stable
-set search_path = public
-as $$
-  select exists (
-    select 1 from public.perfiles
-    where id = auth.uid() and rol = 'admin'
-  );
-$$;
-
-
--- =====================================================================
 -- PERFILES · datos de cada persona
 -- Supabase Auth guarda correo y contraseña en auth.users; aquí va el resto.
 -- =====================================================================
@@ -118,17 +100,22 @@ create index if not exists carreras_region_idx      on public.carreras (region_s
 create index if not exists carreras_institucion_idx on public.carreras (nombre_institucion);
 create index if not exists carreras_orden_idx       on public.carreras (carrera);
 
--- Búsqueda por texto en nombre, institución y región, sin distinguir tildes.
-create extension if not exists unaccent;
+-- Búsqueda por subcadena en nombre, institución y región.
+--
+-- Se usa un índice de trigramas (pg_trgm) y no búsqueda de texto completo,
+-- porque la app busca fragmentos: escribir "inge" debe encontrar
+-- "Ingeniería". La búsqueda de texto completo solo encuentra palabras
+-- enteras, y además unaccent() no puede ir en un índice por no ser
+-- IMMUTABLE.
+create extension if not exists pg_trgm;
 
 create index if not exists carreras_busqueda_idx on public.carreras
   using gin (
-    to_tsvector(
-      'simple',
-      unaccent(coalesce(carrera, '') || ' ' ||
-               coalesce(nombre_institucion, '') || ' ' ||
-               coalesce(region_sede, ''))
-    )
+    (
+      coalesce(carrera, '') || ' ' ||
+      coalesce(nombre_institucion, '') || ' ' ||
+      coalesce(region_sede, '')
+    ) gin_trgm_ops
   );
 
 
@@ -327,3 +314,43 @@ drop trigger if exists al_crear_usuario on auth.users;
 create trigger al_crear_usuario
   after insert on auth.users
   for each row execute function public.crear_perfil_nuevo_usuario();
+
+
+-- =====================================================================
+-- FUNCIÓN AUXILIAR: ¿quien consulta es administrador?
+--
+-- Equivale a isAdmin() de las reglas de Firestore.
+-- Va al final a propósito: PostgreSQL valida el cuerpo de las funciones
+-- `language sql` al crearlas, así que la tabla perfiles ya debe existir.
+-- =====================================================================
+create or replace function public.es_admin()
+returns boolean
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.perfiles
+    where id = auth.uid() and rol = 'admin'
+  );
+$$;
+
+
+-- =====================================================================
+-- FUNCIÓN AUXILIAR: el rol de quien consulta
+--
+-- Necesaria para que una política sobre `perfiles` pueda mirar el rol
+-- actual sin consultar `perfiles` directamente: eso volvería a disparar
+-- la política y PostgreSQL falla con "infinite recursion detected".
+-- Al ser `security definer`, la consulta se salta RLS y corta el ciclo.
+-- =====================================================================
+create or replace function public.mi_rol()
+returns text
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select rol from public.perfiles where id = auth.uid();
+$$;
