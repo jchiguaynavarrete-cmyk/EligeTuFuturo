@@ -17,6 +17,15 @@ export interface DatosSolicitud {
   cantidadEstudiantes: number;
 }
 
+
+/** Lo que devuelve el backend al habilitar una cuenta institucional. */
+export interface CredencialesInstitucion {
+  correo: string;
+  /** Solo viene si la cuenta se acaba de crear. */
+  passwordTemporal: string | null;
+  cuentaNueva: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class SolicitudesService {
   private supabase = inject(SupabaseClientService).cliente;
@@ -166,6 +175,45 @@ export class SolicitudesService {
           'haya perdido el permiso de administrador: cierra sesión y vuelve a entrar.'
       );
     }
+  }
+
+  /**
+   * Crea o habilita la cuenta de la institución para que pueda entrar.
+   *
+   * Va por el backend porque el rol de institución no se puede
+   * auto-asignar: la base crea a todos como estudiante a propósito, y
+   * cambiar eso exige la llave de servicio, que nunca viaja al navegador.
+   *
+   * Devuelve la clave temporal solo si la cuenta se acaba de crear.
+   */
+  async habilitarCuenta(solicitudId: string): Promise<CredencialesInstitucion> {
+    const token = await this.authService.getToken();
+    if (!token) throw new Error('SIN_SESION');
+
+    const r = await fetch(`${environment.apiPagosUrl}/solicitudes/habilitar-cuenta`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ solicitudId }),
+    });
+
+    const cuerpo = await r.json().catch(() => ({}));
+
+    if (!r.ok) {
+      const codigo = (cuerpo as any)?.error || 'ERROR_HABILITANDO_CUENTA';
+
+      const explicacion: Record<string, string> = {
+        SOLICITUD_SIN_CORREO:
+          'La solicitud no trae correo, así que no hay a quién crearle la cuenta.',
+        SIN_PERMISO: 'Solo un administrador puede habilitar cuentas.',
+      };
+
+      throw new Error(explicacion[codigo] || codigo);
+    }
+
+    return cuerpo as CredencialesInstitucion;
   }
 
   async aprobarSolicitud(

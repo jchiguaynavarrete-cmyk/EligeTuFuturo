@@ -127,3 +127,10 @@ ion-item.campo-valido {
 .boton-peligro {
   color: var(--ion-color-danger) !important;
 }
+
+/* Las credenciales se leen y se dictan: tipografía de ancho fijo para
+   que no se confundan caracteres parecidos. */
+.alerta-credenciales .alert-message {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.95rem;
+}

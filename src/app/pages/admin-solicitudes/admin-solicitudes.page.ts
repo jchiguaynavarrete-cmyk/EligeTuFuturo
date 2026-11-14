@@ -6,7 +6,10 @@ import { IonicModule, AlertController, ToastController } from '@ionic/angular';
 import { Observable, of, firstValueFrom, BehaviorSubject } from 'rxjs';
 import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 
-import { SolicitudesService } from 'src/app/services/solicitudes.service';
+import {
+  SolicitudesService,
+  CredencialesInstitucion,
+} from 'src/app/services/solicitudes.service';
 import { PlanesService } from 'src/app/services/planes.service';
 import { AuthService } from 'src/app/services/auth.service';
 import {
@@ -130,18 +133,6 @@ export class AdminSolicitudesPage {
       return;
     }
 
-    // Un plan sin pago se activa en el acto, y activarlo necesita saber a
-    // qué cuenta. Se avisa antes de aprobar: si no, quedaría aprobada
-    // pero sin plan, que es peor que no haberla tocado.
-    if (!plan.requierePago && !s.uidSolicitante) {
-      await this.mostrarToast(
-        'Esta solicitud llegó por el formulario público y aún no tiene ' +
-          'cuenta asociada. La institución debe iniciar sesión con ese ' +
-          'correo antes de que puedas activarle un plan sin pago.'
-      );
-      return;
-    }
-
     // Un plan sin pago se activa de inmediato; no tiene sentido pedir monto.
     if (!plan.requierePago) {
       await this.confirmarAprobacionSinPago(s, plan);
@@ -254,6 +245,86 @@ export class AdminSolicitudesPage {
     await this.guardarAprobacion(s, plan, '0');
   }
 
+
+  /**
+   * Muestra el acceso de la institución, una sola vez.
+   *
+   * La clave temporal no se guarda en ninguna pantalla ni se vuelve a
+   * pedir: el administrador la entrega en mano o por teléfono. Si la
+   * cuenta ya existía, no hay clave que mostrar y no se toca la suya.
+   */
+  private async mostrarCredenciales(
+    s: Solicitud,
+    credenciales: CredencialesInstitucion,
+    requierePago: boolean
+  ): Promise<void> {
+    const siguiente = requierePago
+      ? 'Con ese acceso puede entrar y pagar su plan.'
+      : 'Con ese acceso ya puede usar su plan, que quedó activo.';
+
+    if (!credenciales.cuentaNueva) {
+      const alert = await this.alertCtrl.create({
+        header: 'Solicitud aprobada',
+        subHeader: s.nombreInstitucion,
+        message: [
+          `${credenciales.correo} ya tenía cuenta en el sistema.`,
+          '',
+          'Su contraseña no se modificó: entra con la que ya usaba.',
+          '',
+          siguiente,
+        ].join(SALTO),
+        cssClass: 'alerta-texto',
+        buttons: ['Entendido'],
+      });
+
+      await alert.present();
+      return;
+    }
+
+    const alert = await this.alertCtrl.create({
+      header: 'Acceso de la institución',
+      subHeader: s.nombreInstitucion,
+      message: [
+        'Entrega estos datos al encargado. La contraseña no se vuelve a mostrar.',
+        '',
+        `Correo:      ${credenciales.correo}`,
+        `Contraseña:  ${credenciales.passwordTemporal}`,
+        '',
+        siguiente,
+      ].join(SALTO),
+      cssClass: 'alerta-texto alerta-credenciales',
+      backdropDismiss: false,
+      buttons: [
+        {
+          text: 'Copiar',
+          handler: () => {
+            this.copiarCredenciales(credenciales);
+            // `false` deja el cuadro abierto: copiar no debería cerrarlo.
+            return false;
+          },
+        },
+        { text: 'Listo', role: 'cancel' },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  private async copiarCredenciales(c: CredencialesInstitucion): Promise<void> {
+    const texto = [
+      'Acceso a EligeTuFuturo',
+      `Correo: ${c.correo}`,
+      `Contraseña: ${c.passwordTemporal}`,
+    ].join(SALTO);
+
+    try {
+      await navigator.clipboard.writeText(texto);
+      await this.mostrarToast('Acceso copiado.');
+    } catch {
+      await this.mostrarToast('El navegador no dejó copiar. Anótalo a mano.');
+    }
+  }
+
   private async guardarAprobacion(
     s: Solicitud,
     plan: any,
@@ -278,14 +349,15 @@ export class AdminSolicitudesPage {
     this.procesando = s.id;
 
     try {
+      // Primero la cuenta, después la aprobación. Al revés, un plan sin
+      // pago intentaría activarse sobre una solicitud sin dueño y
+      // quedaría aprobada pero sin plan.
+      const credenciales = await this.solicitudesService.habilitarCuenta(s.id);
+
       await this.solicitudesService.aprobarSolicitud(s.id, adminUid, monto, plan);
       this.recargar();
 
-      await this.mostrarToast(
-        plan.requierePago
-          ? 'Solicitud aprobada. La institución ya puede pagar.'
-          : 'Solicitud aprobada y plan activado.'
-      );
+      await this.mostrarCredenciales(s, credenciales, plan.requierePago);
     } catch (err: any) {
       console.error(err);
       // Se muestra el motivo real: un mensaje genérico obliga a abrir
