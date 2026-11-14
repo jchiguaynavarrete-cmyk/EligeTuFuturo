@@ -93,6 +93,22 @@ export class AuthService {
     if (error) throw error;
   }
 
+  /**
+   * Cambia la contraseña de quien tiene la sesión abierta.
+   *
+   * No pide la actual porque Supabase no la exige: la sesión ya prueba
+   * quién es. Pedirla igual daría una falsa sensación de seguridad, ya
+   * que el servidor no la verificaría.
+   *
+   * Existe sobre todo para las instituciones, que entran con una clave
+   * temporal entregada por el administrador y deben poder cambiarla sin
+   * depender del correo.
+   */
+  async cambiarPassword(nueva: string): Promise<void> {
+    const { error } = await this.supabase.auth.updateUser({ password: nueva });
+    if (error) throw error;
+  }
+
   /** Envía el correo para definir una contraseña nueva. */
   async recuperarPassword(email: string): Promise<void> {
     const { error } = await this.supabase.auth.resetPasswordForEmail(
