@@ -271,10 +271,12 @@ export class AdminSolicitudesPage {
           ? 'Solicitud aprobada. La institución ya puede pagar.'
           : 'Solicitud aprobada y plan activado.'
       );
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       await loading.dismiss();
-      await this.mostrarToast('No se pudo aprobar la solicitud.');
+      // Se muestra el motivo real: un mensaje genérico obliga a abrir
+      // la consola del navegador para saber qué pasó.
+      await this.mostrarToast(err?.message || 'No se pudo aprobar la solicitud.');
     }
   }
 
@@ -320,10 +322,10 @@ export class AdminSolicitudesPage {
       await loading.dismiss();
       this.recargar();
       await this.mostrarToast('Solicitud rechazada.');
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       await loading.dismiss();
-      await this.mostrarToast('No se pudo rechazar la solicitud.');
+      await this.mostrarToast(err?.message || 'No se pudo rechazar la solicitud.');
     }
   }
 
@@ -379,7 +381,13 @@ export class AdminSolicitudesPage {
   }
 
   private async mostrarToast(message: string): Promise<void> {
-    const toast = await this.toastCtrl.create({ message, duration: 2600 });
+    // Los mensajes de error pueden ser largos: 2,6 s no alcanzaba para
+    // leerlos, y el botón permite cerrarlo antes si molesta.
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 6000,
+      buttons: [{ text: 'Cerrar', role: 'cancel' }],
+    });
     await toast.present();
   }
 

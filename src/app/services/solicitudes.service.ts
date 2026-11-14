@@ -151,13 +151,30 @@ export class SolicitudesService {
    * Si el plan no requiere pago (Piloto), se activa de inmediato: esa
    * decisión viene de la configuración del plan, no de cada pantalla.
    */
+  /**
+   * Comprueba que la actualización haya tocado alguna fila.
+   *
+   * Cuando las políticas de seguridad bloquean un cambio, la base NO
+   * devuelve error: responde que todo salió bien y no modifica nada.
+   * Sin esta comprobación la pantalla anunciaría "aprobada" mientras la
+   * solicitud sigue pendiente, que es justo lo que no debe pasar.
+   */
+  private exigirQueCambiara(filas: unknown[] | null): void {
+    if (!filas || filas.length === 0) {
+      throw new Error(
+        'La base no aplicó el cambio. Lo más probable es que la sesión ' +
+          'haya perdido el permiso de administrador: cierra sesión y vuelve a entrar.'
+      );
+    }
+  }
+
   async aprobarSolicitud(
     solicitudId: string,
     adminUid: string,
     monto: number,
     plan: Plan
   ): Promise<void> {
-    const { error } = await this.supabase
+    const { data, error } = await this.supabase
       .from('solicitudes')
       .update({
         estado: 'aprobada',
@@ -167,9 +184,11 @@ export class SolicitudesService {
         admin_id: adminUid,
         motivo_rechazo: null,
       })
-      .eq('id', solicitudId);
+      .eq('id', solicitudId)
+      .select('id');
 
     if (error) throw error;
+    this.exigirQueCambiara(data);
 
     if (!plan.requierePago) {
       await this.activarPlan(solicitudId, plan);
@@ -177,7 +196,7 @@ export class SolicitudesService {
   }
 
   async rechazarSolicitud(solicitudId: string, adminUid: string, motivo: string): Promise<void> {
-    const { error } = await this.supabase
+    const { data, error } = await this.supabase
       .from('solicitudes')
       .update({
         estado: 'rechazada',
@@ -185,9 +204,11 @@ export class SolicitudesService {
         admin_id: adminUid,
         motivo_rechazo: motivo.trim() || null,
       })
-      .eq('id', solicitudId);
+      .eq('id', solicitudId)
+      .select('id');
 
     if (error) throw error;
+    this.exigirQueCambiara(data);
   }
 
   /**
