@@ -1,126 +1,395 @@
-ion-content {
-  --background: linear-gradient(180deg, var(--app-bg-top), var(--app-bg-bottom));
+/* =====================================================================
+   Catálogo de carreras
+
+   Hereda el fondo y el velo de las pantallas de acceso: la foto fija
+   detrás, el contenido encima en paneles de vidrio. El velo oscurece el
+   centro, que es justo donde va todo lo que hay que leer.
+   ===================================================================== */
+
+.cabecera-limpia ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+  --color: #fff;
+  --min-height: 44px;
 }
 
-/* CARD SIMULADOR */
-.card-simulador {
-  max-width: 980px;
-  margin: 10px auto 14px auto;
-  border-radius: 16px;
-  background: var(--app-surface);
-  border: 1px solid var(--app-border);
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.45);
+.pantalla-carreras {
+  --background: transparent;
 }
 
-.card-simulador ion-card-title {
-  font-weight: 900;
-  color: #ffffff;
-}
-
-.card-simulador p {
-  color: rgba(255, 255, 255, 0.85);
-  margin-top: 6px;
-}
-
-.card-simulador ion-button {
-  margin-top: 10px;
-  height: 44px;
-  font-weight: 900;
-  border-radius: 14px;
-}
-
-/* BUSCADOR */
-ion-searchbar {
-  max-width: 980px;
-  margin: 0 auto 12px auto;
-
-  --background: var(--app-surface);
-  --color: rgba(255, 255, 255, 0.92);
-  --placeholder-color: var(--app-text-muted);
-  --icon-color: var(--app-text-muted);
-
-  border: 1px solid var(--app-border);
-  border-radius: 14px;
-}
-
-/* FILTROS */
-ion-item {
-  max-width: 980px;
-  margin: 8px auto;
-
-  --background: var(--app-surface);
-  --border-color: var(--app-border);
-  --color: #ffffff;
-
-  border: 1px solid var(--app-border);
-  border-radius: 14px;
+.fondo {
+  position: fixed;
+  inset: 0;
   overflow: hidden;
-
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  z-index: 0;
 }
 
-ion-label {
-  font-weight: 800;
-  opacity: 1;
-  color: #ffffff;
+.foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 45%;
 }
 
-/* Valor elegido en cada filtro (TODAS, Nombre, ...) */
-ion-select {
-  --placeholder-color: rgba(255, 255, 255, 0.85);
-  --placeholder-opacity: 1;
-  color: rgba(255, 255, 255, 0.92);
-  font-weight: 700;
+.velo {
+  position: absolute;
+  inset: 0;
+  background:
+    /* 1. Oscurece la franja central, detrás del contenido */
+    radial-gradient(
+      72% 62% at 50% 48%,
+      rgba(6, 6, 14, 0.93) 0%,
+      rgba(6, 6, 14, 0.8) 44%,
+      rgba(6, 6, 14, 0.42) 78%,
+      rgba(6, 6, 14, 0.28) 100%
+    ),
+    /* 2. Apaga la foto entera */
+    linear-gradient(
+      180deg,
+      rgba(8, 8, 18, 0.74) 0%,
+      rgba(8, 8, 18, 0.64) 38%,
+      rgba(8, 8, 18, 0.84) 100%
+    ),
+    /* 3. Devuelve el tinte de la marca por arriba */
+    radial-gradient(
+      90% 55% at 50% -10%,
+      rgba(139, 92, 246, 0.28) 0%,
+      rgba(79, 124, 255, 0.14) 46%,
+      rgba(8, 8, 18, 0) 76%
+    );
 }
 
-/* BOTÓN LIMPIAR */
-ion-button[color='medium'] {
-  max-width: 980px;
-  margin: 12px auto 8px auto;
-  display: block;
-
-  height: 42px;
-  border-radius: 14px;
-  font-weight: 900;
-
-  --background: var(--app-surface-elevated);
-  --color: rgba(255, 255, 255, 0.92);
-}
-
-/* STATS */
-.stats {
-  max-width: 980px;
-  margin: 8px auto 12px auto;
-  color: rgba(255, 255, 255, 0.92);
-  font-weight: 800;
-  font-size: 14px;
-}
-
-/* LISTA */
-ion-list {
-  max-width: 980px;
+.lienzo {
+  position: relative;
+  z-index: 1;
+  max-width: 860px;
   margin: 0 auto;
+  padding: 10px 24px calc(40px + var(--ion-safe-area-bottom, 0px));
+}
+
+/* ---------------------------- Encabezado ---------------------------- */
+.encabezado {
+  text-align: center;
+  margin-bottom: 26px;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.marca-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #8b5cf6, #4f7cff 55%, #22d3ee);
+}
+
+.marca-nombre {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: #fff;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.8);
+
+  em {
+    font-style: normal;
+    color: var(--app-link);
+  }
+}
+
+.titulo {
+  margin: 0 0 8px;
+  font-size: clamp(26px, 5vw, 34px);
+  font-weight: 800;
+  letter-spacing: -1.1px;
+  line-height: 1.12;
+  color: #fff;
+  text-shadow: 0 3px 22px rgba(0, 0, 0, 0.75);
+}
+
+.bajada {
+  margin: 0 auto;
+  max-width: 50ch;
+  font-size: 16px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.84);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+}
+
+/* ---------------------------- Simulador ----------------------------
+   Es la acción principal de la pantalla: va primero y se distingue del
+   resto con un borde teñido y su propio botón. */
+.simulador {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 16px;
+  padding: 20px 22px;
+
+  border-radius: 20px;
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  background:
+    linear-gradient(
+      100deg,
+      rgba(139, 92, 246, 0.24),
+      rgba(79, 124, 255, 0.16) 55%,
+      rgba(34, 211, 238, 0.12)
+    ),
+    rgba(16, 16, 24, 0.62);
+  backdrop-filter: blur(14px);
+
+  transition: border-color 180ms ease, transform 180ms ease;
+}
+
+.simulador:hover {
+  border-color: rgba(139, 92, 246, 0.75);
+  transform: translateY(-2px);
+}
+
+.simulador-icono {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: linear-gradient(100deg, #8b5cf6, #4f7cff 55%, #22d3ee);
+  box-shadow: 0 10px 24px rgba(79, 124, 255, 0.38);
+}
+
+.simulador-texto {
+  flex: 1 1 220px;
+  min-width: 0;
+
+  h2 {
+    margin: 0 0 4px;
+    font-size: 17.5px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    color: #fff;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.78);
+  }
+}
+
+.simulador-boton {
+  flex-shrink: 0;
+  margin: 0;
+  height: 46px;
+
+  font-size: 15px;
+  font-weight: 800;
+  text-transform: none;
+  letter-spacing: 0.2px;
+
+  --border-radius: 14px;
+  --background: linear-gradient(100deg, #8b5cf6, #4f7cff 55%, #22d3ee);
+  --background-activated: linear-gradient(100deg, #7c4ef0, #3f6cf5 55%, #15c4e0);
+  --background-focused: var(--background-activated);
+  --box-shadow: 0 12px 28px rgba(79, 124, 255, 0.4);
+  --color: #fff;
+  --padding-start: 20px;
+  --padding-end: 20px;
+}
+
+/* ------------------------ Buscador y filtros ------------------------ */
+.panel {
+  padding: 18px 20px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(16, 16, 24, 0.76);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.5);
+}
+
+.buscador {
+  --background: rgba(255, 255, 255, 0.07);
+  --color: #fff;
+  --placeholder-color: rgba(255, 255, 255, 0.45);
+  --placeholder-opacity: 1;
+  --icon-color: rgba(255, 255, 255, 0.55);
+  --clear-button-color: rgba(255, 255, 255, 0.6);
+  --border-radius: 15px;
+  --box-shadow: none;
+
+  padding: 0;
+  min-height: 52px;
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+/*
+ * Cada filtro es una pastilla: la etiqueta en versalitas y el valor al
+ * lado. Antes cada uno ocupaba una fila completa, así que los cuatro
+ * empujaban la lista fuera de la pantalla.
+ */
+.filtro {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 40px;
+  padding: 0 6px 0 13px;
+
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.05);
+
+  transition: border-color 160ms ease, background 160ms ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  /* El filtro aplicado se nota de un vistazo */
+  &.activo {
+    border-color: rgba(79, 124, 255, 0.8);
+    background: rgba(79, 124, 255, 0.16);
+
+    .filtro-etiqueta {
+      color: #9ec1ff;
+    }
+  }
+
+  ion-select {
+    --padding-start: 6px;
+    --padding-end: 4px;
+    --placeholder-color: #fff;
+    --placeholder-opacity: 1;
+
+    max-width: 180px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+  }
+}
+
+.filtro-etiqueta {
+  flex-shrink: 0;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Salida de emergencia: visible, pero sin invitar a usarla */
+.limpiar {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 40px;
+  padding: 0 14px;
+
+  border-radius: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.28);
+  background: none;
+  cursor: pointer;
+
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+
+  transition: color 160ms ease, border-color 160ms ease;
+
+  &:hover {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+.conteo {
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.72);
+
+  b {
+    color: #fff;
+    font-weight: 800;
+  }
+}
+
+/* ------------------------------ Lista ------------------------------ */
+.lista {
+  margin-top: 18px;
+}
+
+ion-accordion-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   background: transparent;
 }
 
-/* Header carrera */
+.carrera {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(16, 16, 24, 0.8);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+
+  transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+
+  &:hover {
+    border-color: rgba(126, 179, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.42);
+  }
+}
+
 ion-accordion ion-item[slot='header'] {
-  --background: var(--app-surface);
-  border: 1px solid var(--app-border);
-  border-radius: 14px;
-  margin: 10px 0;
+  --background: transparent;
+  --background-hover: transparent;
+  --color: #fff;
+  --padding-start: 18px;
+  --inner-padding-end: 14px;
+  --min-height: 68px;
 }
 
-ion-accordion ion-label h2 {
-  font-weight: 900;
+ion-accordion ion-label {
+  h2 {
+    margin: 0 0 4px;
+    font-size: 16.5px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    text-transform: capitalize;
+    color: #fff;
+  }
+
+  p {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.45;
+    text-transform: capitalize;
+    color: rgba(255, 255, 255, 0.72);
+  }
 }
 
-ion-accordion ion-label p {
-  opacity: 0.7;
-  margin-top: 4px;
-}
-
-/* Tipos */
+/* Franja de color: verde para técnicas, azul para profesionales */
 .tecnica {
   border-left: 4px solid #2dd36f !important;
 }
@@ -129,57 +398,98 @@ ion-accordion ion-label p {
   border-left: 4px solid #3b82f6 !important;
 }
 
-/* Contenido acordeón */
+.corazon {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+
+  transition: color 160ms ease, border-color 160ms ease, transform 160ms ease;
+
+  &:hover {
+    color: #ff7a9a;
+    border-color: rgba(255, 122, 154, 0.55);
+    transform: scale(1.06);
+  }
+
+  &.marcado {
+    color: #ff5c85;
+    border-color: rgba(255, 92, 133, 0.55);
+    background: rgba(255, 92, 133, 0.12);
+  }
+}
+
+/* ----------------------------- Detalle ----------------------------- */
 .acordeon {
-  padding: 12px 12px 16px 12px;
-  margin: 0 4px 10px 4px;
-
-  border-left: 3px solid rgba(59, 130, 246, 0.6);
-  background: var(--app-surface);
-  border-radius: 14px;
-
-  color: rgba(255, 255, 255, 0.88);
+  padding: 4px 18px 20px;
 }
 
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr;
+.datos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dato {
+  display: inline-flex;
+  align-items: baseline;
   gap: 6px;
-}
+  padding: 7px 12px;
 
-@media (min-width: 900px) {
-  .info-grid {
-    grid-template-columns: 1fr 1fr;
-    column-gap: 18px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 13px;
+
+  span {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  b {
+    font-weight: 700;
+    color: #fff;
   }
 }
 
 .titulo-seccion {
-  margin-top: 14px;
-  margin-bottom: 10px;
-  font-weight: 900;
-  opacity: 0.9;
+  margin: 20px 0 10px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
 }
 
-/* PONDERACIONES CON BARRAS */
 .ponderaciones {
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 700px) {
   .ponderaciones {
     grid-template-columns: 1fr 1fr;
-    gap: 12px 18px;
+    gap: 10px 16px;
   }
 }
 
 .pond {
-  padding: 10px;
+  padding: 11px 12px;
   border-radius: 12px;
-  background: var(--app-surface-elevated);
-  border: 1px solid var(--app-border);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .pond-top {
@@ -188,22 +498,23 @@ ion-accordion ion-label p {
   justify-content: space-between;
   gap: 10px;
   margin-bottom: 8px;
-  font-weight: 800;
+  font-size: 13.5px;
+  font-weight: 700;
+
+  span {
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  b {
+    font-weight: 800;
+    color: #fff;
+  }
 }
 
-.pond-top span {
-  opacity: 0.85;
-}
-
-.pond-top b {
-  opacity: 0.95;
-}
-
-/* Barra */
 .bar {
-  height: 10px;
+  height: 8px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.14);
   overflow: hidden;
 }
 
@@ -211,102 +522,121 @@ ion-accordion ion-label p {
   height: 100%;
   width: 0%;
   border-radius: 999px;
-  background: rgba(59, 130, 246, 0.85);
+  background: linear-gradient(90deg, #4f7cff, #22d3ee);
+  transition: width 320ms ease;
 }
 
-/* PAGINACIÓN */
+/* --------------------------- Sin resultados --------------------------- */
+.vacio {
+  padding: 46px 24px;
+  text-align: center;
+
+  border-radius: 20px;
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  background: rgba(16, 16, 24, 0.6);
+}
+
+.vacio-titulo {
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.vacio-texto {
+  margin: 0 0 18px;
+  font-size: 14.5px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* ---------------------------- Paginación ---------------------------- */
 .paginacion {
-  max-width: 980px;
-  margin: 18px auto 28px auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-
-  color: var(--app-text-muted);
-  font-weight: 900;
+  gap: 16px;
+  margin-top: 26px;
 }
 
-.paginacion ion-button {
-  border-radius: 14px;
-  font-weight: 900;
-}
-
-/* ACCESO A PLANES INSTITUCIONALES */
-.banner-institucion {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-
-  max-width: 980px;
-  margin: 0 auto 14px auto;
-  padding: 16px 18px;
-
-  border-radius: 16px;
-  background: linear-gradient(
-    135deg,
-    rgba(99, 102, 241, 0.16),
-    rgba(126, 179, 255, 0.10)
-  );
-  border: 1px solid rgba(126, 179, 255, 0.34);
-}
-
-.icono-institucion {
-  flex-shrink: 0;
-  width: 44px;
+.pag {
+  margin: 0;
   height: 44px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  font-size: 22px;
 
-  background: rgba(126, 179, 255, 0.16);
-  border: 1px solid rgba(126, 179, 255, 0.34);
+  font-size: 14.5px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0.2px;
+
+  --border-radius: 13px;
+  --background: rgba(255, 255, 255, 0.07);
+  --background-activated: rgba(255, 255, 255, 0.16);
+  --background-focused: var(--background-activated);
+  --background-hover: rgba(255, 255, 255, 0.14);
+  --box-shadow: none;
+  --color: #fff;
+  --border-width: 1px;
+  --border-style: solid;
+  --border-color: rgba(255, 255, 255, 0.18);
 }
 
-.texto-institucion {
-  flex: 1;
-  min-width: 200px;
-}
-
-.texto-institucion strong {
-  display: block;
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--app-text);
-}
-
-.texto-institucion p {
-  margin: 3px 0 0 0;
-  font-size: 13.5px;
-  line-height: 1.4;
-  color: var(--app-text-muted);
-}
-
-.boton-institucion {
-  flex-shrink: 0;
-  padding: 11px 20px;
-  border-radius: 12px;
-  cursor: pointer;
-
+.pag-texto {
   font-size: 14px;
-  font-weight: 800;
-  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.72);
 
-  color: #ffffff;
-  background: var(--ion-color-primary);
-  border: 1px solid var(--ion-color-primary);
-
-  transition: filter 0.18s ease;
+  b {
+    color: #fff;
+    font-weight: 800;
+  }
 }
 
-.boton-institucion:hover {
-  filter: brightness(1.14);
-}
+/* ------------------------------ Móvil ------------------------------ */
+@media (max-width: 620px) {
+  /* Ahí la foto casi no se alcanza a ver: el velo se vuelve parejo */
+  .velo {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(8, 8, 18, 0.80) 0%,
+        rgba(8, 8, 18, 0.93) 45%,
+        rgba(8, 8, 18, 0.96) 100%
+      ),
+      radial-gradient(90% 40% at 50% -10%, rgba(139, 92, 246, 0.22) 0%, rgba(8, 8, 18, 0) 70%);
+  }
 
-@media (max-width: 560px) {
-  .boton-institucion {
+  .lienzo {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .simulador {
+    flex-wrap: wrap;
+    padding: 18px;
+  }
+
+  .simulador-boton {
     width: 100%;
+  }
+
+  .panel {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .filtro ion-select {
+    max-width: 130px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .simulador,
+  .carrera,
+  .corazon,
+  .fill {
+    transition: none;
+  }
+
+  .simulador:hover,
+  .carrera:hover {
+    transform: none;
   }
 }

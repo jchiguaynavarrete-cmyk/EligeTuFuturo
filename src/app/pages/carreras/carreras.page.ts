@@ -6,9 +6,7 @@ import { Router } from '@angular/router';
 import {
   IonContent,
   IonHeader,
-  IonTitle,
   IonToolbar,
-  IonList,
   IonItem,
   IonLabel,
   IonAccordionGroup,
@@ -17,10 +15,6 @@ import {
   IonSelectOption,
   IonSearchbar,
   IonButton,
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardContent,
 } from '@ionic/angular/standalone';
 
 import { CarrerasService, CarreraDoc } from '../../services/carreras.service';
@@ -36,9 +30,7 @@ import { FavoritosService } from '../../services/favoritos.service';
     FormsModule,
     IonContent,
     IonHeader,
-    IonTitle,
     IonToolbar,
-    IonList,
     IonItem,
     IonLabel,
     IonAccordionGroup,
@@ -47,10 +39,6 @@ import { FavoritosService } from '../../services/favoritos.service';
     IonSelectOption,
     IonSearchbar,
     IonButton,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardContent,
   ],
 })
 export class CarrerasPage implements OnInit {
