@@ -1,0 +1,162 @@
+<ion-content class="contacto">
+  <header class="barra">
+    <button type="button" class="marca" (click)="volverALanding()">
+      Elige<em>Tu</em>Futuro
+    </button>
+  </header>
+
+  <div class="caja">
+    <!-- ENVIADO -->
+    <section class="exito" *ngIf="enviado">
+      <div class="marca-ok">✓</div>
+      <h1>Solicitud enviada</h1>
+      <p>
+        Gracias, {{ nombre.split(' ')[0] }}. Nuestro equipo revisará tu
+        solicitud y se pondrá en contacto a <strong>{{ correo }}</strong>.
+      </p>
+
+      <div class="acciones">
+        <button type="button" class="boton principal" (click)="verDemo()">
+          Mientras tanto, ver la demo →
+        </button>
+        <button type="button" class="boton secundario" (click)="volverALanding()">
+          Volver
+        </button>
+      </div>
+    </section>
+
+    <!-- FORMULARIO -->
+    <ng-container *ngIf="!enviado">
+      <button type="button" class="volver" (click)="volverALanding()">
+        ← Volver a los planes
+      </button>
+
+      <div class="encabezado">
+        <p class="sobretitulo">Solicitud de información</p>
+        <h1>Conversemos sobre tu institución</h1>
+        <p class="bajada">
+          Déjanos tus datos y te enviamos una propuesta ajustada a tu realidad.
+          No te pedimos crear una cuenta.
+        </p>
+      </div>
+
+      <div class="plan-elegido" *ngIf="plan">
+        <span class="etiqueta">Plan de interés</span>
+        <strong>{{ plan.nombre }}</strong>
+      </div>
+
+      <div class="estado-centro" *ngIf="cargandoPlan">
+        <ion-spinner></ion-spinner>
+      </div>
+
+      <form (ngSubmit)="enviar()" *ngIf="!cargandoPlan">
+        <div class="campos">
+          <label class="campo">
+            <span class="etiqueta-campo">Nombre *</span>
+            <input
+              type="text"
+              [(ngModel)]="nombre"
+              name="nombre"
+              placeholder="Nombre y apellido"
+              maxlength="60"
+              autocomplete="off"
+              [class.invalido]="errorDe('nombre')"
+              (input)="alEscribir('nombre')"
+              (blur)="marcarSalida('nombre')" />
+            <span class="error" *ngIf="errorDe('nombre')">{{ errorDe('nombre') }}</span>
+          </label>
+
+          <label class="campo">
+            <span class="etiqueta-campo">Cargo *</span>
+            <input
+              type="text"
+              [(ngModel)]="cargo"
+              name="cargo"
+              placeholder="Director, orientador, jefe DAEM..."
+              maxlength="50"
+              autocomplete="off"
+              [class.invalido]="errorDe('cargo')"
+              (input)="alEscribir('cargo')"
+              (blur)="marcarSalida('cargo')" />
+            <span class="error" *ngIf="errorDe('cargo')">{{ errorDe('cargo') }}</span>
+          </label>
+
+          <label class="campo ancho">
+            <span class="etiqueta-campo">Institución o comuna *</span>
+            <input
+              type="text"
+              [(ngModel)]="institucion"
+              name="institucion"
+              placeholder="Nombre del establecimiento, comuna o SLEP"
+              maxlength="80"
+              autocomplete="off"
+              [class.invalido]="errorDe('institucion')"
+              (input)="alEscribir('institucion')"
+              (blur)="marcarSalida('institucion')" />
+            <span class="error" *ngIf="errorDe('institucion')">
+              {{ errorDe('institucion') }}
+            </span>
+          </label>
+
+          <label class="campo">
+            <span class="etiqueta-campo">Correo *</span>
+            <input
+              type="email"
+              [(ngModel)]="correo"
+              name="correo"
+              placeholder="correo@institucion.cl"
+              maxlength="80"
+              autocomplete="off"
+              [class.invalido]="errorDe('correo')"
+              (input)="alEscribir('correo')"
+              (blur)="marcarSalida('correo')" />
+            <span class="error" *ngIf="errorDe('correo')">{{ errorDe('correo') }}</span>
+          </label>
+
+          <label class="campo">
+            <span class="etiqueta-campo">
+              Teléfono <span class="opcional">opcional</span>
+            </span>
+            <input
+              type="tel"
+              [(ngModel)]="telefono"
+              name="telefono"
+              placeholder="+56 9 1234 5678"
+              maxlength="16"
+              autocomplete="off"
+              [class.invalido]="errorDe('telefono')"
+              (input)="onTelefonoInput($event)"
+              (blur)="marcarSalida('telefono')" />
+            <span class="error" *ngIf="errorDe('telefono')">{{ errorDe('telefono') }}</span>
+          </label>
+
+          <label class="campo ancho">
+            <span class="etiqueta-campo">N° aproximado de alumnos *</span>
+            <input
+              type="number"
+              [(ngModel)]="cantidadAlumnos"
+              name="cantidadAlumnos"
+              placeholder="Ej: 450"
+              min="1"
+              [class.invalido]="errorDe('cantidadAlumnos')"
+              (input)="alEscribir('cantidadAlumnos')"
+              (blur)="marcarSalida('cantidadAlumnos')" />
+            <span class="error" *ngIf="errorDe('cantidadAlumnos')">
+              {{ errorDe('cantidadAlumnos') }}
+            </span>
+          </label>
+        </div>
+
+        <p class="aviso-error" *ngIf="errorEnvio">{{ errorEnvio }}</p>
+
+        <button type="submit" class="boton principal ancho-total" [disabled]="enviando">
+          {{ enviando ? 'Enviando...' : 'Enviar solicitud' }}
+        </button>
+
+        <p class="nota">
+          Usaremos tus datos solo para contactarte sobre EligeTuFuturo.
+        </p>
+      </form>
+    </ng-container>
+  </div>
+</ion-content>

@@ -1,0 +1,184 @@
+.subtexto {
+  opacity: 0.85;
+  margin-bottom: 12px;
+}
+
+/* Inputs en grid */
+.grid-puntajes {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+@media (min-width: 720px) {
+  .grid-puntajes {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Filtros en grid */
+.grid-filtros {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+@media (min-width: 720px) {
+  .grid-filtros {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1020px) {
+  .grid-filtros {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+}
+
+/* Botones */
+.botones {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Carga */
+.centrado {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+/* Error */
+.error {
+  margin-top: 12px;
+  color: #f44336;
+  font-size: 0.9rem;
+}
+
+/* note warning */
+.note-warn {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Conteo y títulos */
+.contador {
+  opacity: 0.8;
+  margin: 10px 0 0;
+}
+
+.titulo-resultados {
+  margin: 14px 0 8px;
+}
+
+/* Mensaje inicial */
+.mensaje-inicial {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mensaje-inicial p {
+  margin: 0;
+  opacity: 0.85;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 600px) {
+  .mensaje-inicial {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Resultado */
+.meta {
+  opacity: 0.85;
+}
+
+.score {
+  margin-top: 6px;
+}
+
+.ponderaciones {
+  margin-top: 4px;
+  opacity: 0.85;
+  font-size: 0.9rem;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Fix ion-item dentro del card */
+ion-card ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+ion-card ion-label {
+  margin-bottom: 6px;
+}
+
+ion-note[slot='helper'] {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: var(--ion-color-medium);
+}
+
+/* ⭐ Favoritos */
+ion-button.fav-btn {
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+
+  width: 44px;
+  height: 44px;
+
+  --color: var(--ion-color-medium) !important;
+}
+.acc-content {
+  padding: 12px 14px 14px;
+}
+
+.grid-detalles {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+@media (min-width: 720px) {
+  .grid-detalles {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.kv {
+  opacity: 0.9;
+}
+
+.calc {
+  margin-top: 10px;
+  opacity: 0.9;
+}
+
+.calc ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.calc li {
+  margin: 2px 0;
+}

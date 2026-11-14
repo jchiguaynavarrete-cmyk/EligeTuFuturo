@@ -1,0 +1,271 @@
+ion-content {
+  --background: linear-gradient(180deg, var(--app-bg-top), var(--app-bg-bottom));
+}
+
+/* Contenedor */
+form {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* Inputs */
+ion-item {
+  --background: var(--app-surface);
+  --border-color: var(--app-border);
+  --color: var(--app-text);
+  margin: 12px 0;
+  border-radius: 14px;
+  border: 1px solid var(--app-border);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+/* El campo enfocado se marca con el azul primario */
+ion-item:focus-within {
+  --background: var(--app-surface-elevated);
+  border-color: var(--ion-color-primary);
+}
+
+ion-label {
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+ion-input {
+  font-size: 16px;
+  --color: var(--app-text);
+  --placeholder-color: var(--app-text-muted);
+}
+
+/* Datetime */
+ion-datetime {
+  max-width: 420px;
+  margin-top: 6px;
+
+  --background: var(--app-surface-elevated);
+  border-radius: 14px;
+  border: 1px solid var(--app-border);
+}
+
+/* Fila que abre el calendario */
+.fecha-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin: 8px 0 2px 0;
+  padding: 12px 14px;
+
+  background: var(--app-surface-elevated);
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.fecha-trigger:hover {
+  background: var(--app-surface-hover);
+  border-color: var(--app-border-strong);
+}
+
+.fecha-trigger.abierto {
+  border-color: var(--ion-color-primary);
+}
+
+.fecha-icono {
+  font-size: 20px;
+  color: var(--app-link);
+  flex-shrink: 0;
+}
+
+.fecha-valor {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--app-text);
+  text-transform: capitalize;
+}
+
+.fecha-placeholder {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--app-text-muted);
+}
+
+.fecha-edad {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  color: var(--app-text-muted);
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+}
+
+/* El chevron gira al abrir */
+.fecha-chevron {
+  margin-left: auto;
+  font-size: 18px;
+  color: var(--app-text-muted);
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
+.fecha-chevron.abierto {
+  transform: rotate(180deg);
+}
+
+/* Despliegue animado: 0fr -> 1fr permite animar una altura desconocida */
+.calendario-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.28s ease, opacity 0.2s ease;
+}
+
+.calendario-wrap.abierto {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.calendario-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .calendario-wrap,
+  .fecha-chevron {
+    transition: none;
+  }
+}
+
+/* Panel compacto de seguridad */
+.password-panel {
+  margin: 4px 4px 12px 4px;
+}
+
+.password-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.password-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.password-bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: var(--ion-color-danger);
+  transition: width 0.25s ease, background 0.25s ease;
+}
+
+.password-bar-fill.nivel-media {
+  background: var(--ion-color-warning);
+}
+
+.password-bar-fill.nivel-fuerte {
+  background: var(--ion-color-success);
+}
+
+.password-label {
+  font-size: 12px;
+  font-weight: 800;
+  min-width: 48px;
+  text-align: right;
+  color: var(--ion-color-danger);
+}
+
+.password-label.nivel-media {
+  color: var(--ion-color-warning);
+}
+
+.password-label.nivel-fuerte {
+  color: var(--ion-color-success);
+}
+
+/* Requisitos como chips en vez de lista larga */
+.password-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.chip {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+
+  color: var(--app-text-muted);
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+
+  transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.chip.ok {
+  color: var(--ion-color-success);
+  background: rgba(45, 211, 111, 0.14);
+  border-color: rgba(45, 211, 111, 0.45);
+}
+
+.chip.ok::before {
+  content: '✓ ';
+}
+
+.password-ok {
+  margin: 10px 0 0 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ion-color-success);
+}
+
+.password-ok::before {
+  content: '✓ ';
+}
+
+/* Botón principal */
+.btn-primary {
+  margin-top: 18px;
+  height: 46px;
+  font-weight: 700;
+  border-radius: 14px;
+}
+
+/* Botón volver / cambiar modo */
+.btn-link {
+  margin-top: 12px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+
+  /* Mayúsculas por defecto de Ionic: en frases largas cuesta leerlas */
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 15px;
+
+  --color: var(--app-link);
+  color: var(--app-link);
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  form {
+    max-width: 100%;
+  }
+
+  ion-datetime {
+    max-width: 100%;
+  }
+}

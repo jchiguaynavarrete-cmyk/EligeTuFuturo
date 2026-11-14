@@ -1,0 +1,206 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Carreras</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- CARD DEL SIMULADOR -->
+  <ion-card class="card-simulador">
+    <ion-card-header>
+      <ion-card-title>Simulador de Carreras para tu Futuro</ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <p>
+        Usa nuestro simulador y descubre qué carreras podrían ajustarse
+        a tus puntajes PAES y ponderaciones. ¡Anticípate a tus opciones!
+      </p>
+
+      <ion-button expand="block" color="primary" (click)="irAlSimulador()">
+        Ir al Simulador
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- BUSCADOR -->
+  <ion-searchbar
+    [(ngModel)]="searchTerm"
+    (ionInput)="aplicarFiltros()"
+    placeholder="Buscar por nombre, institución o región">
+  </ion-searchbar>
+
+  <!-- FILTROS -->
+  <ion-item>
+    <ion-label>Área</ion-label>
+    <ion-select [(ngModel)]="filtroArea" (ionChange)="aplicarFiltros()">
+      <ion-select-option *ngFor="let a of areas" [value]="a">
+        {{ a }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>Región</ion-label>
+    <ion-select [(ngModel)]="filtroRegion" (ionChange)="aplicarFiltros()">
+      <ion-select-option *ngFor="let r of regiones" [value]="r">
+        {{ r }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>Institución</ion-label>
+    <ion-select [(ngModel)]="filtroInstitucion" (ionChange)="aplicarFiltros()">
+      <ion-select-option *ngFor="let i of instituciones" [value]="i">
+        {{ i }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>Ordenar por</ion-label>
+    <ion-select [(ngModel)]="orden" (ionChange)="aplicarFiltros()">
+      <ion-select-option value="nombre">Nombre</ion-select-option>
+      <ion-select-option value="arancel">Arancel</ion-select-option>
+      <ion-select-option value="duracion">Duración</ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <ion-button expand="full" color="medium" (click)="limpiarFiltros()">
+    Limpiar Filtros
+  </ion-button>
+
+  <!-- STATS -->
+  <p class="stats">
+    Total: {{ totalCarreras }} ·
+    Filtradas: {{ totalFiltradas }} ·
+    Página {{ pagina }} de {{ totalPaginas }}
+  </p>
+
+  <!-- LISTA -->
+  <ion-list>
+    <ion-accordion-group>
+
+      <ion-accordion
+        *ngFor="let carrera of paginaActualCarreras"
+        [value]="carrera.codigo_carrera">
+
+        <ion-item
+          slot="header"
+          [ngClass]="{
+            'tecnica': carrera.es_tecnico === '1',
+            'profesional': carrera.es_tecnico === '0'
+          }">
+
+          <ion-label>
+            <h2>{{ carrera.carrera }}</h2>
+            <p>
+              {{ carrera.nombre_institucion }} ·
+              {{ carrera.region_sede }}
+            </p>
+          </ion-label>
+
+          <ion-button
+            slot="end"
+            fill="clear"
+            (click)="toggleFavorito(carrera, $event)">
+            {{ esFavorito(carrera) ? '★' : '☆' }}
+          </ion-button>
+
+        </ion-item>
+
+        <!-- CONTENIDO -->
+        <div slot="content" class="acordeon">
+          <div class="info-grid">
+            <p><b>Sede:</b> {{ carrera.sede }}</p>
+            <p><b>Duración:</b> {{ carrera.duracion_formal }} semestres</p>
+            <p><b>Vacantes:</b> {{ carrera.vacantes_primer_semestre }}</p>
+            <p><b>Arancel:</b> {{ carrera.valor_arancel }}</p>
+          </div>
+
+          <h4 class="titulo-seccion">Ponderaciones</h4>
+
+          <div class="ponderaciones">
+            <div class="pond">
+              <div class="pond-top">
+                <span>Lenguaje</span>
+                <b>{{ pct(carrera.psu_lenguaje) }}</b>
+              </div>
+              <div class="bar">
+                <div class="fill" [style.width.%]="pctNum(carrera.psu_lenguaje)"></div>
+              </div>
+            </div>
+
+            <div class="pond">
+              <div class="pond-top">
+                <span>Matemáticas</span>
+                <b>{{ pct(carrera.psu_matematicas) }}</b>
+              </div>
+              <div class="bar">
+                <div class="fill" [style.width.%]="pctNum(carrera.psu_matematicas)"></div>
+              </div>
+            </div>
+
+            <div class="pond">
+              <div class="pond-top">
+                <span>Ciencias</span>
+                <b>{{ pct(carrera.psu_ciencias) }}</b>
+              </div>
+              <div class="bar">
+                <div class="fill" [style.width.%]="pctNum(carrera.psu_ciencias)"></div>
+              </div>
+            </div>
+
+            <div class="pond">
+              <div class="pond-top">
+                <span>Historia</span>
+                <b>{{ pct(carrera.psu_historia) }}</b>
+              </div>
+              <div class="bar">
+                <div class="fill" [style.width.%]="pctNum(carrera.psu_historia)"></div>
+              </div>
+            </div>
+
+            <div class="pond">
+              <div class="pond-top">
+                <span>Ranking</span>
+                <b>{{ pct(carrera.ranking) }}</b>
+              </div>
+              <div class="bar">
+                <div class="fill" [style.width.%]="pctNum(carrera.ranking)"></div>
+              </div>
+            </div>
+
+            <div class="pond">
+              <div class="pond-top">
+                <span>Notas EM</span>
+                <b>{{ pct(carrera.notas_em) }}</b>
+              </div>
+              <div class="bar">
+                <div class="fill" [style.width.%]="pctNum(carrera.notas_em)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </ion-accordion>
+
+    </ion-accordion-group>
+  </ion-list>
+
+  <!-- PAGINACIÓN -->
+  <div class="paginacion">
+    <ion-button (click)="paginaAnterior()" [disabled]="pagina === 1">
+      Anterior
+    </ion-button>
+
+    <span>Página {{ pagina }} de {{ totalPaginas }}</span>
+
+    <ion-button (click)="paginaSiguiente()" [disabled]="pagina === totalPaginas">
+      Siguiente
+    </ion-button>
+  </div>
+
+</ion-content>

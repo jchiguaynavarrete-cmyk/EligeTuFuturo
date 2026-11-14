@@ -1,0 +1,477 @@
+ion-content.demo {
+  --background: linear-gradient(180deg, #0f1021, #0a0b16 60%, var(--app-bg-bottom));
+}
+
+/* Banner fijo del recorrido */
+.banner-demo {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  padding: 12px 18px;
+  background: linear-gradient(135deg, #7c5cff, #4f7cff);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.pildora {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.salto {
+  flex: 1;
+  min-width: 200px;
+  text-align: left;
+
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cerrar {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  cursor: pointer;
+
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.16);
+  border: none;
+}
+
+/* Disposición */
+.lienzo {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 22px 18px 40px 18px;
+}
+
+@media (min-width: 900px) {
+  .lienzo {
+    grid-template-columns: 340px 1fr;
+    align-items: start;
+  }
+
+  .globo {
+    position: sticky;
+    top: 86px;
+  }
+}
+
+/* Globo guía */
+.globo {
+  padding: 20px;
+  border-radius: 18px;
+  background: var(--app-surface);
+  border: 1px solid #7c5cff;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.42);
+}
+
+.globo-cabecera {
+  margin-bottom: 14px;
+}
+
+.contador {
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--app-link);
+}
+
+.barra-progreso {
+  height: 4px;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.relleno {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7c5cff, #22d3ee);
+  transition: width 0.3s ease;
+}
+
+.globo h2 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--app-text);
+}
+
+.globo p {
+  margin: 0 0 18px 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--app-text-muted);
+}
+
+.globo-acciones {
+  display: flex;
+  gap: 8px;
+}
+
+.boton {
+  flex: 1;
+  padding: 11px 14px;
+  border-radius: 11px;
+  cursor: pointer;
+
+  font-size: 14px;
+  font-weight: 800;
+  font-family: inherit;
+
+  transition: filter 0.18s ease, background 0.18s ease, opacity 0.18s ease;
+}
+
+.boton.principal {
+  color: #ffffff;
+  background: linear-gradient(135deg, #7c5cff, #4f7cff);
+  border: none;
+}
+
+.boton.principal:hover {
+  filter: brightness(1.14);
+}
+
+.boton.secundario {
+  color: var(--app-text);
+  background: transparent;
+  border: 1px solid var(--app-border-strong);
+}
+
+.boton.secundario:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.puntos {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 16px;
+}
+
+.punto {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border-radius: 50%;
+  cursor: pointer;
+
+  background: rgba(255, 255, 255, 0.22);
+  border: none;
+  transition: background 0.2s ease, width 0.2s ease;
+}
+
+.punto.activo {
+  width: 22px;
+  border-radius: 999px;
+  background: #7c5cff;
+}
+
+/* Escenario: ventana simulada */
+.marco {
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.45);
+}
+
+.marco-barra {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 14px;
+  background: var(--app-surface-elevated);
+  border-bottom: 1px solid var(--app-border);
+}
+
+.punto-barra {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.marco-titulo {
+  margin-left: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--app-text-muted);
+}
+
+.pantalla {
+  padding: 18px;
+  min-height: 420px;
+}
+
+/* Perfil ficticio */
+.perfil {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+
+  font-size: 14px;
+  font-weight: 900;
+
+  color: #dbeafe;
+  background: rgba(124, 92, 255, 0.2);
+  border: 1px solid rgba(124, 92, 255, 0.45);
+}
+
+.perfil strong {
+  display: block;
+  font-size: 15.5px;
+  font-weight: 800;
+  color: var(--app-text);
+}
+
+.curso {
+  font-size: 12.5px;
+  color: var(--app-text-muted);
+}
+
+/* Vistas */
+.titulo-vista {
+  margin: 0 0 14px 0;
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--app-text);
+}
+
+.subtitulo-vista {
+  margin: 18px 0 10px 0;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--app-text-muted);
+}
+
+.buscador-falso {
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  color: var(--app-text-muted);
+  background: var(--app-surface-elevated);
+  border: 1px solid var(--app-border);
+}
+
+.fila-carrera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  padding: 13px 14px;
+  margin-bottom: 9px;
+  border-radius: 12px;
+  background: var(--app-surface-elevated);
+  border: 1px solid var(--app-border);
+}
+
+.fila-carrera .info strong {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--app-text);
+}
+
+.fila-carrera .info span {
+  font-size: 12.5px;
+  color: var(--app-text-muted);
+}
+
+.datos {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dato {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  color: var(--app-text-muted);
+  background: var(--app-surface-hover);
+  border: 1px solid var(--app-border);
+}
+
+.veredicto {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 999px;
+  color: #fca5a5;
+  background: rgba(235, 68, 90, 0.14);
+  border: 1px solid rgba(235, 68, 90, 0.4);
+}
+
+.veredicto.si {
+  color: #86efac;
+  background: rgba(45, 211, 111, 0.14);
+  border-color: rgba(45, 211, 111, 0.42);
+}
+
+.afinidad {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 999px;
+  color: #c4b5fd;
+  background: rgba(124, 92, 255, 0.16);
+  border: 1px solid rgba(124, 92, 255, 0.42);
+}
+
+.puntajes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.chip-puntaje {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 11px;
+  border-radius: 999px;
+  color: var(--app-text);
+  background: var(--app-surface-hover);
+  border: 1px solid var(--app-border);
+}
+
+/* Reporte */
+.metricas {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.metrica {
+  padding: 14px 12px;
+  border-radius: 12px;
+  text-align: center;
+  background: var(--app-surface-elevated);
+  border: 1px solid var(--app-border);
+}
+
+.metrica strong {
+  display: block;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--app-text);
+}
+
+.metrica span {
+  font-size: 11.5px;
+  color: var(--app-text-muted);
+}
+
+.barra-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+
+.nombre-area {
+  flex: 0 0 150px;
+  font-size: 12.5px;
+  color: var(--app-text);
+}
+
+.pista {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.relleno-area {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7c5cff, #22d3ee);
+}
+
+.pct {
+  flex: 0 0 34px;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--app-text-muted);
+}
+
+.alertas {
+  margin-top: 6px;
+}
+
+.alerta {
+  margin: 0 0 7px 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--app-text);
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.34);
+}
+
+.nota-demo {
+  margin: 14px 0 0 0;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--app-text-muted);
+}
+
+@media (max-width: 560px) {
+  .nombre-area {
+    flex-basis: 110px;
+    font-size: 11.5px;
+  }
+
+  .metricas {
+    gap: 7px;
+  }
+}

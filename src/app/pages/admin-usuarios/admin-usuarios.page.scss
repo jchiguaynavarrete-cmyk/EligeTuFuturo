@@ -1,0 +1,135 @@
+ion-content {
+  --background: linear-gradient(180deg, var(--app-bg-top), var(--app-bg-bottom));
+}
+
+ion-searchbar {
+  max-width: 820px;
+  margin: 0 auto 4px auto;
+
+  --background: var(--app-surface);
+  --color: var(--app-text);
+  --placeholder-color: var(--app-text-muted);
+  --icon-color: var(--app-text-muted);
+
+  border: 1px solid var(--app-border);
+  border-radius: 14px;
+}
+
+.conteo {
+  max-width: 820px;
+  margin: 8px auto 12px auto;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--app-text-muted);
+}
+
+/* Tarjeta por usuario */
+.tarjeta-usuario {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+
+  max-width: 820px;
+  margin: 0 auto 10px auto;
+  padding: 14px;
+
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: 14px;
+}
+
+.avatar {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+
+  font-weight: 900;
+  font-size: 15px;
+
+  color: #dbeafe;
+  background: rgba(59, 130, 246, 0.18);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+}
+
+.avatar.admin {
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.16);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.datos {
+  min-width: 0;
+  flex: 1;
+}
+
+.linea-nombre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nombre {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--app-text);
+}
+
+.chip-rol {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.correo {
+  margin-top: 3px;
+  font-size: 14px;
+  color: var(--app-text-muted);
+  word-break: break-all;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 8px;
+
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--app-text-muted);
+}
+
+/* Estados */
+.estado-centro {
+  max-width: 820px;
+  margin: 40px auto;
+  text-align: center;
+  color: var(--app-text-muted);
+}
+
+.aviso-error {
+  max-width: 820px;
+  margin: 20px auto;
+  padding: 14px 16px;
+
+  border-radius: 14px;
+  background: rgba(235, 68, 90, 0.12);
+  border: 1px solid rgba(235, 68, 90, 0.4);
+  color: var(--app-text);
+}
+
+.aviso-error p {
+  margin: 6px 0 0 0;
+  font-size: 14px;
+  color: var(--app-text-muted);
+}

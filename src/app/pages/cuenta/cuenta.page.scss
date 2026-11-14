@@ -1,0 +1,113 @@
+ion-content {
+  --background: linear-gradient(180deg, var(--app-bg-top), var(--app-bg-bottom));
+}
+
+ion-card {
+  border-radius: 16px;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  margin: 14px auto;
+  max-width: 820px;
+}
+
+.profile-card {
+  margin-top: 8px;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 18px;
+  background: rgba(59, 130, 246, 0.18);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  color: #dbeafe;
+}
+
+.avatar.skeleton {
+  background: var(--app-surface-elevated);
+  border: none;
+}
+
+.profile-info .name {
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.profile-info .email {
+  margin-top: 4px;
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+/* GRID DE DATOS */
+.data-card ion-card-title,
+.actions-card ion-card-title {
+  font-weight: 900;
+}
+
+.grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 760px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.kv {
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+}
+
+.k {
+  font-size: 12px;
+  opacity: 0.7;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.v {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+/* PILL ROL */
+.pill {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  background: var(--app-surface-elevated);
+  border: 1px solid var(--app-border);
+}
+
+.pill.admin {
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.30);
+  color: #fde68a;
+}
+
+/* BOTÓN LOGOUT */
+.btn-logout {
+  height: 46px;
+  font-weight: 900;
+  border-radius: 14px;
+}

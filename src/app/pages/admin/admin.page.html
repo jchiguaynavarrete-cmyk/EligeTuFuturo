@@ -1,0 +1,59 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Panel Administrador</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <h2>👑 Administración</h2>
+  <p>Opciones disponibles solo para administradores.</p>
+
+  <ion-list>
+
+    <ion-item button routerLink="/tabs/admin/carreras">
+      <ion-label>📚 Gestionar Carreras</ion-label>
+    </ion-item>
+
+
+    <ion-item button routerLink="/tabs/admin/usuarios">
+      <ion-label>
+        👥 Ver Usuarios
+      </ion-label>
+    </ion-item>
+
+    <ion-item button routerLink="/tabs/admin/solicitudes">
+      <ion-label>
+        🏛️ Planes y solicitudes
+      </ion-label>
+    </ion-item>
+
+    <ion-item button (click)="sincronizarPlanes()">
+      <ion-label>
+        🌱 Crear o actualizar planes
+        <span class="pendiente">estructura del informe</span>
+      </ion-label>
+    </ion-item>
+
+    <!-- Sin implementar todavía: se marcan para no aparentar que funcionan -->
+    <ion-item button disabled>
+      <ion-label>
+        ⬆️ Cargar Carreras (JSON / CSV)
+        <span class="pendiente">próximamente</span>
+      </ion-label>
+    </ion-item>
+
+    <ion-item button disabled>
+      <ion-label>
+        📊 Estadísticas
+        <span class="pendiente">próximamente</span>
+      </ion-label>
+    </ion-item>
+
+  </ion-list>
+
+  <ion-button expand="full" color="medium" routerLink="/tabs/carreras">
+    Volver
+  </ion-button>
+
+</ion-content>

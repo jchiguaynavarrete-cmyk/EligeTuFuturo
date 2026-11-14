@@ -1,0 +1,106 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* Optional CSS utils that can be commented out */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/**
+ * Ionic Dark Mode
+ * -----------------------------------------------------
+ * For more info, please see:
+ * https://ionicframework.com/docs/theming/dark-mode
+ */
+
+/*
+ * La app está diseñada en oscuro (las páginas usan capas blancas
+ * translúcidas sobre fondos negros). Con dark.system la paleta solo
+ * se aplicaba si el SO estaba en oscuro, y en modo claro el texto
+ * salía negro sobre fondo negro. Por eso se fija siempre en oscuro.
+ */
+@import '@ionic/angular/css/palettes/dark.always.css';
+/* @import "@ionic/angular/css/palettes/dark.class.css"; */
+/* @import "@ionic/angular/css/palettes/dark.system.css"; */
+
+/**
+ * Tokens de superficie
+ * -----------------------------------------------------
+ * Las páginas oscuras usaban rgba(255,255,255,0.03) sobre un fondo
+ * casi negro: daba #131313, indistinguible del fondo. Estos tonos son
+ * colores sólidos con un salto real respecto al fondo, siguiendo la
+ * escala de elevación de Material para tema oscuro (#121212 base).
+ */
+:root {
+  --app-bg-top: #16161a;
+  --app-bg-bottom: #101012;
+
+  --app-surface: #242424;
+  --app-surface-elevated: #2d2d2d;
+  --app-surface-hover: #333333;
+
+  --app-border: rgba(255, 255, 255, 0.18);
+  --app-border-strong: rgba(255, 255, 255, 0.28);
+
+  --app-text: #ffffff;
+  --app-text-muted: rgba(255, 255, 255, 0.72);
+
+  /* El azul primario queda apagado sobre negro; este tiene mejor contraste. */
+  --app-link: #7eb3ff;
+}
+
+/**
+ * Estados de validación de formularios
+ * -----------------------------------------------------
+ * Genéricos a propósito: cualquier formulario de la app puede marcar un
+ * ion-item con .campo-invalido / .campo-valido y poner el mensaje en un
+ * elemento con .campo-error.
+ */
+ion-item.campo-invalido {
+  border-color: var(--ion-color-danger);
+  box-shadow: 0 0 0 1px var(--ion-color-danger), 0 8px 18px rgba(0, 0, 0, 0.35);
+}
+
+ion-item.campo-valido {
+  border-color: var(--ion-color-success);
+}
+
+.campo-error {
+  margin: -4px 4px 10px 4px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ion-color-danger);
+}
+
+.etiqueta-opcional {
+  margin-left: 6px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--app-text-muted);
+  background: var(--app-surface-hover);
+  border: 1px solid var(--app-border);
+}

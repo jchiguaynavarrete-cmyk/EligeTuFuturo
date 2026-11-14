@@ -1,0 +1,60 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Gestionar Carreras</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <ion-searchbar
+    placeholder="Buscar carrera, institución, sede…"
+    [debounce]="300"
+    [(ngModel)]="searchTerm"
+    (ionInput)="aplicarFiltros()">
+  </ion-searchbar>
+
+  <ion-segment [(ngModel)]="vista" (ionChange)="onVistaChange()">
+    <ion-segment-button value="activas">Activas</ion-segment-button>
+    <ion-segment-button value="inactivas">Inactivas</ion-segment-button>
+    <ion-segment-button value="todas">Todas</ion-segment-button>
+  </ion-segment>
+
+  <p style="margin: 10px 0; opacity: 0.8;">
+    Cargadas: {{ totalCargadas }} | Mostrando: {{ filtradas.length }}
+    <span *ngIf="cargando"> · Cargando…</span>
+    <span *ngIf="!cargando && !puedeCargarMas && totalCargadas > 0"> · Fin de lista</span>
+  </p>
+
+  <ion-list>
+    <ion-item *ngFor="let c of filtradas; trackBy: trackById">
+      <ion-label>
+        <h2>{{ c.carrera }}</h2>
+        <p>{{ c.nombre_institucion }} · {{ c.region_sede }} · {{ c.sede }} · {{ c.horario }}</p>
+        <p>Área: {{ c.area_cineunesco }} · Código: {{ c.codigo_carrera }}</p>
+      </ion-label>
+
+      <ion-button
+        size="small"
+        [color]="c.activa ? 'danger' : 'success'"
+        (click)="toggleActiva(c, $event)">
+        {{ c.activa ? 'Desactivar' : 'Activar' }}
+      </ion-button>
+    </ion-item>
+
+    <ion-item *ngIf="!cargando && filtradas.length === 0">
+      <ion-label>No hay resultados con los filtros actuales.</ion-label>
+    </ion-item>
+  </ion-list>
+
+  <ion-button
+    expand="block"
+    (click)="cargarMas()"
+    [disabled]="cargando || !puedeCargarMas">
+    {{ cargando ? 'Cargando...' : (puedeCargarMas ? 'Cargar más' : 'Sin más resultados') }}
+  </ion-button>
+
+  <ion-button expand="block" color="medium" routerLink="/tabs/admin">
+    Volver al Panel
+  </ion-button>
+
+</ion-content>

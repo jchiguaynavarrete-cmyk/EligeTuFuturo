@@ -1,0 +1,378 @@
+/*
+ * Pantalla de bienvenida.
+ *
+ * Fondo fotográfico a sangre con un velo oscuro encima. La app va fijada en
+ * oscuro (ver global.scss), así que no se definen variantes en claro.
+ *
+ * Orden de los bloques:
+ *   Escritorio -> mensaje, beneficios, acción   (columna izquierda)
+ *   Móvil      -> mensaje, acción, beneficios
+ *
+ * En móvil la acción sube por delante de los beneficios a propósito: el botón
+ * Comenzar es lo que la persona vino a tocar y tiene que entrar en la primera
+ * pantalla, sin scroll. Si se reordena esto, volver a medir que el botón siga
+ * dentro del viewport en 375x667.
+ */
+
+ion-content.bienvenida {
+  /* Color de respaldo mientras la foto carga, del mismo tono que el velo. */
+  --background: #0a0a12;
+}
+
+/* ---------- Fondo fotográfico ---------- */
+
+/*
+ * position: fixed y no absolute: en móvil el contenido es más alto que la
+ * pantalla, y con absolute la foto se estiraría a lo largo de todo el scroll.
+ * Fija se comporta como una portada y el texto pasa por encima.
+ */
+.fondo {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* El encuadre interesante está a la derecha: ahí están los estudiantes. */
+  object-position: 78% center;
+}
+
+/*
+ * El velo es lo que hace legible el texto. Va más denso a la izquierda, que
+ * es donde se apoya el contenido, y se abre hacia la derecha para no tapar
+ * las caras.
+ */
+.velo {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      100deg,
+      rgba(8, 8, 18, 0.97) 0%,
+      rgba(8, 8, 18, 0.93) 30%,
+      rgba(10, 10, 22, 0.70) 52%,
+      rgba(12, 10, 28, 0.34) 74%,
+      rgba(12, 10, 28, 0.22) 100%
+    ),
+    /* Un apagado general: la foto original es bastante luminosa. */
+    linear-gradient(180deg, rgba(6, 6, 14, 0.42) 0%, rgba(6, 6, 14, 0.30) 55%, rgba(6, 6, 14, 0.62) 100%);
+}
+
+/* ---------- Estructura ---------- */
+
+.lienzo {
+  position: relative;
+  z-index: 1; /* por encima del fondo */
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+
+  box-sizing: border-box;
+  min-height: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 20px calc(24px + var(--ion-safe-area-bottom, 0px));
+}
+
+.panel-texto {
+  display: flex;
+  flex-direction: column;
+  /* min-width: 0 evita que un título largo desborde su columna. */
+  min-width: 0;
+}
+
+/* ---------- Marca ---------- */
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.marca-logo {
+  display: flex;
+  border-radius: 14px;
+  /* Un poco de luz propia para que el logo no quede plano sobre la foto. */
+  box-shadow: 0 10px 26px rgba(79, 124, 255, 0.45);
+}
+
+.marca-logo svg {
+  display: block;
+}
+
+.marca-nombre {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--app-text);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+}
+
+.marca-nombre em {
+  font-style: normal;
+  background: linear-gradient(90deg, #a78bfa, #22d3ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---------- Mensaje ---------- */
+
+/*
+ * Las sombras de texto son defensa, no adorno: si la foto se cambia por una
+ * más clara, son lo que evita que el texto se vuelva ilegible.
+ */
+.titulo {
+  margin: 0;
+  font-size: clamp(28px, 6.2vw, 50px);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -1px;
+  color: var(--app-text);
+  text-shadow: 0 3px 22px rgba(0, 0, 0, 0.75);
+
+  /* Una palabra larga nunca debe empujar el ancho de la pantalla. */
+  overflow-wrap: break-word;
+}
+
+.bajada {
+  margin: 14px 0 0;
+  max-width: 46ch;
+  font-size: clamp(15px, 3.6vw, 18px);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.86);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+}
+
+/* ---------- Beneficios ---------- */
+
+.ventajas {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+/*
+ * Cristal esmerilado: sobre una foto, una tarjeta translúcida plana deja ver
+ * el detalle de la imagen y el texto se ensucia. El desenfoque lo resuelve.
+ */
+.ventajas li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+
+  padding: 11px 14px;
+  border-radius: 14px;
+  background: rgba(16, 16, 30, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.ventaja-icono {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.95), rgba(79, 124, 255, 0.95));
+}
+
+.ventaja-icono ion-icon {
+  font-size: 19px;
+  color: #fff;
+}
+
+.ventaja-texto {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--app-text);
+  min-width: 0;
+}
+
+/* ---------- Acción ---------- */
+
+.bloque-accion {
+  margin-top: 26px;
+  max-width: 420px;
+}
+
+.btn-comenzar {
+  height: 54px;
+  margin: 0;
+
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  text-transform: none;
+
+  --border-radius: 16px;
+  --background: linear-gradient(100deg, #8b5cf6, #4f7cff 55%, #22d3ee);
+  --background-activated: linear-gradient(100deg, #7c4ef0, #3f6cf5 55%, #15c4e0);
+  --background-focused: var(--background-activated);
+  --box-shadow: 0 14px 34px rgba(79, 124, 255, 0.46);
+  --color: #fff;
+}
+
+.pie {
+  margin: 14px 0 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.82);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+}
+
+/*
+ * Es un <button> y no un <a>: no navega por URL, dispara una acción del
+ * componente. Se le quita el aspecto de botón pero conserva el foco por
+ * teclado, que un <span> con (click) perdería.
+ *
+ * 11px arriba y abajo dejan la zona de toque sobre los 40px recomendados;
+ * el margen negativo evita que ese relleno descuadre el texto.
+ */
+.enlace {
+  display: inline-block;
+  padding: 11px 8px;
+  margin: -11px -8px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+
+  font: inherit;
+  font-weight: 800;
+  color: #9ec5ff;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.enlace:hover {
+  color: #c3dbff;
+}
+
+.enlace:focus-visible {
+  outline: 2px solid #9ec5ff;
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* =========================================================
+   ESCRITORIO  (>= 900px): el texto se apoya en la zona oscura
+   de la foto; los estudiantes quedan libres a la derecha.
+   Validado en 1366x768 y 1920x1080.
+   ========================================================= */
+
+@media (min-width: 900px) {
+  .lienzo {
+    gap: 30px;
+    padding: 40px;
+  }
+
+  /* Ocupa poco más de la mitad: el resto queda para la fotografía. */
+  .panel-texto {
+    max-width: 600px;
+  }
+
+  .ventajas {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1500px) {
+  .lienzo {
+    max-width: 1320px;
+  }
+
+  .panel-texto {
+    max-width: 660px;
+  }
+}
+
+/* =========================================================
+   MÓVIL Y TABLET  (< 900px): una columna
+   Orden: mensaje -> acción -> beneficios
+   Validado en 375x667, 390x844 y 412x915.
+   ========================================================= */
+
+@media (max-width: 899px) {
+  /*
+   * La foto pasa de fondo completo a banda superior.
+   *
+   * A pantalla completa en vertical el recorte es brutal: de una foto 16:9
+   * solo sobrevive unos 26% del ancho, o sea un estudiante y medio cortado
+   * por el título. Limitada a una banda, la proporción del hueco se acerca
+   * a la de la imagen y entran los cuatro. Debajo funde a oscuro y el texto
+   * queda sobre fondo sólido, que es donde mejor se lee.
+   */
+  .fondo {
+    bottom: auto;
+    height: 44vh;
+  }
+
+  .foto {
+    object-position: 58% 30%;
+  }
+
+  .velo {
+    background: linear-gradient(
+      180deg,
+      rgba(8, 8, 18, 0.30) 0%,
+      rgba(8, 8, 18, 0.35) 45%,
+      rgba(8, 8, 18, 0.80) 80%,
+      rgba(10, 10, 18, 1) 100%
+    );
+  }
+
+  /* El contenido arranca bajo la banda, pisando solo su parte ya opaca. */
+  .lienzo {
+    justify-content: flex-start;
+    padding-top: 36vh;
+  }
+
+  .bloque-mensaje {
+    order: 1;
+  }
+
+  .bloque-accion {
+    order: 2;
+    /* A una columna el botón ocupa todo el ancho: más fácil de acertar. */
+    max-width: 100%;
+    margin-top: 22px;
+  }
+
+  .ventajas {
+    order: 3;
+    margin-top: 26px;
+  }
+}
+
+/* Teléfonos estrechos: solo se recortan los márgenes, nunca la tipografía. */
+@media (max-width: 400px) {
+  /*
+   * Ojo: aquí NO se puede usar el atajo `padding`. El bloque de arriba fija
+   * padding-top en vh para dejar sitio a la banda de la foto, y el atajo lo
+   * machacaría: la banda desaparecía justo en los móviles más estrechos.
+   */
+  .lienzo {
+    padding-right: 16px;
+    padding-bottom: calc(20px + var(--ion-safe-area-bottom, 0px));
+    padding-left: 16px;
+    gap: 20px;
+  }
+
+  .marca-nombre {
+    font-size: 20px;
+  }
+}

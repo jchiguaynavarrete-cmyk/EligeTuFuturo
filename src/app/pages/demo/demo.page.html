@@ -1,0 +1,179 @@
+<ion-content class="demo">
+  <!-- Banner fijo durante todo el recorrido -->
+  <div class="banner-demo">
+    <span class="pildora">Recorrido de demostración</span>
+    <button type="button" class="salto" (click)="solicitarPiloto()">
+      Saltar Tour y Solicitar Piloto 60 días →
+    </button>
+    <button type="button" class="cerrar" (click)="salir()" aria-label="Salir">✕</button>
+  </div>
+
+  <div class="lienzo">
+    <!-- Globo guía -->
+    <aside class="globo">
+      <div class="globo-cabecera">
+        <span class="contador">Paso {{ indice + 1 }} de {{ pasos.length }}</span>
+        <div class="barra-progreso">
+          <div class="relleno" [style.width.%]="progreso"></div>
+        </div>
+      </div>
+
+      <h2>{{ paso.titulo }}</h2>
+      <p>{{ paso.texto }}</p>
+
+      <div class="globo-acciones">
+        <button
+          type="button"
+          class="boton secundario"
+          [disabled]="esPrimero"
+          (click)="anterior()">
+          ← Anterior
+        </button>
+
+        <button
+          type="button"
+          class="boton principal"
+          *ngIf="!esUltimo"
+          (click)="siguiente()">
+          Siguiente →
+        </button>
+
+        <button
+          type="button"
+          class="boton principal"
+          *ngIf="esUltimo"
+          (click)="solicitarPiloto()">
+          Solicitar Piloto 60 días →
+        </button>
+      </div>
+
+      <div class="puntos">
+        <button
+          type="button"
+          class="punto"
+          *ngFor="let p of pasos; let i = index"
+          [class.activo]="i === indice"
+          [attr.aria-label]="p.titulo"
+          (click)="irA(i)"></button>
+      </div>
+    </aside>
+
+    <!-- Pantalla simulada -->
+    <section class="escenario">
+      <div class="marco">
+        <div class="marco-barra">
+          <span class="punto-barra"></span>
+          <span class="punto-barra"></span>
+          <span class="punto-barra"></span>
+          <span class="marco-titulo">EligeTuFuturo · {{ perfil.nombre }}</span>
+        </div>
+
+        <div class="pantalla">
+          <!-- Cabecera del perfil ficticio -->
+          <div class="perfil">
+            <span class="avatar">{{ perfil.iniciales }}</span>
+            <div>
+              <strong>{{ perfil.nombre }} {{ perfil.apellido }}</strong>
+              <span class="curso">{{ perfil.curso }} · {{ perfil.establecimiento }}</span>
+            </div>
+          </div>
+
+          <!-- 1 · CARRERAS -->
+          <div class="vista" *ngIf="paso.vista === 'carreras'">
+            <div class="buscador-falso">🔍 Buscar por nombre, institución o región</div>
+
+            <article class="fila-carrera" *ngFor="let c of carreras">
+              <div class="info">
+                <strong>{{ c.nombre }}</strong>
+                <span>{{ c.institucion }} · {{ c.region }}</span>
+              </div>
+              <div class="datos">
+                <span class="dato">Corte {{ c.puntajeCorte }}</span>
+                <span class="dato">{{ c.duracion }}</span>
+              </div>
+            </article>
+          </div>
+
+          <!-- 2 · SIMULADOR -->
+          <div class="vista" *ngIf="paso.vista === 'simulador'">
+            <div class="puntajes">
+              <span class="chip-puntaje">NEM {{ puntajes.nem }}</span>
+              <span class="chip-puntaje">Ranking {{ puntajes.ranking }}</span>
+              <span class="chip-puntaje">Lectora {{ puntajes.lectora }}</span>
+              <span class="chip-puntaje">Matemática {{ puntajes.matematica }}</span>
+              <span class="chip-puntaje">Ciencias {{ puntajes.ciencias }}</span>
+            </div>
+
+            <article class="fila-carrera" *ngFor="let c of carreras">
+              <div class="info">
+                <strong>{{ c.nombre }}</strong>
+                <span>{{ c.institucion }}</span>
+              </div>
+              <div class="datos">
+                <span class="dato">Tu puntaje {{ ponderado(c) }}</span>
+                <span class="veredicto" [class.si]="alcanza(c)">
+                  {{ alcanza(c) ? '✓ Alcanzas' : 'Corte ' + c.puntajeCorte }}
+                </span>
+              </div>
+            </article>
+          </div>
+
+          <!-- 3 · FAVORITOS -->
+          <div class="vista" *ngIf="paso.vista === 'favoritos'">
+            <p class="titulo-vista">Carreras guardadas por {{ perfil.nombre }}</p>
+
+            <article class="fila-carrera" *ngFor="let c of carreras">
+              <div class="info">
+                <strong>{{ c.nombre }}</strong>
+                <span>{{ c.institucion }} · {{ c.arancel }}</span>
+              </div>
+              <div class="datos">
+                <span class="afinidad">{{ c.afinidad }}% afín</span>
+              </div>
+            </article>
+          </div>
+
+          <!-- 4 · REPORTE DIRECTIVO -->
+          <div class="vista" *ngIf="paso.vista === 'reporte'">
+            <p class="titulo-vista">
+              Reporte directivo · {{ reporte.curso }}
+            </p>
+
+            <div class="metricas">
+              <div class="metrica">
+                <strong>{{ reporte.estudiantes }}</strong>
+                <span>estudiantes</span>
+              </div>
+              <div class="metrica">
+                <strong>{{ reporte.conSimulacion }}</strong>
+                <span>ya simularon</span>
+              </div>
+              <div class="metrica">
+                <strong>{{ reporte.areasTop[0].porcentaje }}%</strong>
+                <span>{{ reporte.areasTop[0].area }}</span>
+              </div>
+            </div>
+
+            <p class="subtitulo-vista">Áreas de mayor interés</p>
+            <div class="barra-area" *ngFor="let a of reporte.areasTop">
+              <span class="nombre-area">{{ a.area }}</span>
+              <div class="pista">
+                <div class="relleno-area" [style.width.%]="a.porcentaje"></div>
+              </div>
+              <span class="pct">{{ a.porcentaje }}%</span>
+            </div>
+
+            <div class="alertas">
+              <p class="subtitulo-vista">Requieren acompañamiento</p>
+              <p class="alerta" *ngFor="let a of reporte.alertas">⚠ {{ a }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="nota-demo">
+        Datos de demostración. Sofía y su curso son ficticios.
+      </p>
+    </section>
+  </div>
+</ion-content>

@@ -1,0 +1,228 @@
+ion-content {
+  --background: linear-gradient(180deg, var(--app-bg-top), var(--app-bg-bottom));
+}
+
+.cabecera {
+  max-width: 720px;
+  margin: 12px auto 24px auto;
+  text-align: center;
+}
+
+.marca {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px auto;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.cabecera[data-resultado='ok'] .marca {
+  color: var(--ion-color-success);
+  background: rgba(45, 211, 111, 0.14);
+  border: 2px solid var(--ion-color-success);
+  box-shadow: 0 0 0 8px rgba(45, 211, 111, 0.1);
+}
+
+.cabecera[data-resultado='cancelado'] .marca {
+  color: var(--app-text-muted);
+  background: var(--app-surface-elevated);
+  border: 2px solid var(--app-border-strong);
+}
+
+.cabecera[data-resultado='rechazado'] .marca,
+.cabecera[data-resultado='error'] .marca {
+  color: var(--ion-color-danger);
+  background: rgba(235, 68, 90, 0.14);
+  border: 2px solid var(--ion-color-danger);
+}
+
+.cabecera h1 {
+  margin: 0 0 8px 0;
+  font-size: 30px;
+  font-weight: 900;
+  color: var(--app-text);
+}
+
+.mensaje {
+  margin: 0 auto;
+  max-width: 540px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--app-text-muted);
+}
+
+/* Paneles */
+.panel {
+  max-width: 720px;
+  margin: 0 auto 16px auto;
+  padding: 18px 20px;
+
+  border-radius: 16px;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.35);
+}
+
+.panel dl {
+  margin: 0;
+}
+
+.panel dl > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.panel dl > div:last-child {
+  border-bottom: none;
+}
+
+.panel dt {
+  font-size: 14px;
+  color: var(--app-text-muted);
+}
+
+.panel dd {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--app-text);
+  text-align: right;
+}
+
+.mono {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 13.5px;
+}
+
+.chip {
+  display: inline-block;
+  padding: 3px 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+
+  color: #fca5a5;
+  background: rgba(235, 68, 90, 0.16);
+  border: 1px solid rgba(235, 68, 90, 0.45);
+}
+
+.chip[data-ok='true'] {
+  color: #86efac;
+  background: rgba(45, 211, 111, 0.16);
+  border-color: rgba(45, 211, 111, 0.45);
+}
+
+/* Próximos pasos */
+.pasos h2 {
+  margin: 0 0 4px 0;
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--app-text);
+}
+
+.pasos .intro {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  color: var(--app-text-muted);
+}
+
+.pasos ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+@media (min-width: 720px) {
+  .pasos ol {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.pasos li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.numero {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  color: #ffffff;
+  background: var(--ion-color-primary);
+}
+
+.pasos li strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--app-text);
+}
+
+.pasos li p {
+  margin: 3px 0 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--app-text-muted);
+}
+
+/* Acciones */
+.acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  max-width: 720px;
+  margin: 20px auto 0 auto;
+}
+
+@media (min-width: 560px) {
+  .acciones {
+    flex-direction: row;
+  }
+
+  .acciones ion-button {
+    flex: 1;
+  }
+}
+
+.acciones ion-button {
+  height: 48px;
+  font-weight: 800;
+  --border-radius: 14px;
+  margin: 0;
+}
+
+.nota-pruebas {
+  max-width: 720px;
+  margin: 18px auto 20px auto;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--app-text-muted);
+}
+
+.estado-centro {
+  max-width: 720px;
+  margin: 60px auto;
+  text-align: center;
+  color: var(--app-text-muted);
+}

@@ -1,0 +1,162 @@
+ion-content {
+  --background: linear-gradient(180deg, var(--app-bg-top), var(--app-bg-bottom));
+}
+
+.cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  max-width: 900px;
+  margin: 4px auto 22px auto;
+}
+
+@media (min-width: 760px) {
+  .cabecera {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 28px;
+  }
+
+  .cabecera .texto {
+    flex: 1;
+  }
+}
+
+.sobretitulo {
+  margin: 0 0 6px 0;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--app-link);
+}
+
+.cabecera h1 {
+  margin: 0 0 10px 0;
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--app-text);
+}
+
+.bajada {
+  margin: 0;
+  max-width: 560px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--app-text-muted);
+}
+
+/* Tarjeta del plan elegido */
+.tarjeta-plan-elegido {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  padding: 14px 18px;
+  border-radius: 14px;
+
+  background: var(--app-surface-elevated);
+  border: 1px solid var(--ion-color-primary);
+  flex-shrink: 0;
+}
+
+.tarjeta-plan-elegido .etiqueta {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--app-text-muted);
+}
+
+.tarjeta-plan-elegido strong {
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--app-text);
+}
+
+/* Formulario en dos columnas en pantallas anchas */
+.formulario {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.campos {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px 20px;
+}
+
+@media (min-width: 760px) {
+  .campos {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.campo ion-item {
+  --background: var(--app-surface);
+  --border-color: var(--app-border);
+  --color: var(--app-text);
+
+  margin: 10px 0 0 0;
+  border-radius: 14px;
+  border: 1px solid var(--app-border);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.campo ion-item:focus-within {
+  --background: var(--app-surface-elevated);
+  border-color: var(--ion-color-primary);
+}
+
+.campo ion-label {
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.campo ion-input {
+  font-size: 16px;
+  --color: var(--app-text);
+  --placeholder-color: var(--app-text-muted);
+}
+
+.boton-enviar {
+  margin-top: 22px;
+  height: 48px;
+  font-weight: 800;
+  --border-radius: 14px;
+}
+
+.nota-envio {
+  margin: 10px 0 20px 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--app-text-muted);
+}
+
+.estado-centro {
+  max-width: 900px;
+  margin: 40px auto;
+  text-align: center;
+  color: var(--app-text-muted);
+}
+
+.aviso-error {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 14px 16px;
+
+  border-radius: 14px;
+  background: rgba(235, 68, 90, 0.12);
+  border: 1px solid rgba(235, 68, 90, 0.4);
+  color: var(--app-text);
+}
+
+.aviso-error p {
+  margin: 6px 0 0 0;
+  font-size: 14px;
+  color: var(--app-text-muted);
+}

@@ -1,0 +1,90 @@
+// =====================================================================
+// REGLAS A AGREGAR para el módulo de planes institucionales.
+//
+// Pega estos tres bloques DENTRO de `match /databases/{database}/documents`,
+// junto a los que ya tienes (carreras, usuarios, rut_index, notificaciones).
+// Reutilizan las funciones isAuth(), isVerified() e isAdmin() que ya existen.
+// =====================================================================
+
+
+// =====================================================================
+// 💼 PLANES (catálogo público)
+// - Cualquiera que haya iniciado sesión puede verlos.
+// - Solo un admin cambia precios o textos.
+// =====================================================================
+match /planes/{planId} {
+  allow read: if isAuth();
+  allow create, update: if isAdmin();
+  allow delete: if false;
+}
+
+
+// =====================================================================
+// 📋 SOLICITUDES
+// - Cada institución ve y crea las suyas; un admin las ve todas.
+// - La institución NO puede fijar su estado, su monto ni darse por pagada:
+//   al crear se exige que vengan en los valores neutros, y después solo
+//   el admin (o el backend con Admin SDK) puede modificarlos.
+// =====================================================================
+match /solicitudes/{solicitudId} {
+
+  allow get: if isAdmin()
+              || (isVerified() && resource.data.uidSolicitante == request.auth.uid);
+
+  // Listar: Firestore evalúa esta condición contra cada documento que
+  // devolvería la consulta y rechaza la consulta completa si alguno falla.
+  // Por eso basta con exigir el uid: una consulta filtrada por el propio
+  // uid pasa, y una sin filtro es rechazada entera.
+  allow list: if isAdmin()
+               || (isVerified() && resource.data.uidSolicitante == request.auth.uid);
+
+  allow create: if isVerified()
+                 && request.resource.data.uidSolicitante == request.auth.uid
+                 && request.resource.data.estado == 'pendiente'
+                 && request.resource.data.monto == null
+                 && request.resource.data.pagoId == null
+                 && request.resource.data.adminUid == null
+                 && request.resource.data.estadoPago in ['pendiente', 'no_aplica']
+                 && request.resource.data.cantidadEstudiantes is int
+                 && request.resource.data.cantidadEstudiantes > 0
+                 && request.resource.data.cantidadEstudiantes <= 100000
+                 && request.resource.data.nombreInstitucion is string
+                 && request.resource.data.nombreInstitucion.size() >= 3
+                 && request.resource.data.nombreInstitucion.size() <= 80
+                 && request.resource.data.rbd is string
+                 && request.resource.data.correo is string;
+
+  // Solo administración cambia estado, monto o estado de pago.
+  allow update: if isAdmin();
+
+  allow delete: if false;
+}
+
+
+// =====================================================================
+// 💳 PAGOS
+// - Los escribe únicamente el backend con el Admin SDK, que se salta
+//   estas reglas. Desde la app solo se pueden leer los propios.
+// =====================================================================
+match /pagos/{pagoId} {
+  allow get: if isAdmin()
+              || (isVerified() && resource.data.uidSolicitante == request.auth.uid);
+
+  allow list: if isAdmin();
+
+  // Nadie crea ni modifica pagos desde el navegador.
+  allow create, update, delete: if false;
+}
+
+
+// =====================================================================
+// 🏛️ INSTITUCIONES (plan vigente)
+// - La institución lee el suyo; un admin los lee todos.
+// - El plan y sus fechas los escribe el backend al confirmar el pago.
+// =====================================================================
+match /instituciones/{uid} {
+  allow get: if isAdmin() || (isVerified() && request.auth.uid == uid);
+  allow list: if isAdmin();
+
+  allow create, update, delete: if false;
+}

@@ -1,0 +1,23 @@
+<section class="aviso">
+  <div class="icono" aria-hidden="true">🔒</div>
+
+  <h2>Tu colegio aún no tiene EligeTuFuturo</h2>
+
+  <p class="texto">
+    {{ funcion }} está disponible para establecimientos con convenio activo.
+    Si crees que a tu curso le serviría, cuéntaselo a tu director u orientador:
+    ellos pueden solicitarlo.
+  </p>
+
+  <div class="acciones">
+    <button type="button" class="boton whatsapp" (click)="compartirWhatsapp()">
+      Compartir por WhatsApp
+    </button>
+
+    <button type="button" class="boton copiar" (click)="copiarEnlace()">
+      {{ copiado ? '✓ Enlace copiado' : 'Copiar enlace' }}
+    </button>
+  </div>
+
+  <p class="enlace-visible">{{ enlace }}</p>
+</section>

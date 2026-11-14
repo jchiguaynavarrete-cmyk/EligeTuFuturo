@@ -1,0 +1,20 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Verificar cuenta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Revisa tu correo 📩</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      Para terminar tu registro debes verificar tu email.
+      Revisa también la carpeta de spam.
+    </ion-card-content>
+  </ion-card>
+
+  <ion-button expand="block" (click)="reenviar()">Reenviar correo</ion-button>
+  <ion-button expand="block" fill="outline" (click)="irLogin()">Volver a login</ion-button>
+</ion-content>

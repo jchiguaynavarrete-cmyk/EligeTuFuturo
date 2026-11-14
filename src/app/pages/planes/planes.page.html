@@ -1,0 +1,114 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/carreras"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Planes institucionales</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ng-container *ngIf="estado$ | async as estado">
+    <div class="encabezado">
+      <p class="sobretitulo">Planes para instituciones</p>
+      <h1>Elige el plan para tu institución</h1>
+      <p class="bajada">
+        Tus estudiantes de 4° medio usan EligeTuFuturo sin pagar: el acceso lo
+        financia el colegio, la municipalidad o el SLEP con una licencia anual.
+        Mientras más establecimientos incluyes, menor es el valor por
+        establecimiento.
+      </p>
+    </div>
+
+    <div class="estado-centro" *ngIf="estado.cargando">
+      <ion-spinner></ion-spinner>
+      <p>Cargando planes...</p>
+    </div>
+
+    <div class="aviso-error" *ngIf="!estado.cargando && estado.error">
+      <strong>No se pudieron cargar los planes</strong>
+      <p>{{ estado.error }}</p>
+    </div>
+
+    <ng-container *ngIf="!estado.cargando && !estado.error">
+      <div
+        class="estado-centro"
+        *ngIf="estado.pagados.length === 0 && estado.complementarios.length === 0">
+        <p>Todavía no hay planes disponibles.</p>
+      </div>
+
+      <!-- Planes pagados: licencias anuales con precio fijo -->
+      <div class="grilla-planes" *ngIf="estado.pagados.length > 0">
+        <article
+          class="tarjeta-plan"
+          [class.destacado]="t.plan.destacado"
+          *ngFor="let t of estado.pagados; trackBy: trackPorId">
+          <span class="cinta" *ngIf="t.plan.destacado">Recomendado</span>
+
+          <h2>{{ t.plan.nombre }}</h2>
+          <p class="descripcion">{{ t.plan.descripcion }}</p>
+
+          <div class="precio-bloque">
+            <p class="precio">
+              {{ t.precio }}
+              <span class="periodo" *ngIf="t.plan.precio">/ año</span>
+            </p>
+            <p class="precio-nota" *ngIf="t.plan.precio">Valor neto anual + IVA</p>
+          </div>
+
+          <div class="chips">
+            <span class="chip" *ngIf="t.plan.cobertura">{{ t.plan.cobertura }}</span>
+            <span class="chip" [class.chip-ahorro]="t.ahorro > 0" *ngIf="t.porEstablecimiento">
+              {{ t.porEstablecimiento }} ·
+              {{ t.ahorro > 0 ? 'ahorras ' + t.ahorro + '%' : 'precio base' }}
+            </span>
+          </div>
+
+          <ul class="caracteristicas">
+            <li *ngFor="let c of t.plan.caracteristicas">{{ c }}</li>
+          </ul>
+
+          <p class="ideal-para" *ngIf="t.plan.idealPara">
+            Ideal para: <strong>{{ t.plan.idealPara }}</strong>
+          </p>
+
+          <button type="button" class="boton-plan" (click)="solicitar(t.plan)">
+            {{ t.plan.textoBoton }} →
+          </button>
+        </article>
+      </div>
+
+      <!-- Modalidades sin ingreso fijo: Piloto y Convenio Nacional -->
+      <section class="otras-modalidades" *ngIf="estado.complementarios.length > 0">
+        <h2 class="titulo-seccion">Otras modalidades</h2>
+
+        <div class="grilla-complementarios">
+          <article
+            class="tarjeta-complementaria"
+            *ngFor="let t of estado.complementarios; trackBy: trackPorId">
+            <div class="cuerpo">
+              <div class="titulo-linea">
+                <h3>{{ t.plan.nombre }}</h3>
+                <span class="etiqueta" [attr.data-plan]="t.plan.id">{{ t.precio }}</span>
+              </div>
+              <p>{{ t.plan.descripcion }}</p>
+            </div>
+
+            <button type="button" class="boton-plan boton-compacto" (click)="solicitar(t.plan)">
+              {{ t.plan.textoBoton }}
+            </button>
+          </article>
+        </div>
+      </section>
+
+      <div class="nota-precios">
+        <strong>Valores del primer año de contrato</strong>
+        <p>
+          Montos netos anuales, no incluyen IVA. Se reajustan cada año según IPC
+          (referencia 3,7%). La facturación es anual y la paga la institución:
+          los estudiantes no pagan.
+        </p>
+      </div>
+    </ng-container>
+  </ng-container>
+</ion-content>

@@ -1,0 +1,98 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Mi cuenta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ng-container *ngIf="perfil$ | async as perfil; else loading">
+
+    <!-- HEADER PERFIL -->
+    <ion-card class="profile-card">
+      <ion-card-content class="profile-header">
+        <div class="avatar">
+          {{ getIniciales(perfil.nombre) }}
+        </div>
+
+        <div class="profile-info">
+          <div class="name">{{ perfil.nombre }}</div>
+          <div class="email">{{ perfil.email }}</div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- DATOS -->
+    <ion-card class="data-card">
+      <ion-card-header>
+        <ion-card-title>Datos personales</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="grid">
+          <div class="kv">
+            <div class="k">RUT</div>
+            <div class="v">{{ perfil.rut || '-' }}</div>
+          </div>
+
+          <div class="kv">
+            <div class="k">Fecha de nacimiento</div>
+            <div class="v">{{ formatearFecha(perfil.fechaNacimiento) }}</div>
+          </div>
+
+          <div class="kv">
+            <div class="k">Edad</div>
+            <div class="v">{{ perfil.edad }} años</div>
+          </div>
+
+          <div class="kv">
+            <div class="k">Rol</div>
+            <div class="v">
+              <span class="pill" [class.admin]="perfil.rol === 'admin'">
+                {{ perfil.rol === 'admin' ? 'Administrador' : 'Usuario' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- ACCIONES -->
+    <ion-card class="actions-card">
+      <ion-card-header>
+        <ion-card-title>Acciones</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <ion-button expand="block" fill="outline" routerLink="/tabs/institucion">
+          Mis solicitudes de plan
+        </ion-button>
+
+        <ion-button expand="block" color="danger" class="btn-logout" (click)="cerrarSesion()">
+          Cerrar sesión
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+  </ng-container>
+
+  <!-- LOADING -->
+  <ng-template #loading>
+    <ion-card class="profile-card">
+      <ion-card-content class="profile-header">
+        <div class="avatar skeleton"></div>
+        <div class="profile-info" style="width: 100%;">
+          <ion-skeleton-text animated style="width: 60%; height: 18px;"></ion-skeleton-text>
+          <ion-skeleton-text animated style="width: 40%; height: 14px; margin-top: 8px;"></ion-skeleton-text>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="data-card">
+      <ion-card-content>
+        <ion-skeleton-text animated style="width: 100%; height: 14px;"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width: 90%; height: 14px; margin-top: 10px;"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width: 80%; height: 14px; margin-top: 10px;"></ion-skeleton-text>
+      </ion-card-content>
+    </ion-card>
+  </ng-template>
+</ion-content>

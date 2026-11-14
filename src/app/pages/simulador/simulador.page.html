@@ -1,0 +1,338 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Simulador PAES</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- Sin convenio del establecimiento, el simulador no se muestra -->
+  <app-aviso-sin-convenio
+    *ngIf="tieneConvenio === false"
+    funcion="El Simulador PAES">
+  </app-aviso-sin-convenio>
+
+  <ng-container *ngIf="tieneConvenio === true">
+
+  <!-- =========================
+       CARD INGRESO DE PUNTAJES
+       ========================= -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Ingresa tus puntajes</ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <p class="subtexto">
+        Ingresa puntajes PAES en el rango <b>{{ PAES_MIN }} a {{ PAES_MAX }}</b>.
+        Calcularemos tu <b>puntaje ponderado</b> por carrera.
+      </p>
+
+      <div class="grid-puntajes">
+        <!-- Lenguaje -->
+        <ion-item>
+          <ion-label position="stacked">Lenguaje</ion-label>
+          <ion-input
+            type="number"
+            inputmode="numeric"
+            placeholder="Ej: 750"
+            [min]="PAES_MIN"
+            [max]="PAES_MAX"
+            [step]="1"
+            [(ngModel)]="puntajes.lenguaje"
+            (ionInput)="onInputPuntaje('lenguaje')"
+            (ionBlur)="normalizarPuntaje('lenguaje')">
+          </ion-input>
+
+          <ion-note slot="helper">Rango válido: {{ PAES_MIN }} – {{ PAES_MAX }}</ion-note>
+          <ion-note *ngIf="mensajesRango.lenguaje" color="danger" class="note-warn">
+            {{ mensajesRango.lenguaje }}
+          </ion-note>
+        </ion-item>
+
+        <!-- Matemáticas -->
+        <ion-item>
+          <ion-label position="stacked">Matemáticas</ion-label>
+          <ion-input
+            type="number"
+            inputmode="numeric"
+            placeholder="Ej: 780"
+            [min]="PAES_MIN"
+            [max]="PAES_MAX"
+            [step]="1"
+            [(ngModel)]="puntajes.matematicas"
+            (ionInput)="onInputPuntaje('matematicas')"
+            (ionBlur)="normalizarPuntaje('matematicas')">
+          </ion-input>
+
+          <ion-note slot="helper">Rango válido: {{ PAES_MIN }} – {{ PAES_MAX }}</ion-note>
+          <ion-note *ngIf="mensajesRango.matematicas" color="danger" class="note-warn">
+            {{ mensajesRango.matematicas }}
+          </ion-note>
+        </ion-item>
+
+        <!-- Ciencias -->
+        <ion-item>
+          <ion-label position="stacked">Ciencias</ion-label>
+          <ion-input
+            type="number"
+            inputmode="numeric"
+            placeholder="Ej: 700"
+            [min]="PAES_MIN"
+            [max]="PAES_MAX"
+            [step]="1"
+            [(ngModel)]="puntajes.ciencias"
+            (ionInput)="onInputPuntaje('ciencias')"
+            (ionBlur)="normalizarPuntaje('ciencias')">
+          </ion-input>
+
+          <ion-note slot="helper">Rango válido: {{ PAES_MIN }} – {{ PAES_MAX }}</ion-note>
+          <ion-note *ngIf="mensajesRango.ciencias" color="danger" class="note-warn">
+            {{ mensajesRango.ciencias }}
+          </ion-note>
+        </ion-item>
+
+        <!-- Historia -->
+        <ion-item>
+          <ion-label position="stacked">Historia</ion-label>
+          <ion-input
+            type="number"
+            inputmode="numeric"
+            placeholder="Ej: 680"
+            [min]="PAES_MIN"
+            [max]="PAES_MAX"
+            [step]="1"
+            [(ngModel)]="puntajes.historia"
+            (ionInput)="onInputPuntaje('historia')"
+            (ionBlur)="normalizarPuntaje('historia')">
+          </ion-input>
+
+          <ion-note slot="helper">Rango válido: {{ PAES_MIN }} – {{ PAES_MAX }}</ion-note>
+          <ion-note *ngIf="mensajesRango.historia" color="danger" class="note-warn">
+            {{ mensajesRango.historia }}
+          </ion-note>
+        </ion-item>
+
+        <!-- Ranking -->
+        <ion-item>
+          <ion-label position="stacked">Ranking</ion-label>
+          <ion-input
+            type="number"
+            inputmode="numeric"
+            placeholder="Ej: 800"
+            [min]="PAES_MIN"
+            [max]="PAES_MAX"
+            [step]="1"
+            [(ngModel)]="puntajes.ranking"
+            (ionInput)="onInputPuntaje('ranking')"
+            (ionBlur)="normalizarPuntaje('ranking')">
+          </ion-input>
+
+          <ion-note slot="helper">Rango válido: {{ PAES_MIN }} – {{ PAES_MAX }}</ion-note>
+          <ion-note *ngIf="mensajesRango.ranking" color="danger" class="note-warn">
+            {{ mensajesRango.ranking }}
+          </ion-note>
+        </ion-item>
+
+        <!-- NEM -->
+        <ion-item>
+          <ion-label position="stacked">NEM</ion-label>
+          <ion-input
+            type="number"
+            inputmode="numeric"
+            placeholder="Ej: 780"
+            [min]="PAES_MIN"
+            [max]="PAES_MAX"
+            [step]="1"
+            [(ngModel)]="puntajes.notasEm"
+            (ionInput)="onInputPuntaje('notasEm')"
+            (ionBlur)="normalizarPuntaje('notasEm')">
+          </ion-input>
+
+          <ion-note slot="helper">Rango válido: {{ PAES_MIN }} – {{ PAES_MAX }}</ion-note>
+          <ion-note *ngIf="mensajesRango.notasEm" color="danger" class="note-warn">
+            {{ mensajesRango.notasEm }}
+          </ion-note>
+        </ion-item>
+      </div>
+
+      <div class="botones">
+        <ion-button expand="block" type="button" (click)="simular()">
+          Calcular puntajes ponderados
+        </ion-button>
+
+        <ion-button expand="block" type="button" fill="outline" color="medium" (click)="limpiar()">
+          Limpiar
+        </ion-button>
+      </div>
+
+      <div *ngIf="error" class="error">
+        {{ error }}
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- =========================
+       ESTADO DE CARGA
+       ========================= -->
+  <ng-container *ngIf="cargando">
+    <div class="centrado">
+      <ion-spinner></ion-spinner>
+      <p>Cargando carreras...</p>
+    </div>
+  </ng-container>
+
+  <!-- =========================
+       FILTROS (cuando ya hay simulación)
+       ========================= -->
+  <ng-container *ngIf="!cargando && carrerasSimuladas.length > 0">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Filtrar resultados</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <ion-searchbar
+          [debounce]="300"
+          placeholder="Buscar carrera, institución, sede…"
+          [(ngModel)]="searchTerm"
+          (ionInput)="aplicarFiltrosResultados()">
+        </ion-searchbar>
+
+        <div class="grid-filtros">
+          <ion-item>
+            <ion-label position="stacked">Nivel</ion-label>
+            <ion-select [(ngModel)]="filtroNivel" (ionChange)="onCambioFiltro()">
+              <ion-select-option *ngFor="let n of niveles" [value]="n">{{ n }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Área</ion-label>
+            <ion-select [(ngModel)]="filtroArea" (ionChange)="onCambioFiltro()">
+              <ion-select-option *ngFor="let a of areas" [value]="a">{{ a }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Región</ion-label>
+            <ion-select [(ngModel)]="filtroRegion" (ionChange)="onCambioFiltro()">
+              <ion-select-option *ngFor="let r of regiones" [value]="r">{{ r }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Institución</ion-label>
+            <ion-select [(ngModel)]="filtroInstitucion" (ionChange)="onCambioFiltro()">
+              <ion-select-option *ngFor="let i of instituciones" [value]="i">{{ i }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+
+        <p class="contador">
+          Mostrando: <b>{{ filtradas.length }}</b> (Top 200)
+        </p>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+
+  <!-- =========================
+       RESULTADOS (ACORDEÓN)
+       ========================= -->
+  <ng-container *ngIf="!cargando && filtradas.length > 0">
+    <h2 class="titulo-resultados">Resultados (ordenados por mejor puntaje)</h2>
+
+    <ion-accordion-group>
+      <ion-accordion
+        *ngFor="let cs of filtradas; trackBy: trackById"
+        [value]="cs.carrera.id">
+
+        <!-- HEADER -->
+        <ion-item slot="header" lines="full" detail="false">
+          <ion-label>
+            <h2>{{ cs.carrera.carrera }}</h2>
+
+            <p class="meta">
+              {{ cs.carrera.nombre_institucion }} · {{ cs.carrera.region_sede }}
+              · <b>{{ cs.nivelTexto }}</b>
+            </p>
+
+            <p class="score">
+              Puntaje ponderado estimado:
+              <strong>{{ cs.puntajePonderado }} pts</strong>
+            </p>
+
+            <p class="ponderaciones">
+              Ponderaciones:
+              <span class="mono">{{ cs.ponderacionesTexto }}</span>
+            </p>
+          </ion-label>
+
+          <ion-button
+            class="fav-btn"
+            slot="end"
+            type="button"
+            fill="clear"
+            [disabled]="estaToggling(cs.carrera)"
+            [color]="esFavorito(cs.carrera) ? 'warning' : 'medium'"
+            (click)="toggleFavorito(cs.carrera, $event)">
+            <ion-icon
+              slot="icon-only"
+              [name]="esFavorito(cs.carrera) ? 'star' : 'star-outline'">
+            </ion-icon>
+          </ion-button>
+        </ion-item>
+
+        <!-- CONTENT -->
+        <div slot="content" class="acc-content">
+          <div class="grid-detalles">
+            <div class="kv"><b>Área:</b> {{ cs.carrera.area_cineunesco || '-' }}</div>
+            <div class="kv"><b>Sede:</b> {{ cs.carrera.sede || '-' }}</div>
+            <div class="kv"><b>Región:</b> {{ cs.carrera.region_sede || '-' }}</div>
+
+            <div class="kv"><b>Jornada:</b> {{ getCampo(cs.carrera, 'horario') || '-' }}</div>
+            <div class="kv"><b>Duración:</b> {{ getCampo(cs.carrera, 'duracion_formal') || '-' }}</div>
+            <div class="kv"><b>Arancel:</b> {{ getCampo(cs.carrera, 'valor_arancel') || '-' }}</div>
+            <div class="kv"><b>Costo titulación:</b> {{ getCampo(cs.carrera, 'costo_titulacion') || '-' }}</div>
+            <div class="kv"><b>Tipo carrera:</b> {{ getCampo(cs.carrera, 'tipo_carreras') || '-' }}</div>
+          </div>
+
+          <div class="calc" *ngIf="cs.detalleCalculo?.length">
+            <p><b>Cálculo (aprox):</b></p>
+            <ul>
+              <li *ngFor="let l of cs.detalleCalculo">{{ l.texto }}</li>
+            </ul>
+          </div>
+        </div>
+
+      </ion-accordion>
+    </ion-accordion-group>
+  </ng-container>
+
+  <!-- =========================
+       SIN RESULTADOS (después de simular)
+       ========================= -->
+  <ng-container *ngIf="!cargando && carrerasSimuladas.length > 0 && filtradas.length === 0">
+    <div class="mensaje-inicial">
+      <p>No hay resultados con los filtros actuales. Prueba cambiando nivel, área, región o institución.</p>
+    </div>
+  </ng-container>
+
+  <!-- =========================
+       ESTADO INICIAL + VOLVER
+       ========================= -->
+  <ng-container *ngIf="!cargando && carrerasSimuladas.length === 0 && !error">
+    <div class="mensaje-inicial">
+      <p>
+        Ingresa tus puntajes y presiona <strong>"Calcular puntajes ponderados"</strong>.
+      </p>
+
+      <ion-button type="button" fill="clear" color="medium" (click)="volverACarreras()">
+        ← Volver
+      </ion-button>
+    </div>
+  </ng-container>
+
+  </ng-container>
+
+</ion-content>

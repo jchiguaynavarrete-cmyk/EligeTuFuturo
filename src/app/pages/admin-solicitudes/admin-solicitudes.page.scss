@@ -1,0 +1,302 @@
+ion-content {
+  --background: linear-gradient(180deg, var(--app-bg-top), var(--app-bg-bottom));
+}
+
+.encabezado {
+  max-width: 1100px;
+  margin: 4px auto 16px auto;
+}
+
+.encabezado h1 {
+  margin: 0 0 4px 0;
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--app-text);
+}
+
+.encabezado p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--app-text-muted);
+}
+
+/* Filtros */
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 1100px;
+  margin: 0 auto 12px auto;
+}
+
+.filtro {
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  color: var(--app-text-muted);
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.filtro:hover {
+  background: var(--app-surface-hover);
+}
+
+.filtro.activo {
+  color: #ffffff;
+  background: var(--ion-color-primary);
+  border-color: var(--ion-color-primary);
+}
+
+ion-searchbar {
+  max-width: 1100px;
+  margin: 0 auto 14px auto;
+
+  --background: var(--app-surface);
+  --color: var(--app-text);
+  --placeholder-color: var(--app-text-muted);
+  --icon-color: var(--app-text-muted);
+
+  border: 1px solid var(--app-border);
+  border-radius: 14px;
+}
+
+/* Tabla con desplazamiento horizontal en pantallas angostas */
+.envoltorio-tabla {
+  max-width: 1100px;
+  margin: 0 auto 20px auto;
+  overflow-x: auto;
+
+  border-radius: 16px;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+}
+
+.tabla-solicitudes {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: collapse;
+}
+
+.tabla-solicitudes thead th {
+  padding: 13px 14px;
+  text-align: left;
+
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--app-text-muted);
+
+  background: var(--app-surface-elevated);
+  border-bottom: 1px solid var(--app-border);
+  white-space: nowrap;
+}
+
+.tabla-solicitudes tbody td {
+  padding: 13px 14px;
+  font-size: 14px;
+  color: var(--app-text);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  vertical-align: middle;
+}
+
+.tabla-solicitudes tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tabla-solicitudes tbody tr:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tabla-solicitudes .num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tabla-solicitudes .acciones-col {
+  text-align: center;
+}
+
+.tabla-solicitudes td strong {
+  display: block;
+  font-weight: 800;
+}
+
+.tabla-solicitudes .sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--app-text-muted);
+}
+
+.correo {
+  word-break: break-all;
+  color: var(--app-text-muted);
+}
+
+/* Chips */
+.chip-plan {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+
+  color: var(--app-link);
+  background: rgba(126, 179, 255, 0.14);
+  border: 1px solid rgba(126, 179, 255, 0.38);
+}
+
+.chip-plan[data-plan='comunal'] {
+  color: #c4b5fd;
+  background: rgba(139, 92, 246, 0.14);
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+/* 'redEducativa' es el plan antiguo; se deja para solicitudes previas */
+.chip-plan[data-plan='territorial'],
+.chip-plan[data-plan='redEducativa'] {
+  color: #86efac;
+  background: rgba(45, 211, 111, 0.14);
+  border-color: rgba(45, 211, 111, 0.38);
+}
+
+.chip-plan[data-plan='nacional'] {
+  color: #fcd34d;
+  background: rgba(245, 194, 107, 0.12);
+  border-color: rgba(245, 194, 107, 0.38);
+}
+
+.chip-plan[data-plan='piloto'] {
+  color: var(--app-text-muted);
+  background: var(--app-surface-hover);
+  border-color: var(--app-border);
+}
+
+.chip-estado {
+  display: inline-block;
+  padding: 3px 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.chip-estado[data-estado='pendiente'] {
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+}
+
+.chip-estado[data-estado='aprobada'] {
+  color: #86efac;
+  background: rgba(45, 211, 111, 0.16);
+  border: 1px solid rgba(45, 211, 111, 0.45);
+}
+
+.chip-estado[data-estado='rechazada'] {
+  color: #fca5a5;
+  background: rgba(235, 68, 90, 0.16);
+  border: 1px solid rgba(235, 68, 90, 0.45);
+}
+
+/* Acciones */
+.acciones {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.accion {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  cursor: pointer;
+
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+
+  background: var(--app-surface-elevated);
+  border: 1px solid var(--app-border);
+
+  transition: background 0.16s ease, border-color 0.16s ease, opacity 0.16s ease;
+}
+
+.accion:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.accion.aprobar {
+  color: var(--ion-color-success);
+}
+
+.accion.aprobar:hover:not(:disabled) {
+  background: rgba(45, 211, 111, 0.18);
+  border-color: var(--ion-color-success);
+}
+
+.accion.rechazar {
+  color: var(--ion-color-danger);
+}
+
+.accion.rechazar:hover:not(:disabled) {
+  background: rgba(235, 68, 90, 0.18);
+  border-color: var(--ion-color-danger);
+}
+
+.accion.ver:hover {
+  background: var(--app-surface-hover);
+  border-color: var(--app-border-strong);
+}
+
+/* Estados */
+.estado-centro {
+  max-width: 1100px;
+  margin: 40px auto;
+  text-align: center;
+  color: var(--app-text-muted);
+}
+
+.aviso-error {
+  max-width: 1100px;
+  margin: 20px auto;
+  padding: 14px 16px;
+
+  border-radius: 14px;
+  background: rgba(235, 68, 90, 0.12);
+  border: 1px solid rgba(235, 68, 90, 0.4);
+  color: var(--app-text);
+}
+
+.aviso-error p {
+  margin: 6px 0 0 0;
+  font-size: 14px;
+  color: var(--app-text-muted);
+}
+
+/* Marca las que llegaron por el formulario público de la landing */
+.chip-origen {
+  display: inline-block;
+  margin-left: 2px;
+  padding: 1px 8px;
+  border-radius: 999px;
+
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+
+  color: #c4b5fd;
+  background: rgba(124, 92, 255, 0.16);
+  border: 1px solid rgba(124, 92, 255, 0.42);
+}

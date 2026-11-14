@@ -1,0 +1,266 @@
+ion-content {
+  --background: linear-gradient(180deg, var(--app-bg-top), var(--app-bg-bottom));
+}
+
+/* Plan vigente */
+.plan-vigente {
+  max-width: 860px;
+  margin: 4px auto 18px auto;
+  padding: 16px 18px;
+
+  border-radius: 16px;
+  background: rgba(45, 211, 111, 0.12);
+  border: 1px solid rgba(45, 211, 111, 0.42);
+}
+
+.plan-vigente .etiqueta {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--ion-color-success);
+}
+
+.plan-vigente h2 {
+  margin: 4px 0 2px 0;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--app-text);
+}
+
+.plan-vigente p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--app-text-muted);
+}
+
+/* Tarjeta de solicitud */
+.tarjeta-solicitud {
+  max-width: 860px;
+  margin: 0 auto 16px auto;
+  padding: 18px;
+
+  border-radius: 16px;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.35);
+}
+
+.cabecera-solicitud {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cabecera-solicitud h2 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 900;
+  color: var(--app-text);
+}
+
+.institucion {
+  margin: 2px 0 0 0;
+  font-size: 14px;
+  color: var(--app-text-muted);
+}
+
+.chip-estado {
+  flex-shrink: 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.chip-estado[data-estado='pendiente'] {
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+}
+
+.chip-estado[data-estado='aprobada'] {
+  color: #86efac;
+  background: rgba(45, 211, 111, 0.16);
+  border: 1px solid rgba(45, 211, 111, 0.45);
+}
+
+.chip-estado[data-estado='rechazada'] {
+  color: #fca5a5;
+  background: rgba(235, 68, 90, 0.16);
+  border: 1px solid rgba(235, 68, 90, 0.45);
+}
+
+/* Datos */
+.datos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 28px;
+  margin: 16px 0;
+  padding: 14px 0;
+  border-top: 1px solid var(--app-border);
+  border-bottom: 1px solid var(--app-border);
+}
+
+.datos div {
+  margin: 0;
+}
+
+.datos dt {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--app-text-muted);
+}
+
+.datos dd {
+  margin: 3px 0 0 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--app-text);
+}
+
+/* Línea de tiempo */
+.pasos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.paso {
+  display: flex;
+  gap: 14px;
+  padding-bottom: 16px;
+  position: relative;
+}
+
+.paso:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 32px;
+  bottom: 0;
+  width: 2px;
+  background: var(--app-border);
+}
+
+.marca {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  color: var(--app-text-muted);
+  background: var(--app-surface-elevated);
+  border: 1px solid var(--app-border);
+  z-index: 1;
+}
+
+.paso[data-estado='completado'] .marca {
+  color: #ffffff;
+  background: var(--ion-color-success);
+  border-color: var(--ion-color-success);
+}
+
+.paso[data-estado='actual'] .marca {
+  color: #ffffff;
+  background: var(--ion-color-primary);
+  border-color: var(--ion-color-primary);
+  box-shadow: 0 0 0 4px rgba(56, 128, 255, 0.22);
+}
+
+.paso[data-estado='bloqueado'] .marca {
+  opacity: 0.45;
+}
+
+.contenido-paso strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--app-text);
+}
+
+.contenido-paso p {
+  margin: 2px 0 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--app-text-muted);
+}
+
+.paso[data-estado='pendiente'] .contenido-paso,
+.paso[data-estado='bloqueado'] .contenido-paso {
+  opacity: 0.6;
+}
+
+/* Avisos */
+.aviso-rechazo {
+  margin: 14px 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(235, 68, 90, 0.12);
+  border: 1px solid rgba(235, 68, 90, 0.4);
+  color: var(--app-text);
+}
+
+.aviso-rechazo p {
+  margin: 4px 0 0 0;
+  font-size: 14px;
+  color: var(--app-text-muted);
+}
+
+.boton-pagar {
+  margin-top: 8px;
+  height: 48px;
+  font-weight: 800;
+  --border-radius: 14px;
+}
+
+.nota {
+  margin: 10px 0 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--app-text-muted);
+}
+
+.nota.exito {
+  font-weight: 700;
+  color: var(--ion-color-success);
+}
+
+.estado-centro {
+  max-width: 860px;
+  margin: 40px auto;
+  text-align: center;
+  color: var(--app-text-muted);
+}
+
+.estado-centro ion-button {
+  margin-top: 12px;
+}
+
+.aviso-error {
+  max-width: 860px;
+  margin: 20px auto;
+  padding: 14px 16px;
+
+  border-radius: 14px;
+  background: rgba(235, 68, 90, 0.12);
+  border: 1px solid rgba(235, 68, 90, 0.4);
+  color: var(--app-text);
+}
+
+.aviso-error p {
+  margin: 6px 0 0 0;
+  font-size: 14px;
+  color: var(--app-text-muted);
+}

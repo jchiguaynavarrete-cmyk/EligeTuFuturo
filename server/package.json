@@ -1,0 +1,19 @@
+{
+  "name": "elige-tu-futuro-pagos",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Backend de pagos con Webpay Plus para EligeTuFuturo (ambiente de integración)",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "firebase-admin": "^13.10.0",
+    "transbank-sdk": "^6.0.0"
+  }
+}

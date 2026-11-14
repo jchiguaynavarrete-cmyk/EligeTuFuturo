@@ -1,0 +1,126 @@
+<ion-content class="landing">
+  <!-- Barra simple: la landing es pública, no lleva la barra de pestañas -->
+  <header class="barra">
+    <button type="button" class="marca" (click)="volver()">
+      Elige<em>Tu</em>Futuro
+    </button>
+
+    <div class="acciones-barra">
+      <button type="button" class="enlace-barra" (click)="contactoGeneral()">
+        Contáctanos
+      </button>
+      <button type="button" class="boton-volver" (click)="volver()">
+        ← Volver al inicio
+      </button>
+    </div>
+  </header>
+
+  <!-- 1 · PROPUESTA DE VALOR -->
+  <section class="hero">
+    <p class="sobretitulo">Para instituciones educacionales</p>
+
+    <h1>
+      Orientación vocacional
+      <span class="destacado">con datos</span>
+    </h1>
+
+    <p class="bajada">
+      Acompaña a tus estudiantes de 4° medio en la decisión más importante de
+      su vida escolar, y reduce el cambio de carrera y la deserción en primer
+      año con información real.
+    </p>
+
+    <ul class="argumentos">
+      <li *ngFor="let a of argumentos">{{ a }}</li>
+    </ul>
+
+    <div class="acciones-hero">
+      <button type="button" class="boton principal" (click)="verDemo()">
+        Ver Demo Guiada →
+      </button>
+      <button type="button" class="boton secundario" (click)="contactoGeneral()">
+        Hablar con el equipo
+      </button>
+    </div>
+
+    <p class="nota-hero">
+      La demo no requiere registro y toma menos de dos minutos.
+    </p>
+  </section>
+
+  <!-- 2 · VISTA PREVIA DE BENEFICIOS -->
+  <section class="beneficios">
+    <h2>Qué recibe tu institución</h2>
+    <p class="subtitulo-seccion">
+      Más allá del acceso para estudiantes, el establecimiento obtiene
+      información para conducir el proceso.
+    </p>
+
+    <div class="grilla-beneficios">
+      <article class="tarjeta-beneficio" *ngFor="let b of beneficios">
+        <span class="icono" aria-hidden="true">
+          <ion-icon [name]="b.icono"></ion-icon>
+        </span>
+        <h3>{{ b.titulo }}</h3>
+        <p>{{ b.texto }}</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- 3 · PLANES, AL FINAL -->
+  <section class="planes" id="planes">
+    <h2>Planes para tu institución</h2>
+    <p class="subtitulo-seccion">
+      El acceso lo financia el colegio, la municipalidad o el SLEP con una
+      licencia anual. Los estudiantes no pagan.
+    </p>
+
+    <ng-container *ngIf="estado$ | async as estado">
+      <div class="estado-centro" *ngIf="estado.cargando">
+        <ion-spinner></ion-spinner>
+      </div>
+
+      <div class="aviso-error" *ngIf="!estado.cargando && estado.error">
+        <p>{{ estado.error }}</p>
+        <button type="button" class="boton principal" (click)="contactoGeneral()">
+          Solicitar información
+        </button>
+      </div>
+
+      <div class="grilla-planes" *ngIf="!estado.cargando && !estado.error">
+        <article
+          class="tarjeta-plan"
+          [class.destacado]="plan.destacado"
+          *ngFor="let plan of estado.planes; trackBy: trackPorId">
+          <span class="cinta" *ngIf="plan.destacado">Más solicitado</span>
+
+          <h3>{{ plan.nombre }}</h3>
+          <p class="descripcion">{{ plan.descripcion }}</p>
+
+          <p class="precio">{{ textoPrecio(plan) }}</p>
+          <p class="cobertura" *ngIf="plan.cobertura">{{ plan.cobertura }}</p>
+
+          <ul class="caracteristicas">
+            <li *ngFor="let c of plan.caracteristicas">{{ c }}</li>
+          </ul>
+
+          <button type="button" class="boton plan" (click)="solicitar(plan)">
+            {{ plan.textoBoton }}
+          </button>
+        </article>
+      </div>
+    </ng-container>
+
+    <p class="nota-planes">
+      Valores netos anuales, no incluyen IVA. Cada solicitud es revisada por
+      nuestro equipo antes de generar una propuesta.
+    </p>
+  </section>
+
+  <footer class="pie-landing">
+    <button type="button" class="boton-volver grande" (click)="volver()">
+      ← Volver al inicio
+    </button>
+    <p>EligeTuFuturo · Orientación vocacional para la educación chilena</p>
+  </footer>
+</ion-content>

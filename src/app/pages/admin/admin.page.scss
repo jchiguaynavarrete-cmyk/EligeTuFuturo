@@ -1,0 +1,21 @@
+h2 {
+  margin-top: 8px;
+}
+
+ion-item {
+  margin-bottom: 8px;
+}
+
+/* Marca de opción aún no construida */
+.pendiente {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--app-text-muted);
+  background: var(--app-surface-hover);
+  border: 1px solid var(--app-border);
+}

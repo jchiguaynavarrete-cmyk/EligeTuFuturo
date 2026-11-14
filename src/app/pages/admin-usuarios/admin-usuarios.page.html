@@ -1,0 +1,73 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/admin"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Usuarios</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ng-container *ngIf="estado$ | async as estado">
+    <!-- CARGANDO -->
+    <div class="estado-centro" *ngIf="estado.cargando">
+      <ion-spinner></ion-spinner>
+      <p>Cargando usuarios...</p>
+    </div>
+
+    <!-- ERROR -->
+    <div class="aviso-error" *ngIf="!estado.cargando && estado.error">
+      <strong>No se pudieron cargar los usuarios</strong>
+      <p>{{ estado.error }}</p>
+    </div>
+
+    <ng-container *ngIf="!estado.cargando && !estado.error">
+      <ion-searchbar
+        [(ngModel)]="busqueda"
+        name="busqueda"
+        placeholder="Buscar por nombre, correo o RUT"
+        [debounce]="200">
+      </ion-searchbar>
+
+      <ng-container *ngIf="filtrar(estado.usuarios) as lista">
+        <p class="conteo">
+          {{ lista.length }}
+          {{ lista.length === 1 ? 'usuario' : 'usuarios' }}
+          <span *ngIf="busqueda.trim()">de {{ estado.usuarios.length }}</span>
+        </p>
+
+        <!-- VACIO -->
+        <div class="estado-centro" *ngIf="lista.length === 0">
+          <p *ngIf="busqueda.trim(); else sinUsuarios">
+            Ningún usuario coincide con «{{ busqueda }}».
+          </p>
+          <ng-template #sinUsuarios>
+            <p>Todavía no hay usuarios registrados.</p>
+          </ng-template>
+        </div>
+
+        <!-- LISTA -->
+        <div class="tarjeta-usuario" *ngFor="let u of lista; trackBy: trackPorUid">
+          <div class="avatar" [class.admin]="u.rol === 'admin'">
+            {{ getIniciales(u.nombre) }}
+          </div>
+
+          <div class="datos">
+            <div class="linea-nombre">
+              <span class="nombre">{{ u.nombre || 'Sin nombre' }}</span>
+              <span class="chip-rol" *ngIf="u.rol === 'admin'">admin</span>
+            </div>
+
+            <div class="correo">{{ u.email }}</div>
+
+            <div class="meta">
+              <span>{{ u.rut || '—' }}</span>
+              <span *ngIf="u.edad">{{ u.edad }} años</span>
+              <span>Registro: {{ fechaRegistro(u.creadoEn) }}</span>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+  </ng-container>
+</ion-content>

@@ -1,0 +1,97 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/institucion"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Pago del plan</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="estado-centro" *ngIf="cargando">
+    <ion-spinner></ion-spinner>
+    <p>Cargando...</p>
+  </div>
+
+  <div class="aviso-error" *ngIf="!cargando && error">
+    <strong>No se puede continuar con el pago</strong>
+    <p>{{ error }}</p>
+    <ion-button fill="outline" size="small" (click)="volver()">
+      Volver al panel
+    </ion-button>
+  </div>
+
+  <ng-container *ngIf="!cargando && solicitud as s">
+    <div class="cabecera">
+      <div class="candado">🔒</div>
+      <div>
+        <h1>Pago seguro con Webpay</h1>
+        <p>Revisa el resumen de tu contratación antes de continuar.</p>
+      </div>
+    </div>
+
+    <div class="columnas">
+      <!-- RESUMEN -->
+      <section class="panel resumen">
+        <h2>Resumen de tu plan</h2>
+
+        <dl>
+          <div>
+            <dt>Plan seleccionado</dt>
+            <dd>{{ s.planNombre }}</dd>
+          </div>
+          <div>
+            <dt>Institución</dt>
+            <dd>{{ s.nombreInstitucion }}</dd>
+          </div>
+          <div>
+            <dt>Cantidad de estudiantes</dt>
+            <dd>{{ s.cantidadEstudiantes }}</dd>
+          </div>
+          <div>
+            <dt>Estado de solicitud</dt>
+            <dd><span class="chip-aprobada">✓ Aprobada</span></dd>
+          </div>
+        </dl>
+      </section>
+
+      <!-- MONTO Y BOTÓN -->
+      <section class="panel monto">
+        <h2>Monto aprobado</h2>
+
+        <p class="cifra">{{ formatearMonto(s.monto) }}</p>
+        <p class="moneda">CLP</p>
+
+        <ion-button
+          expand="block"
+          class="boton-pagar"
+          [disabled]="procesando"
+          (click)="pagar()">
+          🔒 Pagar con Webpay Plus →
+        </ion-button>
+
+        <p class="sello">Paga de forma segura con Webpay Plus · Transbank</p>
+      </section>
+    </div>
+
+    <div class="aviso-seguridad">
+      <strong>Tu pago es procesado de forma segura</strong>
+      <p>
+        Serás redirigido al portal seguro de Transbank para completar tu pago
+        con Webpay Plus. Una vez confirmado el pago, tu plan se activará
+        automáticamente.
+      </p>
+    </div>
+
+    <div class="aviso-pruebas">
+      <strong>Ambiente de pruebas</strong>
+      <p>
+        Esta integración usa el ambiente de integración de Transbank: no se
+        realizan cobros reales. Usa la tarjeta de prueba
+        <code>4051 8856 0044 6623</code>, CVV <code>123</code>, cualquier fecha
+        futura. En el banco de prueba: RUT <code>11.111.111-1</code>, clave
+        <code>123</code>.
+      </p>
+    </div>
+  </ng-container>
+</ion-content>

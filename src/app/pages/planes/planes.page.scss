@@ -1,0 +1,347 @@
+ion-content {
+  --background: linear-gradient(180deg, var(--app-bg-top), var(--app-bg-bottom));
+}
+
+.encabezado {
+  max-width: 1000px;
+  margin: 8px auto 28px auto;
+  text-align: center;
+}
+
+.sobretitulo {
+  margin: 0 0 6px 0;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--app-link);
+}
+
+.encabezado h1 {
+  margin: 0 0 10px 0;
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--app-text);
+}
+
+.bajada {
+  margin: 0 auto;
+  max-width: 620px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--app-text-muted);
+}
+
+/* Tres columnas en escritorio, una sola en móvil */
+.grilla-planes {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+@media (min-width: 760px) {
+  .grilla-planes {
+    grid-template-columns: repeat(3, 1fr);
+    align-items: stretch;
+  }
+}
+
+.tarjeta-plan {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  padding: 22px 20px;
+  border-radius: 18px;
+
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.35);
+}
+
+.tarjeta-plan.destacado {
+  border-color: var(--ion-color-primary);
+  box-shadow: 0 0 0 1px var(--ion-color-primary), 0 16px 32px rgba(0, 0, 0, 0.45);
+}
+
+.cinta {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+
+  padding: 4px 14px;
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  color: #ffffff;
+  background: var(--ion-color-primary);
+}
+
+.tarjeta-plan h2 {
+  margin: 6px 0 6px 0;
+  font-size: 21px;
+  font-weight: 900;
+  color: var(--app-text);
+}
+
+.descripcion {
+  margin: 0 0 14px 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--app-text-muted);
+  min-height: 42px;
+}
+
+.precio-bloque {
+  margin: 0 0 12px 0;
+}
+
+.precio {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  color: var(--app-text);
+}
+
+.precio .periodo {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--app-text-muted);
+}
+
+.precio-nota {
+  margin: 2px 0 0 0;
+  font-size: 12px;
+  color: var(--app-text-muted);
+}
+
+/* Cobertura y valor por establecimiento */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 16px 0;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--app-text);
+  background: var(--app-surface-hover);
+  border: 1px solid var(--app-border);
+}
+
+.chip-ahorro {
+  color: #86efac;
+  background: rgba(45, 211, 111, 0.12);
+  border-color: rgba(45, 211, 111, 0.38);
+}
+
+.ideal-para {
+  margin: 0 0 14px 0;
+  font-size: 13px;
+  color: var(--app-text-muted);
+}
+
+.ideal-para strong {
+  color: var(--app-text);
+}
+
+.caracteristicas {
+  flex: 1;
+  list-style: none;
+  margin: 0 0 18px 0;
+  padding: 0;
+}
+
+.caracteristicas li {
+  position: relative;
+  padding: 0 0 0 26px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--app-text);
+}
+
+.caracteristicas li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: 900;
+  color: var(--ion-color-success);
+}
+
+.boton-plan {
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+
+  font-size: 15px;
+  font-weight: 800;
+
+  color: var(--app-text);
+  background: transparent;
+  border: 1px solid var(--app-border-strong);
+
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.boton-plan:hover {
+  background: var(--app-surface-hover);
+  border-color: var(--ion-color-primary);
+}
+
+.tarjeta-plan.destacado .boton-plan {
+  color: #ffffff;
+  background: var(--ion-color-primary);
+  border-color: var(--ion-color-primary);
+}
+
+.tarjeta-plan.destacado .boton-plan:hover {
+  filter: brightness(1.12);
+}
+
+/* Otras modalidades: Piloto y Convenio Nacional */
+.otras-modalidades {
+  max-width: 1000px;
+  margin: 32px auto 0 auto;
+}
+
+.titulo-seccion {
+  margin: 0 0 12px 0;
+  font-size: 19px;
+  font-weight: 900;
+  color: var(--app-text);
+}
+
+.grilla-complementarios {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 760px) {
+  .grilla-complementarios {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.tarjeta-complementaria {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+
+  padding: 18px 20px;
+  border-radius: 18px;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+}
+
+.tarjeta-complementaria .cuerpo {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+.titulo-linea {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.titulo-linea h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--app-text);
+}
+
+.tarjeta-complementaria p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--app-text-muted);
+}
+
+.etiqueta {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--app-text);
+  background: var(--app-surface-hover);
+  border: 1px solid var(--app-border);
+}
+
+.etiqueta[data-plan='nacional'] {
+  color: #fcd34d;
+  background: rgba(245, 194, 107, 0.12);
+  border-color: rgba(245, 194, 107, 0.38);
+}
+
+.boton-compacto {
+  width: auto;
+  flex: 0 0 auto;
+  padding: 11px 18px;
+}
+
+.nota-precios {
+  max-width: 1000px;
+  margin: 24px auto 8px auto;
+  padding: 14px 16px;
+
+  border-radius: 14px;
+  background: rgba(126, 179, 255, 0.1);
+  border: 1px solid rgba(126, 179, 255, 0.32);
+  color: var(--app-text);
+}
+
+.nota-precios p {
+  margin: 6px 0 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--app-text-muted);
+}
+
+.estado-centro {
+  max-width: 1000px;
+  margin: 40px auto;
+  text-align: center;
+  color: var(--app-text-muted);
+}
+
+.aviso-error {
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 14px 16px;
+
+  border-radius: 14px;
+  background: rgba(235, 68, 90, 0.12);
+  border: 1px solid rgba(235, 68, 90, 0.4);
+  color: var(--app-text);
+}
+
+.aviso-error p {
+  margin: 6px 0 0 0;
+  font-size: 14px;
+  color: var(--app-text-muted);
+}

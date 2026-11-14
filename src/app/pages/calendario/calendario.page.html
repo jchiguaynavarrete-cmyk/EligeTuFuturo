@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>📅 Calendario PAES</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <ion-card *ngFor="let f of fechas">
+    <ion-card-content>
+
+      <h2>{{ f.titulo }}</h2>
+
+      <p>
+        📆 {{ f.fecha | date:'dd/MM/yyyy' }}
+      </p>
+
+      <!-- DÍAS RESTANTES -->
+      <p *ngIf="diasRestantes(f.fecha) > 0">
+        ⏳ Faltan <strong>{{ diasRestantes(f.fecha) }}</strong> días
+      </p>
+
+      <!-- FECHA PASADA -->
+      <p *ngIf="diasRestantes(f.fecha) <= 0">
+        ❌ Fecha ya pasada
+      </p>
+
+      <ion-button
+        expand="block"
+        fill="outline"
+        (click)="mostrarAlerta(f)">
+        🔔 Recibir aviso
+      </ion-button>
+
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>

@@ -1,0 +1,186 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/planes"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Solicitud de plan</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="estado-centro" *ngIf="cargando">
+    <ion-spinner></ion-spinner>
+    <p>Cargando...</p>
+  </div>
+
+  <div class="aviso-error" *ngIf="!cargando && errorCarga">
+    <strong>No se pudo abrir la solicitud</strong>
+    <p>{{ errorCarga }}</p>
+  </div>
+
+  <ng-container *ngIf="!cargando && plan">
+    <div class="cabecera">
+      <div class="texto">
+        <p class="sobretitulo">Solicitud de plan</p>
+        <h1>Completa la solicitud</h1>
+        <p class="bajada">
+          Ingresa los datos de tu institución para solicitar el plan
+          seleccionado. Nuestro equipo revisará la solicitud y se pondrá en
+          contacto contigo.
+        </p>
+      </div>
+
+      <aside class="tarjeta-plan-elegido">
+        <span class="etiqueta">Plan seleccionado</span>
+        <strong>{{ plan.nombre }}</strong>
+      </aside>
+    </div>
+
+    <form (ngSubmit)="enviar()" class="formulario">
+      <div class="campos">
+        <!-- INSTITUCIÓN -->
+        <div class="campo">
+          <ion-item
+            [class.campo-invalido]="errorDe('nombreInstitucion')"
+            [class.campo-valido]="campoCorrecto('nombreInstitucion')">
+            <ion-label position="stacked">Institución *</ion-label>
+            <ion-input
+              [(ngModel)]="nombreInstitucion"
+              name="nombreInstitucion"
+              placeholder="Nombre de la institución"
+              autocomplete="off"
+              maxlength="80"
+              required
+              (ionInput)="alEscribir('nombreInstitucion')"
+              (ionBlur)="marcarSalida('nombreInstitucion')">
+            </ion-input>
+          </ion-item>
+          <p class="campo-error" *ngIf="errorDe('nombreInstitucion')">
+            {{ errorDe('nombreInstitucion') }}
+          </p>
+        </div>
+
+        <!-- RBD -->
+        <div class="campo">
+          <ion-item
+            [class.campo-invalido]="errorDe('rbd')"
+            [class.campo-valido]="campoCorrecto('rbd')">
+            <ion-label position="stacked">RBD *</ion-label>
+            <ion-input
+              [(ngModel)]="rbd"
+              name="rbd"
+              placeholder="Ingresa el RBD"
+              inputmode="numeric"
+              autocomplete="off"
+              maxlength="6"
+              required
+              (ionInput)="onRbdInput($event)"
+              (ionBlur)="marcarSalida('rbd')">
+            </ion-input>
+          </ion-item>
+          <p class="campo-error" *ngIf="errorDe('rbd')">{{ errorDe('rbd') }}</p>
+        </div>
+
+        <!-- ENCARGADO -->
+        <div class="campo">
+          <ion-item
+            [class.campo-invalido]="errorDe('encargado')"
+            [class.campo-valido]="campoCorrecto('encargado')">
+            <ion-label position="stacked">Nombre del encargado *</ion-label>
+            <ion-input
+              [(ngModel)]="encargado"
+              name="encargado"
+              placeholder="Nombre completo"
+              autocomplete="off"
+              maxlength="60"
+              required
+              (ionInput)="alEscribir('encargado')"
+              (ionBlur)="marcarSalida('encargado')">
+            </ion-input>
+          </ion-item>
+          <p class="campo-error" *ngIf="errorDe('encargado')">
+            {{ errorDe('encargado') }}
+          </p>
+        </div>
+
+        <!-- CORREO -->
+        <div class="campo">
+          <ion-item
+            [class.campo-invalido]="errorDe('correo')"
+            [class.campo-valido]="campoCorrecto('correo')">
+            <ion-label position="stacked">Correo *</ion-label>
+            <ion-input
+              [(ngModel)]="correo"
+              name="correo"
+              type="email"
+              placeholder="correo@institucion.cl"
+              autocomplete="off"
+              maxlength="80"
+              required
+              (ionInput)="alEscribir('correo')"
+              (ionBlur)="marcarSalida('correo')">
+            </ion-input>
+          </ion-item>
+          <p class="campo-error" *ngIf="errorDe('correo')">{{ errorDe('correo') }}</p>
+        </div>
+
+        <!-- TELÉFONO -->
+        <div class="campo">
+          <ion-item
+            [class.campo-invalido]="errorDe('telefono')"
+            [class.campo-valido]="campoCorrecto('telefono') && telefono">
+            <ion-label position="stacked">
+              Teléfono
+              <span class="etiqueta-opcional">opcional</span>
+            </ion-label>
+            <ion-input
+              [(ngModel)]="telefono"
+              name="telefono"
+              inputmode="tel"
+              placeholder="+56 9 1234 5678"
+              autocomplete="off"
+              maxlength="16"
+              (ionInput)="onTelefonoInput($event)"
+              (ionBlur)="marcarSalida('telefono')">
+            </ion-input>
+          </ion-item>
+          <p class="campo-error" *ngIf="errorDe('telefono')">
+            {{ errorDe('telefono') }}
+          </p>
+        </div>
+
+        <!-- ESTUDIANTES -->
+        <div class="campo">
+          <ion-item
+            [class.campo-invalido]="errorDe('cantidadEstudiantes')"
+            [class.campo-valido]="campoCorrecto('cantidadEstudiantes')">
+            <ion-label position="stacked">Cantidad de estudiantes *</ion-label>
+            <ion-input
+              [(ngModel)]="cantidadEstudiantes"
+              name="cantidadEstudiantes"
+              type="number"
+              inputmode="numeric"
+              placeholder="Ej: 450"
+              min="1"
+              max="100000"
+              required
+              (ionInput)="alEscribir('cantidadEstudiantes')"
+              (ionBlur)="marcarSalida('cantidadEstudiantes')">
+            </ion-input>
+          </ion-item>
+          <p class="campo-error" *ngIf="errorDe('cantidadEstudiantes')">
+            {{ errorDe('cantidadEstudiantes') }}
+          </p>
+        </div>
+      </div>
+
+      <ion-button expand="block" type="submit" class="boton-enviar">
+        Enviar solicitud
+      </ion-button>
+
+      <p class="nota-envio">
+        El monto a pagar lo define nuestro equipo al revisar tu solicitud.
+      </p>
+    </form>
+  </ng-container>
+</ion-content>
