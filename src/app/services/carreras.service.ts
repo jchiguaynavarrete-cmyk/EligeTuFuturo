@@ -179,6 +179,21 @@ export class CarrerasService {
   }
 
   /** Valores únicos para poblar los selectores de filtro. */
+  /**
+   * Cuántas carreras activas hay en total.
+   *
+   * `head: true` pide solo el conteo: no viaja ninguna fila.
+   */
+  async contarCarreras(): Promise<number> {
+    const { count, error } = await this.supabase
+      .from('carreras')
+      .select('*', { count: 'exact', head: true })
+      .eq('activa', true);
+
+    if (error) throw error;
+    return count ?? 0;
+  }
+
   async getOpcionesFiltro(
     columna: 'area_cineunesco' | 'region_sede' | 'nombre_institucion' | 'horario'
   ): Promise<string[]> {

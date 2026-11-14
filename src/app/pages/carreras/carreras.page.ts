@@ -112,6 +112,8 @@ export class CarrerasPage implements OnInit {
       this.regiones = ['TODAS', ...regiones];
       this.instituciones = ['TODAS', ...instituciones];
       this.horarios = ['TODOS', ...horarios];
+
+      this.totalCatalogo = await this.carrerasService.contarCarreras();
     } catch (err) {
       console.error('Error cargando filtros:', err);
     }
@@ -205,12 +207,16 @@ export class CarrerasPage implements OnInit {
     await this.favoritosService.toggleFavorito(carrera);
   }
 
+  /** Carreras del catálogo completo. Se cuenta una vez, sin traer filas. */
+  totalCatalogo = 0;
+
   get totalCarreras(): number {
-    return this.carreras.length;
+    return this.totalCatalogo;
   }
 
+  /** Cuántas cumplen los filtros actuales, no cuántas se están mostrando. */
   get totalFiltradas(): number {
-    return this.filtradas.length;
+    return this.total;
   }
 
   private parseArancel(valor: string): number {
