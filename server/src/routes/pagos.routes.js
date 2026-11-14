@@ -2,7 +2,11 @@ const express = require('express');
 const { requiereSesion, requiereAdmin } = require('../middleware/auth');
 const { crearPago, retornoWebpay } = require('../controllers/pagos.controller');
 const { crearContacto } = require('../controllers/contacto.controller');
-const { reclamarSolicitudes, activarSolicitud } = require('../controllers/solicitudes.controller');
+const {
+  reclamarSolicitudes,
+  activarSolicitud,
+  habilitarCuenta,
+} = require('../controllers/solicitudes.controller');
 
 const router = express.Router();
 
@@ -18,6 +22,12 @@ router.post('/contacto', crearContacto);
  * de crear. Exige sesión: el correo se toma del token, no del cuerpo.
  */
 router.post('/solicitudes/reclamar', requiereSesion, reclamarSolicitudes);
+
+/**
+ * Crea o habilita la cuenta de la institución al aprobar su solicitud.
+ * Solo administración: el rol de institución no se puede auto-asignar.
+ */
+router.post('/solicitudes/habilitar-cuenta', requiereSesion, requiereAdmin, habilitarCuenta);
 
 /** Activa un plan sin pago (el Piloto). Solo administración. */
 router.post('/solicitudes/activar', requiereSesion, requiereAdmin, activarSolicitud);
