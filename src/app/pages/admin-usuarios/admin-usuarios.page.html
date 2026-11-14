@@ -47,6 +47,14 @@
 
         <!-- ========================== Búsqueda ========================== -->
         <section class="panel">
+          <button type="button" class="btn-crear" (click)="crearUsuario()">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Crear cuenta
+          </button>
+
           <ion-searchbar
             class="buscador"
             [(ngModel)]="busqueda"
@@ -112,6 +120,21 @@
                 </div>
               </div>
 
+              <div class="acciones">
+                <button
+                  type="button"
+                  class="btn-editar"
+                  [disabled]="eliminando === u.uid"
+                  [attr.aria-label]="'Editar la cuenta de ' + u.nombre"
+                  (click)="editarUsuario(u)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 20h9" />
+                    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                  </svg>
+                  Editar
+                </button>
+
               <!--
                 No se ofrece borrar la propia cuenta: el backend igual lo
                 rechaza, pero mostrar un botón que siempre falla es peor
@@ -133,6 +156,7 @@
                 </svg>
                 {{ eliminando === u.uid ? 'Eliminando…' : 'Eliminar' }}
               </button>
+              </div>
             </article>
           </div>
         </ng-container>

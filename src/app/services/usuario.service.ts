@@ -147,6 +147,88 @@ export class UsuarioService {
     );
   }
 
+  /** Lo que el panel puede crear o cambiar de una cuenta. */
+  private async pedirAlBackend(
+    ruta: string,
+    metodo: 'POST' | 'PATCH',
+    cuerpo: Record<string, unknown>
+  ): Promise<void> {
+    const token = await this.authService.getToken();
+    if (!token) throw new Error('SIN_SESION');
+
+    const r = await fetch(`${environment.apiPagosUrl}${ruta}`, {
+      method: metodo,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(cuerpo),
+    });
+
+    if (!r.ok) {
+      const respuesta = await r.json().catch(() => ({}));
+      throw new Error(this.explicarError((respuesta as any)?.error));
+    }
+  }
+
+  /**
+   * Crea una cuenta desde el panel.
+   *
+   * Nace con el correo ya confirmado y con el rol que se le indique: es
+   * la única forma de dejar a alguien como institución o administrador
+   * sin entrar a la base de datos.
+   */
+  async crearUsuario(datos: {
+    email: string;
+    password: string;
+    nombres: string;
+    apellidoPaterno: string;
+    apellidoMaterno?: string;
+    rut: string;
+    rol: string;
+  }): Promise<void> {
+    await this.pedirAlBackend('/usuarios', 'POST', datos);
+  }
+
+  /** Cambia correo, nombre o rol de una cuenta. */
+  async actualizarUsuario(
+    uid: string,
+    cambios: {
+      email?: string;
+      nombres?: string;
+      apellidoPaterno?: string;
+      apellidoMaterno?: string;
+      rol?: string;
+    }
+  ): Promise<void> {
+    await this.pedirAlBackend(`/usuarios/${uid}`, 'PATCH', cambios);
+  }
+
+  /** Traduce los códigos del backend a algo que se entienda en pantalla. */
+  private explicarError(codigo: string | undefined): string {
+    const textos: Record<string, string> = {
+      CORREO_INVALIDO: 'Ese correo no tiene un formato válido.',
+      CORREO_YA_REGISTRADO: 'Ya existe una cuenta con ese correo.',
+      PASSWORD_CORTA: 'La contraseña debe tener al menos 8 caracteres.',
+      FALTA_NOMBRE: 'Los nombres y el apellido paterno son obligatorios.',
+      RUT_INVALIDO: 'Ese RUT no es válido. Revisa el dígito verificador.',
+      RUT_YA_REGISTRADO: 'Ese RUT ya está registrado en otra cuenta.',
+      ROL_INVALIDO: 'Ese rol no existe.',
+      NO_TE_QUITES_ADMIN:
+        'No puedes quitarte a ti mismo el rol de administrador: perderías ' +
+        'el acceso al panel y no habría forma de volver.',
+      NO_PUEDES_BORRARTE:
+        'No puedes eliminar tu propia cuenta: quedarías fuera del sistema.',
+      ULTIMO_ADMINISTRADOR:
+        'Es el último administrador. Si lo cambias o lo eliminas, nadie ' +
+        'podría gestionar usuarios, solicitudes ni planes.',
+      SIN_PERMISO: 'Solo un administrador puede hacer esto.',
+      USUARIO_NO_ENCONTRADO: 'Esa cuenta ya no existe.',
+    };
+
+    return textos[codigo || ''] || codigo || 'No se pudo completar la operación.';
+  }
+
   /**
    * Elimina una cuenta por completo.
    *
@@ -167,18 +249,7 @@ export class UsuarioService {
     if (!r.ok) {
       const cuerpo = await r.json().catch(() => ({}));
       const codigo = (cuerpo as any)?.error || 'ERROR_ELIMINANDO';
-
-      const explicacion: Record<string, string> = {
-        NO_PUEDES_BORRARTE:
-          'No puedes eliminar tu propia cuenta: quedarías fuera del sistema.',
-        ULTIMO_ADMINISTRADOR:
-          'Es el último administrador. Si lo eliminas, nadie podría gestionar ' +
-          'usuarios, solicitudes ni planes. Crea otro administrador primero.',
-        SIN_PERMISO: 'Solo un administrador puede eliminar cuentas.',
-        USUARIO_NO_ENCONTRADO: 'Esa cuenta ya no existe.',
-      };
-
-      throw new Error(explicacion[codigo] || codigo);
+      throw new Error(this.explicarError(codigo));
     }
   }
 
