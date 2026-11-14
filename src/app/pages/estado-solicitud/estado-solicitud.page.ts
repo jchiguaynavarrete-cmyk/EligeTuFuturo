@@ -10,7 +10,7 @@ import {
   IonToolbar,
 } from '@ionic/angular/standalone';
 
-import { Observable, of, combineLatest } from 'rxjs';
+import { Observable, of, combineLatest, BehaviorSubject } from 'rxjs';
 import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 
 import { AuthService } from 'src/app/services/auth.service';
@@ -58,14 +58,28 @@ export class EstadoSolicitudPage {
 
   estado$: Observable<EstadoPanel>;
 
+  /**
+   * Pulso de recarga.
+   *
+   * Las consultas a Supabase se resuelven una sola vez. Sin esto, la
+   * institución seguiría viendo "pendiente" después de que el
+   * administrador aprobara, hasta recargar el navegador entero.
+   */
+  private recargar$ = new BehaviorSubject<void>(undefined);
+
+  /** Al volver a entrar, se vuelve a consultar el estado real. */
+  ionViewWillEnter(): void {
+    this.recargar$.next();
+  }
+
   constructor() {
     // Si llegó por el formulario público y después creó su cuenta, aquí
     // se le enlazan esas solicitudes. Es idempotente: si no hay ninguna,
     // no hace nada.
     this.solicitudesService.reclamarSolicitudesPublicas().catch(() => {});
 
-    this.estado$ = this.authService.user$.pipe(
-      switchMap((user) => {
+    this.estado$ = combineLatest([this.authService.user$, this.recargar$]).pipe(
+      switchMap(([user]) => {
         if (!user?.id) {
           return of({
             cargando: false,

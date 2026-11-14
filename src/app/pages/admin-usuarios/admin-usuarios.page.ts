@@ -12,8 +12,8 @@ import {
   IonToolbar,
 } from '@ionic/angular/standalone';
 
-import { Observable, of } from 'rxjs';
-import { catchError, map, startWith } from 'rxjs/operators';
+import { Observable, of, BehaviorSubject } from 'rxjs';
+import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 
 import { UsuarioService, UsuarioPerfil } from 'src/app/services/usuario.service';
 
@@ -47,8 +47,16 @@ export class AdminUsuariosPage {
   estado$: Observable<EstadoLista>;
   busqueda = '';
 
+  /** La consulta se resuelve una vez; esto la repite al volver a entrar. */
+  private recargar$ = new BehaviorSubject<void>(undefined);
+
+  ionViewWillEnter(): void {
+    this.recargar$.next();
+  }
+
   constructor() {
-    this.estado$ = this.usuarioService.listarUsuarios().pipe(
+    this.estado$ = this.recargar$.pipe(
+      switchMap(() => this.usuarioService.listarUsuarios().pipe(
       map((usuarios) => ({ cargando: false, error: '', usuarios })),
       catchError((err) => {
         console.error(err);
@@ -65,7 +73,9 @@ export class AdminUsuariosPage {
             : 'No se pudo cargar la lista de usuarios.',
         });
       }),
-      startWith({ cargando: true, error: '', usuarios: [] as UsuarioPerfil[] })
+          startWith({ cargando: true, error: '', usuarios: [] as UsuarioPerfil[] })
+        )
+      )
     );
   }
 

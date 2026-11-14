@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, AlertController, ToastController, LoadingController } from '@ionic/angular';
 
-import { Observable, of, firstValueFrom } from 'rxjs';
-import { catchError, map, startWith } from 'rxjs/operators';
+import { Observable, of, firstValueFrom, BehaviorSubject } from 'rxjs';
+import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 
 import { SolicitudesService } from 'src/app/services/solicitudes.service';
 import { PlanesService } from 'src/app/services/planes.service';
@@ -53,23 +53,47 @@ export class AdminSolicitudesPage {
   filtro: Filtro = 'todas';
   busqueda = '';
 
-  constructor() {
-    this.estado$ = this.solicitudesService.listarTodas().pipe(
-      map((solicitudes) => ({ cargando: false, error: '', solicitudes })),
-      catchError((err) => {
-        console.error(err);
+  /**
+   * Pulso de recarga.
+   *
+   * La consulta a Supabase se resuelve una sola vez, a diferencia de las
+   * escuchas en vivo de Firestore. Sin esto, al aprobar o rechazar la
+   * tabla seguiría mostrando el estado anterior aunque la base ya hubiera
+   * cambiado. Cada emisión vuelve a pedir la lista.
+   */
+  private recargar$ = new BehaviorSubject<void>(undefined);
 
-        const sinPermiso = err?.code === 'permission-denied';
-        return of({
-          cargando: false,
-          solicitudes: [] as Solicitud[],
-          error: sinPermiso
-            ? 'La base rechazó la lectura. Revisa que las reglas permitan a un admin leer la colección "solicitudes".'
-            : 'No se pudieron cargar las solicitudes.',
-        });
-      }),
-      startWith({ cargando: true, error: '', solicitudes: [] as Solicitud[] })
+  constructor() {
+    this.estado$ = this.recargar$.pipe(
+      switchMap(() =>
+        this.solicitudesService.listarTodas().pipe(
+          map((solicitudes) => ({ cargando: false, error: '', solicitudes })),
+          catchError((err) => {
+            console.error(err);
+
+            const sinPermiso = err?.code === 'permission-denied';
+            return of({
+              cargando: false,
+              solicitudes: [] as Solicitud[],
+              error: sinPermiso
+                ? 'La base rechazó la lectura. Revisa que las reglas permitan a un admin leer la colección "solicitudes".'
+                : 'No se pudieron cargar las solicitudes.',
+            });
+          }),
+          startWith({ cargando: true, error: '', solicitudes: [] as Solicitud[] })
+        )
+      )
     );
+  }
+
+  /** Vuelve a pedir la lista a la base. */
+  private recargar(): void {
+    this.recargar$.next();
+  }
+
+  /** Al volver a entrar en la pestaña, los datos se refrescan. */
+  ionViewWillEnter(): void {
+    this.recargar();
   }
 
   /** Conteo real por estado, para las pestañas de filtro. */
@@ -240,6 +264,7 @@ export class AdminSolicitudesPage {
     try {
       await this.solicitudesService.aprobarSolicitud(s.id, adminUid, monto, plan);
       await loading.dismiss();
+      this.recargar();
 
       await this.mostrarToast(
         plan.requierePago
@@ -293,6 +318,7 @@ export class AdminSolicitudesPage {
     try {
       await this.solicitudesService.rechazarSolicitud(s.id, adminUid, motivo);
       await loading.dismiss();
+      this.recargar();
       await this.mostrarToast('Solicitud rechazada.');
     } catch (err) {
       console.error(err);
