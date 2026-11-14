@@ -9,8 +9,10 @@ const { createClient } = require('@supabase/supabase-js');
  * que diga el navegador.
  */
 
-const URL = process.env.SUPABASE_URL;
-const CLAVE_SERVICIO = process.env.SUPABASE_SECRET_KEY;
+const { leer, leerUrl } = require('./entorno');
+
+const URL = leerUrl('SUPABASE_URL');
+const CLAVE_SERVICIO = leer('SUPABASE_SECRET_KEY');
 
 if (!URL || !CLAVE_SERVICIO) {
   throw new Error(

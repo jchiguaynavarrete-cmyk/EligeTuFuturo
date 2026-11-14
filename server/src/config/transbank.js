@@ -9,7 +9,9 @@ const { WebpayPlus, Options, IntegrationApiKeys, Environment, IntegrationCommerc
  * producción queda escrita pero deshabilitada a propósito.
  */
 
-const AMBIENTE = (process.env.TBK_ENVIRONMENT || 'integration').toLowerCase();
+const { leer } = require('./entorno');
+
+const AMBIENTE = leer('TBK_ENVIRONMENT', 'integration').toLowerCase();
 
 if (AMBIENTE !== 'integration') {
   throw new Error(
@@ -24,9 +26,9 @@ if (AMBIENTE !== 'integration') {
  * Transbank las publica para que cualquiera pueda probar.
  */
 const COMMERCE_CODE =
-  process.env.TBK_COMMERCE_CODE || IntegrationCommerceCodes.WEBPAY_PLUS;
+  leer('TBK_COMMERCE_CODE', IntegrationCommerceCodes.WEBPAY_PLUS);
 
-const API_KEY = process.env.TBK_API_KEY || IntegrationApiKeys.WEBPAY;
+const API_KEY = leer('TBK_API_KEY', IntegrationApiKeys.WEBPAY);
 
 /** Devuelve una transacción lista para operar contra integración. */
 function crearTransaccion() {

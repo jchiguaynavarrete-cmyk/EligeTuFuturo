@@ -1,9 +1,12 @@
 const { db } = require('../config/supabase');
 const { crearTransaccion } = require('../config/transbank');
+const { leerUrl } = require('../config/entorno');
 
-const URL_FRONTEND = process.env.FRONTEND_URL || 'http://localhost:8101';
-const URL_RETORNO =
-  process.env.TBK_RETURN_URL || 'http://localhost:3000/api/pagos/retorno';
+const URL_FRONTEND = leerUrl('FRONTEND_URL', 'http://localhost:8101');
+const URL_RETORNO = leerUrl(
+  'TBK_RETURN_URL',
+  'http://localhost:3000/api/pagos/retorno'
+);
 
 /** Orden de compra única y legible. Transbank la limita a 26 caracteres. */
 function generarBuyOrder() {
