@@ -1,150 +1,187 @@
-<ion-header>
-  <ion-toolbar color="primary">
+<!--
+  Planes y solicitudes.
+
+  Mismo lenguaje que el resto. Cada solicitud pasa de fila de tabla a
+  tarjeta: una tabla de siete columnas obliga a desplazar de lado en
+  cualquier pantalla que no sea un monitor grande.
+-->
+<ion-header class="cabecera-limpia">
+  <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/admin"></ion-back-button>
+      <ion-back-button defaultHref="/tabs/admin" text=""></ion-back-button>
     </ion-buttons>
-    <ion-title>Planes y solicitudes</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <ng-container *ngIf="estado$ | async as estado">
-    <div class="estado-centro" *ngIf="estado.cargando">
-      <ion-spinner></ion-spinner>
-      <p>Cargando solicitudes...</p>
-    </div>
+<ion-content fullscreen="true" class="pantalla-solicitudes">
+  <div class="fondo" aria-hidden="true">
+    <img class="foto" src="/assets/estudiantes-biblioteca.jpg" alt="" decoding="async" />
+    <span class="velo"></span>
+  </div>
 
-    <div class="aviso-error" *ngIf="!estado.cargando && estado.error">
-      <strong>No se pudieron cargar las solicitudes</strong>
-      <p>{{ estado.error }}</p>
-    </div>
+  <div class="lienzo">
+    <ng-container *ngIf="estado$ | async as estado">
 
-    <ng-container *ngIf="!estado.cargando && !estado.error">
-      <div class="encabezado">
-        <h1>Planes y solicitudes</h1>
-        <p>
-          Revisa las solicitudes de instituciones y gestiona la activación de
-          planes.
-        </p>
+      <!-- Cargando -->
+      <div class="cargando" *ngIf="estado.cargando">
+        <span class="giro" aria-hidden="true"></span>
+        <p>Cargando solicitudes…</p>
       </div>
 
-      <!-- FILTROS -->
-      <nav class="filtros">
-        <button
-          type="button"
-          class="filtro"
-          [class.activo]="filtro === 'todas'"
-          (click)="cambiarFiltro('todas')">
-          Todas ({{ contar(estado.solicitudes, 'todas') }})
-        </button>
-        <button
-          type="button"
-          class="filtro"
-          [class.activo]="filtro === 'pendiente'"
-          (click)="cambiarFiltro('pendiente')">
-          Pendientes ({{ contar(estado.solicitudes, 'pendiente') }})
-        </button>
-        <button
-          type="button"
-          class="filtro"
-          [class.activo]="filtro === 'aprobada'"
-          (click)="cambiarFiltro('aprobada')">
-          Aprobadas ({{ contar(estado.solicitudes, 'aprobada') }})
-        </button>
-        <button
-          type="button"
-          class="filtro"
-          [class.activo]="filtro === 'rechazada'"
-          (click)="cambiarFiltro('rechazada')">
-          Rechazadas ({{ contar(estado.solicitudes, 'rechazada') }})
-        </button>
-      </nav>
+      <!-- Error -->
+      <div class="aviso-error" *ngIf="!estado.cargando && estado.error">
+        <p class="error-titulo">No se pudieron cargar las solicitudes</p>
+        <p class="error-texto">{{ estado.error }}</p>
+      </div>
 
-      <ion-searchbar
-        [(ngModel)]="busqueda"
-        name="busqueda"
-        placeholder="Buscar institución, correo o RBD"
-        [debounce]="200">
-      </ion-searchbar>
+      <ng-container *ngIf="!estado.cargando && !estado.error">
 
-      <ng-container *ngIf="filtrar(estado.solicitudes) as lista">
-        <div class="estado-centro" *ngIf="lista.length === 0">
-          <p *ngIf="busqueda.trim()">
-            Ninguna solicitud coincide con «{{ busqueda }}».
+        <!-- ======================== Encabezado ======================== -->
+        <div class="encabezado">
+          <h1 class="titulo">Planes y solicitudes</h1>
+          <p class="bajada">
+            Al aprobar, se crea la cuenta de la institución y se te entrega su
+            acceso para que se lo pases al encargado.
           </p>
-          <p *ngIf="!busqueda.trim()">No hay solicitudes en esta categoría.</p>
         </div>
 
-        <!-- TABLA (se desplaza en pantallas angostas) -->
-        <div class="envoltorio-tabla" *ngIf="lista.length > 0">
-          <table class="tabla-solicitudes">
-            <thead>
-              <tr>
-                <th>Institución</th>
-                <th>Plan solicitado</th>
-                <th class="num">Estudiantes</th>
-                <th>Correo</th>
-                <th class="num">Monto</th>
-                <th>Estado</th>
-                <th class="acciones-col">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let s of lista; trackBy: trackPorId">
-                <td>
-                  <strong>{{ s.nombreInstitucion }}</strong>
-                  <span class="sub">
-                    <ng-container *ngIf="s.rbd">RBD {{ s.rbd }}</ng-container>
-                    <span class="chip-origen" *ngIf="s.origen === 'publico'">
-                      desde la web
-                    </span>
-                  </span>
-                </td>
-                <td>
-                  <span class="chip-plan" [attr.data-plan]="s.planId">
-                    {{ s.planNombre }}
-                  </span>
-                </td>
-                <td class="num">{{ s.cantidadEstudiantes }}</td>
-                <td class="correo">{{ s.correo }}</td>
-                <td class="num">{{ formatearMonto(s.monto) }}</td>
-                <td>
-                  <span class="chip-estado" [attr.data-estado]="s.estado">
-                    {{ textoEstado(s) }}
-                  </span>
-                </td>
-                <td>
-                  <div class="acciones">
-                    <button
-                      type="button"
-                      class="accion aprobar"
-                      title="Aprobar"
-                      [disabled]="s.estado === 'aprobada' || procesando === s.id"
-                      (click)="aprobar(s)">
-                      ✓
-                    </button>
-                    <button
-                      type="button"
-                      class="accion rechazar"
-                      title="Rechazar"
-                      [disabled]="s.estado === 'rechazada' || procesando === s.id"
-                      (click)="rechazar(s)">
-                      ✕
-                    </button>
-                    <button
-                      type="button"
-                      class="accion ver"
-                      title="Ver detalle"
-                      (click)="verDetalle(s)">
-                      👁
-                    </button>
+        <!-- ===================== Filtros y búsqueda ===================== -->
+        <section class="panel">
+          <nav class="filtros" aria-label="Filtrar por estado">
+            <button
+              type="button"
+              class="filtro"
+              [class.activo]="filtro === 'todas'"
+              (click)="cambiarFiltro('todas')">
+              Todas <span class="cuenta">{{ contar(estado.solicitudes, 'todas') }}</span>
+            </button>
+            <button
+              type="button"
+              class="filtro"
+              [class.activo]="filtro === 'pendiente'"
+              (click)="cambiarFiltro('pendiente')">
+              Pendientes <span class="cuenta">{{ contar(estado.solicitudes, 'pendiente') }}</span>
+            </button>
+            <button
+              type="button"
+              class="filtro"
+              [class.activo]="filtro === 'aprobada'"
+              (click)="cambiarFiltro('aprobada')">
+              Aprobadas <span class="cuenta">{{ contar(estado.solicitudes, 'aprobada') }}</span>
+            </button>
+            <button
+              type="button"
+              class="filtro"
+              [class.activo]="filtro === 'rechazada'"
+              (click)="cambiarFiltro('rechazada')">
+              Rechazadas <span class="cuenta">{{ contar(estado.solicitudes, 'rechazada') }}</span>
+            </button>
+          </nav>
+
+          <ion-searchbar
+            class="buscador"
+            [(ngModel)]="busqueda"
+            name="busqueda"
+            placeholder="Buscar institución, correo o RBD"
+            [debounce]="200">
+          </ion-searchbar>
+        </section>
+
+        <!-- ========================= Solicitudes ========================= -->
+        <ng-container *ngIf="filtrar(estado.solicitudes) as lista">
+
+          <div class="vacio" *ngIf="lista.length === 0">
+            <p class="vacio-titulo" *ngIf="busqueda.trim()">
+              Ninguna solicitud coincide con «{{ busqueda }}»
+            </p>
+            <p class="vacio-titulo" *ngIf="!busqueda.trim()">
+              No hay solicitudes en esta categoría
+            </p>
+            <p class="vacio-texto" *ngIf="busqueda.trim()">
+              Prueba con otra palabra, o revisa en otra pestaña.
+            </p>
+          </div>
+
+          <div class="lista" *ngIf="lista.length > 0">
+            <article
+              class="solicitud"
+              *ngFor="let s of lista; trackBy: trackPorId"
+              [attr.data-estado]="s.estado">
+
+              <!-- Encabezado de la tarjeta -->
+              <div class="solicitud-top">
+                <div class="solicitud-quien">
+                  <h2>{{ s.nombreInstitucion }}</h2>
+                  <p class="correo">{{ s.correo }}</p>
+
+                  <div class="etiquetas">
+                    <span class="chip-plan" [attr.data-plan]="s.planId">{{ s.planNombre }}</span>
+                    <span class="chip-origen" *ngIf="s.origen === 'publico'">Desde la web</span>
+                    <span class="chip-rbd" *ngIf="s.rbd">RBD {{ s.rbd }}</span>
                   </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                </div>
+
+                <span class="chip-estado" [attr.data-estado]="s.estado">
+                  {{ textoEstado(s) }}
+                </span>
+              </div>
+
+              <!-- Datos -->
+              <div class="datos">
+                <span class="dato">
+                  <span>Estudiantes</span>
+                  <b>{{ s.cantidadEstudiantes }}</b>
+                </span>
+                <span class="dato">
+                  <span>Monto</span>
+                  <b>{{ formatearMonto(s.monto) }}</b>
+                </span>
+                <span class="dato" *ngIf="s.encargado">
+                  <span>Encargado</span>
+                  <b>{{ s.encargado }}</b>
+                </span>
+              </div>
+
+              <!-- Acciones -->
+              <div class="acciones">
+                <button
+                  type="button"
+                  class="accion aprobar"
+                  [disabled]="s.estado === 'aprobada' || procesando === s.id"
+                  (click)="aprobar(s)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                  Aprobar
+                </button>
+
+                <button
+                  type="button"
+                  class="accion rechazar"
+                  [disabled]="s.estado === 'rechazada' || procesando === s.id"
+                  (click)="rechazar(s)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M18 6 6 18M6 6l12 12" />
+                  </svg>
+                  Rechazar
+                </button>
+
+                <button type="button" class="accion ver" (click)="verDetalle(s)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  Ver detalle
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-container>
+
       </ng-container>
     </ng-container>
-  </ng-container>
+  </div>
 </ion-content>

@@ -1,155 +1,316 @@
-ion-content {
-  --background: linear-gradient(180deg, var(--app-bg-top), var(--app-bg-bottom));
+/* =====================================================================
+   Planes y solicitudes
+
+   Mismo fondo, velo y colores que el resto. Cada solicitud pasa de fila
+   de tabla a tarjeta: una tabla de siete columnas obliga a desplazar de
+   lado en cualquier pantalla que no sea un monitor grande.
+
+   Las insignias conservan sus colores, que ya distinguían plan y estado.
+   ===================================================================== */
+
+.cabecera-limpia ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+  --color: #fff;
+  --min-height: 44px;
 }
 
-.encabezado {
-  max-width: 1100px;
-  margin: 4px auto 16px auto;
+.pantalla-solicitudes {
+  --background: transparent;
 }
 
-.encabezado h1 {
-  margin: 0 0 4px 0;
-  font-size: 24px;
-  font-weight: 900;
-  color: var(--app-text);
+.fondo {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
 }
 
-.encabezado p {
+.foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 45%;
+}
+
+.velo {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      72% 62% at 50% 46%,
+      rgba(6, 6, 14, 0.93) 0%,
+      rgba(6, 6, 14, 0.8) 44%,
+      rgba(6, 6, 14, 0.42) 78%,
+      rgba(6, 6, 14, 0.28) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(8, 8, 18, 0.74) 0%,
+      rgba(8, 8, 18, 0.64) 38%,
+      rgba(8, 8, 18, 0.84) 100%
+    ),
+    radial-gradient(
+      90% 55% at 50% -10%,
+      rgba(139, 92, 246, 0.28) 0%,
+      rgba(79, 124, 255, 0.14) 46%,
+      rgba(8, 8, 18, 0) 76%
+    );
+}
+
+.lienzo {
+  position: relative;
+  z-index: 1;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 6px 24px calc(40px + var(--ion-safe-area-bottom, 0px));
+}
+
+/* ----------------------------- Estados ----------------------------- */
+.cargando {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 56px 20px;
+
+  p {
+    margin: 0;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.72);
+  }
+}
+
+.giro {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.16);
+  border-top-color: #7eb3ff;
+  animation: girar 0.8s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.aviso-error {
+  padding: 20px 22px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 92, 133, 0.42);
+  background: rgba(255, 92, 133, 0.12);
+}
+
+.error-titulo {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffb3c4;
+}
+
+.error-texto {
   margin: 0;
-  font-size: 14px;
-  color: var(--app-text-muted);
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.78);
 }
 
-/* Filtros */
+/* ---------------------------- Encabezado ---------------------------- */
+.encabezado {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.titulo {
+  margin: 0 0 8px;
+  font-size: clamp(25px, 4.8vw, 32px);
+  font-weight: 800;
+  letter-spacing: -1.1px;
+  line-height: 1.12;
+  color: #fff;
+  text-shadow: 0 3px 22px rgba(0, 0, 0, 0.75);
+}
+
+.bajada {
+  margin: 0 auto;
+  max-width: 56ch;
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.82);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+}
+
+/* ------------------------- Filtros y búsqueda ------------------------- */
+.panel {
+  margin-bottom: 16px;
+  padding: 18px 20px;
+
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(16, 16, 24, 0.78);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.48);
+}
+
 .filtros {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  max-width: 1100px;
-  margin: 0 auto 12px auto;
 }
 
 .filtro {
-  padding: 8px 14px;
-  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 15px;
+
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.05);
   cursor: pointer;
 
-  font-size: 13px;
-  font-weight: 700;
-
-  color: var(--app-text-muted);
-  background: var(--app-surface);
-  border: 1px solid var(--app-border);
-
-  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
-}
-
-.filtro:hover {
-  background: var(--app-surface-hover);
-}
-
-.filtro.activo {
-  color: #ffffff;
-  background: var(--ion-color-primary);
-  border-color: var(--ion-color-primary);
-}
-
-ion-searchbar {
-  max-width: 1100px;
-  margin: 0 auto 14px auto;
-
-  --background: var(--app-surface);
-  --color: var(--app-text);
-  --placeholder-color: var(--app-text-muted);
-  --icon-color: var(--app-text-muted);
-
-  border: 1px solid var(--app-border);
-  border-radius: 14px;
-}
-
-/* Tabla con desplazamiento horizontal en pantallas angostas */
-.envoltorio-tabla {
-  max-width: 1100px;
-  margin: 0 auto 20px auto;
-  overflow-x: auto;
-
-  border-radius: 16px;
-  background: var(--app-surface);
-  border: 1px solid var(--app-border);
-}
-
-.tabla-solicitudes {
-  width: 100%;
-  min-width: 860px;
-  border-collapse: collapse;
-}
-
-.tabla-solicitudes thead th {
-  padding: 13px 14px;
-  text-align: left;
-
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--app-text-muted);
-
-  background: var(--app-surface-elevated);
-  border-bottom: 1px solid var(--app-border);
-  white-space: nowrap;
-}
-
-.tabla-solicitudes tbody td {
-  padding: 13px 14px;
+  font: inherit;
   font-size: 14px;
-  color: var(--app-text);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  vertical-align: middle;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.72);
+
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+
+  &.activo {
+    color: #fff;
+    background: rgba(79, 124, 255, 0.2);
+    border-color: rgba(79, 124, 255, 0.75);
+
+    .cuenta {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+  }
 }
 
-.tabla-solicitudes tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.tabla-solicitudes tbody tr:hover {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.tabla-solicitudes .num {
-  text-align: right;
-  white-space: nowrap;
-}
-
-.tabla-solicitudes .acciones-col {
-  text-align: center;
-}
-
-.tabla-solicitudes td strong {
-  display: block;
-  font-weight: 800;
-}
-
-.tabla-solicitudes .sub {
-  display: block;
-  margin-top: 2px;
+.cuenta {
+  min-width: 22px;
+  padding: 2px 7px;
+  border-radius: 99px;
   font-size: 12px;
-  color: var(--app-text-muted);
+  font-weight: 800;
+  text-align: center;
+
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.buscador {
+  --background: rgba(255, 255, 255, 0.07);
+  --color: #fff;
+  --placeholder-color: rgba(255, 255, 255, 0.45);
+  --placeholder-opacity: 1;
+  --icon-color: rgba(255, 255, 255, 0.55);
+  --clear-button-color: rgba(255, 255, 255, 0.6);
+  --border-radius: 15px;
+  --box-shadow: none;
+
+  padding: 0;
+  min-height: 52px;
+  margin-top: 14px;
+}
+
+/* ---------------------------- Solicitudes ---------------------------- */
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.solicitud {
+  padding: 18px 20px;
+
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(16, 16, 24, 0.8);
+  backdrop-filter: blur(10px);
+
+  transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease,
+    opacity 180ms ease;
+
+  &:hover {
+    border-color: rgba(126, 179, 255, 0.45);
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.42);
+  }
+}
+
+/* Lo pendiente es lo único que pide una decisión: se destaca */
+.solicitud[data-estado='pendiente'] {
+  border-color: rgba(245, 158, 11, 0.42);
+}
+
+/* Lo rechazado se apaga, pero sigue legible */
+.solicitud[data-estado='rechazada'] {
+  opacity: 0.62;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.solicitud-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.solicitud-quien {
+  flex: 1;
+  min-width: 0;
+
+  h2 {
+    margin: 0 0 4px;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    color: #fff;
+  }
 }
 
 .correo {
-  word-break: break-all;
-  color: var(--app-text-muted);
+  margin: 0 0 10px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.72);
+  overflow-wrap: anywhere;
 }
 
-/* Chips */
-.chip-plan {
+.etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+/* ------------------------------ Insignias ------------------------------
+   Conservan los colores que ya distinguían cada plan y cada estado. */
+.chip-plan,
+.chip-origen,
+.chip-rbd {
   display: inline-block;
   padding: 3px 10px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   white-space: nowrap;
+}
 
+.chip-plan {
   color: var(--app-link);
   background: rgba(126, 179, 255, 0.14);
   border: 1px solid rgba(126, 179, 255, 0.38);
@@ -176,17 +337,26 @@ ion-searchbar {
 }
 
 .chip-plan[data-plan='piloto'] {
-  color: var(--app-text-muted);
-  background: var(--app-surface-hover);
-  border-color: var(--app-border);
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.chip-origen,
+.chip-rbd {
+  color: rgba(255, 255, 255, 0.64);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .chip-estado {
-  display: inline-block;
-  padding: 3px 11px;
+  flex-shrink: 0;
+  padding: 5px 13px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -208,95 +378,181 @@ ion-searchbar {
   border: 1px solid rgba(235, 68, 90, 0.45);
 }
 
-/* Acciones */
+/* ------------------------------- Datos ------------------------------- */
+.datos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.dato {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 7px 12px;
+
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 13px;
+
+  span {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  b {
+    font-weight: 700;
+    color: #fff;
+  }
+}
+
+/* ----------------------------- Acciones -----------------------------
+   Con texto y no solo un símbolo: un ✓ y una ✕ sueltos obligan a
+   adivinar, y aquí se está decidiendo sobre dinero. */
 .acciones {
   display: flex;
-  gap: 6px;
-  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .accion {
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 15px;
+
+  border-radius: 12px;
   cursor: pointer;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
 
-  font-size: 14px;
-  font-weight: 800;
-  line-height: 1;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
 
-  background: var(--app-surface-elevated);
-  border: 1px solid var(--app-border);
-
-  transition: background 0.16s ease, border-color 0.16s ease, opacity 0.16s ease;
-}
-
-.accion:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
+  &[disabled] {
+    opacity: 0.38;
+    cursor: default;
+    transform: none;
+  }
 }
 
 .accion.aprobar {
-  color: var(--ion-color-success);
-}
+  color: #86efac;
+  background: rgba(45, 211, 111, 0.14);
+  border: 1px solid rgba(45, 211, 111, 0.45);
 
-.accion.aprobar:hover:not(:disabled) {
-  background: rgba(45, 211, 111, 0.18);
-  border-color: var(--ion-color-success);
+  &:hover:not([disabled]) {
+    background: rgba(45, 211, 111, 0.26);
+    border-color: rgba(45, 211, 111, 0.75);
+    transform: translateY(-1px);
+  }
 }
 
 .accion.rechazar {
-  color: var(--ion-color-danger);
+  color: #ff9db3;
+  background: rgba(255, 92, 133, 0.12);
+  border: 1px solid rgba(255, 92, 133, 0.42);
+
+  &:hover:not([disabled]) {
+    background: rgba(255, 92, 133, 0.22);
+    border-color: rgba(255, 92, 133, 0.7);
+    transform: translateY(-1px);
+  }
 }
 
-.accion.rechazar:hover:not(:disabled) {
-  background: rgba(235, 68, 90, 0.18);
-  border-color: var(--ion-color-danger);
+.accion.ver {
+  margin-left: auto;
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.34);
+    color: #fff;
+  }
 }
 
-.accion.ver:hover {
-  background: var(--app-surface-hover);
-  border-color: var(--app-border-strong);
-}
-
-/* Estados */
-.estado-centro {
-  max-width: 1100px;
-  margin: 40px auto;
+/* ------------------------------- Vacío ------------------------------- */
+.vacio {
+  padding: 46px 24px;
   text-align: center;
-  color: var(--app-text-muted);
+
+  border-radius: 20px;
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  background: rgba(16, 16, 24, 0.62);
 }
 
-.aviso-error {
-  max-width: 1100px;
-  margin: 20px auto;
-  padding: 14px 16px;
-
-  border-radius: 14px;
-  background: rgba(235, 68, 90, 0.12);
-  border: 1px solid rgba(235, 68, 90, 0.4);
-  color: var(--app-text);
+.vacio-titulo {
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #fff;
+  overflow-wrap: anywhere;
 }
 
-.aviso-error p {
-  margin: 6px 0 0 0;
-  font-size: 14px;
-  color: var(--app-text-muted);
+.vacio-texto {
+  margin: 0 auto;
+  max-width: 44ch;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.72);
 }
 
-/* Marca las que llegaron por el formulario público de la landing */
-.chip-origen {
-  display: inline-block;
-  margin-left: 2px;
-  padding: 1px 8px;
-  border-radius: 999px;
+/* ------------------------------- Móvil ------------------------------- */
+@media (max-width: 680px) {
+  .velo {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(8, 8, 18, 0.8) 0%,
+        rgba(8, 8, 18, 0.93) 45%,
+        rgba(8, 8, 18, 0.96) 100%
+      ),
+      radial-gradient(90% 40% at 50% -10%, rgba(139, 92, 246, 0.22) 0%, rgba(8, 8, 18, 0) 70%);
+  }
 
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  .lienzo {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
 
-  color: #c4b5fd;
-  background: rgba(124, 92, 255, 0.16);
-  border: 1px solid rgba(124, 92, 255, 0.42);
+  .filtro {
+    flex: 1 1 calc(50% - 4px);
+    justify-content: center;
+  }
+
+  .accion {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  .accion.ver {
+    margin-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .solicitud,
+  .accion,
+  .filtro {
+    transition: none;
+  }
+
+  .solicitud:hover,
+  .accion:hover {
+    transform: none;
+  }
+
+  .giro {
+    animation: none;
+  }
 }
