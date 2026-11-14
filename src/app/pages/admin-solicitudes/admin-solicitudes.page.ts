@@ -23,6 +23,16 @@ type EstadoPanel = {
   solicitudes: Solicitud[];
 };
 
+/**
+ * Salto de línea para los mensajes de los diálogos.
+ *
+ * Ionic ya no interpreta HTML dentro de un `alert`, así que un `<br>`
+ * se vería escrito en pantalla. Se usa texto plano y los saltos los
+ * respeta la clase `alerta-texto` de global.scss.
+ */
+const SALTO = String.fromCharCode(10);
+
+
 @Component({
   selector: 'app-admin-solicitudes',
   standalone: true,
@@ -122,9 +132,15 @@ export class AdminSolicitudesPage {
     const alert = await this.alertCtrl.create({
       header: 'Aprobar solicitud',
       subHeader: `${s.nombreInstitucion} · ${s.planNombre}`,
-      message:
-        `${s.cantidadEstudiantes} estudiantes.<br><br>` +
-        `Monto según el plan: <strong>${this.formatearMonto(monto)}</strong>`,
+      // Texto plano: Ionic ya no interpreta HTML dentro de los
+      // diálogos, así que las etiquetas se verían escritas en pantalla.
+      // Los saltos de línea los respeta la clase `alerta-texto`.
+      message: [
+        `${s.cantidadEstudiantes} estudiantes.`,
+        '',
+        `Monto según el plan: ${this.formatearMonto(monto)}`,
+      ].join(SALTO),
+      cssClass: 'alerta-texto',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
@@ -303,9 +319,9 @@ export class AdminSolicitudesPage {
 
     const alert = await this.alertCtrl.create({
       header: 'Detalle de la solicitud',
-      message: filas.map(([k, v]) => `<strong>${k}:</strong> ${v}`).join('<br>'),
+      message: filas.map(([k, v]) => `${k}: ${v}`).join(SALTO),
       buttons: ['Cerrar'],
-      cssClass: 'alerta-detalle',
+      cssClass: 'alerta-texto alerta-detalle',
     });
 
     await alert.present();

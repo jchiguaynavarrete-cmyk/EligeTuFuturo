@@ -104,3 +104,19 @@ ion-item.campo-valido {
   background: var(--app-surface-hover);
   border: 1px solid var(--app-border);
 }
+
+/* ---------------------------------------------------------------
+   Diálogos con varias líneas
+
+   Ionic no interpreta HTML dentro de un `alert`, así que los
+   mensajes van en texto plano. `pre-line` hace que los saltos de
+   línea se respeten, sin alterar el resto del formato.
+   --------------------------------------------------------------- */
+.alerta-texto .alert-message {
+  white-space: pre-line;
+}
+
+.alerta-detalle .alert-message {
+  text-align: left;
+  line-height: 1.6;
+}
