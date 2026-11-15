@@ -91,3 +91,8 @@ server/.env
 
 # La plantilla si se versiona: no tiene secretos reales
 !server/.env.example
+
+# Documentos con credenciales. El informe publicable vive en docs/;
+# cualquier otro .docx en la raiz queda fuera a proposito.
+/*.docx
+~$*.docx
