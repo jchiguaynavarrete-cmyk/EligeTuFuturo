@@ -16,6 +16,8 @@ import {
   Solicitud,
   Institucion,
   ESTADO_SOLICITUD_META,
+  planVigente,
+  diasRestantes,
 } from 'src/app/models/planes.model';
 
 /** Los cuatro pasos del flujo, para pintarlos como línea de tiempo. */
@@ -191,6 +193,36 @@ export class EstadoSolicitudPage {
 
   irAPagar(s: Solicitud): void {
     this.router.navigate(['/tabs/institucion/pagar', s.id]);
+  }
+
+  /** Si el plan todavía corre. La fecha manda, no solo el estado. */
+  planAlDia(inst: Institucion | null): boolean {
+    return planVigente(inst?.estadoPlan, inst?.fechaTermino as any);
+  }
+
+  /** Tuvo un plan que ya terminó. */
+  planVencido(inst: Institucion | null): boolean {
+    if (!inst) return false;
+    return inst.estadoPlan === 'activo' && !this.planAlDia(inst);
+  }
+
+  /**
+   * Cuántos días le quedan. Se muestra solo cuando queda poco: avisar
+   * con treinta días de anticipación es ruido, con siete es un aviso.
+   */
+  diasQueQuedan(inst: Institucion | null): number | null {
+    const dias = diasRestantes(inst?.fechaTermino as any);
+    return dias !== null && dias >= 0 ? dias : null;
+  }
+
+  /**
+   * Un plan gratuito no se renueva: se reemplaza por uno pagado. Por eso
+   * al colegio que está en el piloto se le ofrece contratar mientras lo
+   * usa, que es cuando le está viendo el valor, y no cuando ya se le
+   * cortó el acceso y perdió el entusiasmo.
+   */
+  esPiloto(inst: Institucion | null): boolean {
+    return (inst?.planNombre || '').toLowerCase().includes('piloto');
   }
 
   verPlanes(): void {

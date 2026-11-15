@@ -5,6 +5,7 @@ import { map, switchMap } from 'rxjs/operators';
 import { SupabaseClientService } from '../core/supabase.client';
 import { AuthService } from './auth.service';
 import { environment } from 'src/environments/environment';
+import { planVigente } from 'src/app/models/planes.model';
 
 /**
  * Perfil de una persona.
@@ -296,12 +297,12 @@ export class UsuarioService {
          */
         const consulta = this.supabase
           .from('instituciones')
-          .select('estado_plan')
+          .select('estado_plan, fecha_termino')
           .eq('id', uid)
           .maybeSingle();
 
         return from(consulta).pipe(
-          map(({ data }) => data?.estado_plan !== 'activo')
+          map(({ data }) => !planVigente(data?.estado_plan, data?.fecha_termino))
         );
       })
     );
@@ -327,12 +328,12 @@ export class UsuarioService {
 
         const consulta = this.supabase
           .from('instituciones')
-          .select('estado_plan')
+          .select('estado_plan, fecha_termino')
           .eq('id', idInstitucion)
           .maybeSingle();
 
         return from(consulta).pipe(
-          map(({ data }) => data?.estado_plan === 'activo')
+          map(({ data }) => planVigente(data?.estado_plan, data?.fecha_termino))
         );
       })
     );

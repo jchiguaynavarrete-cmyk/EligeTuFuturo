@@ -182,3 +182,44 @@ export const ESTADO_PAGO_META: Record<EstadoPago, { texto: string; color: string
   pagado: { texto: 'Pagado', color: 'success' },
   fallido: { texto: 'Pago fallido', color: 'danger' },
 };
+
+/**
+ * Si el plan de una institución está vigente ahora mismo.
+ *
+ * No basta con que `estado_plan` diga 'activo': un piloto de 30 días se
+ * guarda como activo y nadie vuelve a tocarlo cuando el plazo termina.
+ * La fecha manda, y se compara al momento de preguntar.
+ *
+ * Se hace así, y no con un proceso programado que marque los vencidos
+ * cada noche, porque ese proceso puede fallar en silencio y dejar a un
+ * colegio usando el servicio meses después de que su plan terminó.
+ * Comparar la fecha al entrar no se puede caer.
+ *
+ * Sin fecha de término se considera vigente: son los planes que no la
+ * definen, no un error.
+ */
+export function planVigente(
+  estadoPlan: string | null | undefined,
+  fechaTermino: string | Date | null | undefined
+): boolean {
+  if (estadoPlan !== 'activo') return false;
+  if (!fechaTermino) return true;
+
+  const termino = new Date(fechaTermino as string);
+  if (isNaN(termino.getTime())) return true;
+
+  return termino.getTime() > Date.now();
+}
+
+/** Días que le quedan al plan. Negativo si ya venció, null si no aplica. */
+export function diasRestantes(
+  fechaTermino: string | Date | null | undefined
+): number | null {
+  if (!fechaTermino) return null;
+
+  const termino = new Date(fechaTermino as string);
+  if (isNaN(termino.getTime())) return null;
+
+  const MS_POR_DIA = 86_400_000;
+  return Math.ceil((termino.getTime() - Date.now()) / MS_POR_DIA);
+}

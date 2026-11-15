@@ -42,13 +42,54 @@
         </div>
 
         <!-- ======================== Plan vigente ======================== -->
-        <section class="plan-vigente" *ngIf="estado.institucion?.estadoPlan === 'activo'">
+        <section class="plan-vigente" *ngIf="planAlDia(estado.institucion)">
           <span class="etiqueta">Plan activo</span>
           <h2>{{ estado.institucion?.planNombre }}</h2>
           <p>
             {{ estado.institucion?.nombreInstitucion }} · vigente hasta
             {{ formatearFecha(estado.institucion?.fechaTermino) }}
           </p>
+
+          <!--
+            Al colegio que está probando se le ofrece contratar mientras
+            usa el piloto, que es cuando le está viendo el valor. Si se
+            espera a que venza, ya perdió el entusiasmo.
+          -->
+          <div class="oferta" *ngIf="esPiloto(estado.institucion)">
+            <p class="oferta-texto">
+              <ng-container *ngIf="diasQueQuedan(estado.institucion) as dias">
+                Te quedan {{ dias }} {{ dias === 1 ? 'día' : 'días' }} de prueba.
+              </ng-container>
+              Cuando termine, el acceso se cierra. Puedes contratar un plan
+              anual sin esperar a que eso pase.
+            </p>
+
+            <button type="button" class="btn-contratar" (click)="verPlanes()">
+              Contratar un plan
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </button>
+          </div>
+        </section>
+
+        <!-- ======================== Plan vencido ======================== -->
+        <section class="plan-vencido" *ngIf="planVencido(estado.institucion)">
+          <span class="etiqueta">Plan vencido</span>
+          <h2>{{ estado.institucion?.planNombre }}</h2>
+          <p>
+            Terminó el {{ formatearFecha(estado.institucion?.fechaTermino) }}.
+            Tus estudiantes ya no tienen acceso al catálogo ni al simulador.
+          </p>
+
+          <button type="button" class="btn-contratar" (click)="verPlanes()">
+            Contratar un plan
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </button>
         </section>
 
         <!-- ====================== Sin solicitudes ====================== -->
@@ -147,6 +188,19 @@
             El pago fue confirmado y tu plan está activo.
           </p>
         </article>
+
+        <!--
+          Siempre hay por dónde contratar otro plan. Antes el único acceso
+          estaba en el aviso de "no has solicitado nada", así que un colegio
+          que ya había pedido el piloto quedaba sin camino para pasar a un
+          plan pagado.
+        -->
+        <div class="pie-planes" *ngIf="estado.solicitudes.length > 0">
+          <p>¿Necesitas otro plan o ampliar la cobertura?</p>
+          <button type="button" class="btn-ver-planes" (click)="verPlanes()">
+            Ver todos los planes
+          </button>
+        </div>
 
       </ng-container>
     </ng-container>
