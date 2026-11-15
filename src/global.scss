@@ -92,8 +92,17 @@ ion-item.campo-valido {
   border-color: var(--ion-color-success);
 }
 
+/*
+ * El mensaje va DEBAJO del campo, separado.
+ *
+ * Tenía un margen superior negativo que lo subía cuatro píxeles y lo
+ * montaba sobre el borde del input, justo cuando el campo inválido se
+ * engrosa con su sombra roja: el error quedaba encima del texto que la
+ * persona acababa de escribir, que es cuando más necesita leerlo.
+ */
 .campo-error {
-  margin: -4px 4px 10px 4px;
+  display: block;
+  margin: 6px 4px 12px 4px;
   font-size: 13px;
   font-weight: 600;
   line-height: 1.35;

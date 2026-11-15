@@ -251,16 +251,23 @@
 
       <div class="campos">
         <div class="campo">
-          <ion-item>
-            <ion-label position="stacked">Correo electrónico</ion-label>
+          <ion-item [class.campo-invalido]="correoError" [class.campo-valido]="correoSalido && correoValido">
+            <ion-label position="stacked">
+              Correo electrónico
+              <ion-text color="success" *ngIf="correoSalido && correoValido">✓</ion-text>
+            </ion-label>
             <ion-input
               [(ngModel)]="email"
               name="email"
               type="email"
               placeholder="tucorreo@ejemplo.cl"
-              required>
+              autocomplete="email"
+              required
+              (ionBlur)="onCorreoBlur()">
             </ion-input>
           </ion-item>
+
+          <p class="campo-error" *ngIf="correoError">{{ correoError }}</p>
         </div>
 
         <!-- En registro las dos contraseñas van juntas; al entrar va sola -->

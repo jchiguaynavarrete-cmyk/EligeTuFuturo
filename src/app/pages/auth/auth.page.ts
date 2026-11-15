@@ -101,6 +101,7 @@ export class AuthPage implements OnInit {
    * sale de él o pulsa Registrarse. Mientras escribe no se la interrumpe.
    */
   rutSalido = false;
+  correoSalido = false;
   nombreSalido: Record<CampoNombre, boolean> = {
     nombres: false,
     apellidoPaterno: false,
@@ -350,6 +351,7 @@ export class AuthPage implements OnInit {
     // Igual que en el nombre: al escribir se oculta el resultado
     // hasta volver a salir del campo.
     this.rutSalido = false;
+    this.correoSalido = false;
 
     // ion-input mantiene su propio valor interno; si lo que escribieron
     // trae caracteres descartados hay que devolverle el texto corregido.
@@ -389,6 +391,32 @@ export class AuthPage implements OnInit {
     if (!limpio) return 'Ingresa tu RUT.';
 
     return this.rutValido ? '' : 'RUT inválido.';
+  }
+
+  onCorreoBlur() {
+    this.correoSalido = true;
+  }
+
+  get correoValido(): boolean {
+    return this.esEmailValido(this.email);
+  }
+
+  /**
+   * Mensaje bajo el campo del correo.
+   *
+   * Antes solo se comprobaba que no estuviera vacío, así que alguien
+   * podía escribir "hola" y el botón se habilitaba igual: el rechazo
+   * llegaba después, desde el servidor, con un mensaje genérico y sin
+   * señalar qué campo estaba mal.
+   */
+  get correoError(): string {
+    if (!this.correoSalido) return '';
+
+    if (!this.email.trim()) return 'Ingresa tu correo.';
+
+    return this.correoValido
+      ? ''
+      : 'Revisa el correo: debe tener un @ y un punto, como nombre@colegio.cl';
   }
 
   /** Dígito verificador que corresponde a un cuerpo dado (módulo 11). */
@@ -547,7 +575,7 @@ export class AuthPage implements OnInit {
     if (this.modo !== 'register') return true;
 
     if (!this.nombreValido) return false;
-    if (!this.email.trim()) return false;
+    if (!this.esEmailValido(this.email)) return false;
     if (!this.fechaNacimientoStr) return false;
     if (this.fechaError) return false;
 
@@ -619,6 +647,7 @@ export class AuthPage implements OnInit {
       this.showPasswordRules = true;
       // Al enviar se revelan todos los resultados de una vez.
       this.rutSalido = true;
+      this.correoSalido = true;
       (['nombres', 'apellidoPaterno', 'apellidoMaterno'] as CampoNombre[]).forEach((c) => {
         this.nombreSalido[c] = true;
       });
@@ -781,6 +810,7 @@ export class AuthPage implements OnInit {
     this.passwordConfirm = '';
     this.showPasswordRules = false;
     this.rutSalido = false;
+    this.correoSalido = false;
     (['nombres', 'apellidoPaterno', 'apellidoMaterno'] as CampoNombre[]).forEach((c) => {
       this.nombreSalido[c] = false;
     });
