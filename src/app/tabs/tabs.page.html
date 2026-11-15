@@ -2,10 +2,15 @@
   <ion-tab-bar slot="bottom">
 
     <!--
-      Una institución que todavía no paga ve solo su plan, el calendario
-      y su cuenta. Lo que está contratando no se le entrega antes.
+      El panel de la institución está SIEMPRE a mano: ahí ve la vigencia
+      de su plan, contrata otro y paga. Antes la pestaña solo aparecía
+      mientras no tuviera plan, así que al activarse desaparecía y se
+      quedaba sin forma de volver a su propio panel ni de contratar.
+
+      Lo que sí depende de haber pagado son Favoritos y Carreras: eso es
+      justo lo que está contratando, y no se entrega antes.
     -->
-    <ion-tab-button tab="institucion" *ngIf="esInstitucionSinPlan">
+    <ion-tab-button tab="institucion" *ngIf="esInstitucion">
       <ion-icon name="business-outline"></ion-icon>
       <ion-label>Mi plan</ion-label>
     </ion-tab-button>

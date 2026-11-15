@@ -1,4 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import {
   IonTabs,
@@ -50,8 +52,20 @@ export class TabsPage implements OnInit {
    */
   esInstitucionSinPlan = false;
 
+  /**
+   * Cualquier cuenta institucional, pague o no.
+   *
+   * Separado del anterior a propósito: "Mi plan" es su panel, y lo
+   * necesita SIEMPRE -para ver la vigencia, para contratar otro plan,
+   * para pagar-. Antes la pestaña solo aparecía mientras no tuviera
+   * plan, así que al activarse desaparecía y la institución se quedaba
+   * sin forma de volver a su propio panel.
+   */
+  esInstitucion = false;
+
   private authService = inject(AuthService);
   private usuarioService = inject(UsuarioService);
+  private router = inject(Router);
 
   constructor() {
     // ✅ Registrar TODOS los íconos usados en tabs
@@ -74,13 +88,32 @@ export class TabsPage implements OnInit {
       return;
     }
 
+    this.revisarAccesos(user.id);
+
+    /*
+     * La barra de pestañas se monta una sola vez y queda viva, así que
+     * un cambio de estado -pagar un plan, que se venza- no se notaría
+     * hasta recargar el navegador entero. Al terminar cada navegación se
+     * vuelve a preguntar.
+     */
+    this.router.events
+      .pipe(filter((e) => e instanceof NavigationEnd))
+      .subscribe(() => {
+        const actual = this.authService.getCurrentUser();
+        if (actual) this.revisarAccesos(actual.id);
+      });
+  }
+
+  /** Qué pestañas corresponden a esta persona, según la base. */
+  private revisarAccesos(uid: string): void {
     // El rol se lee de la base, no de la sesión.
-    this.usuarioService.getUsuario(user.id).subscribe((perfil) => {
+    this.usuarioService.getUsuario(uid).subscribe((perfil) => {
       this.esAdmin = perfil?.rol === 'admin';
+      this.esInstitucion = perfil?.rol === 'institucion';
     });
 
     this.usuarioService
-      .institucionConPlanPendiente(user.id)
+      .institucionConPlanPendiente(uid)
       .subscribe((pendiente) => (this.esInstitucionSinPlan = pendiente));
   }
 }
