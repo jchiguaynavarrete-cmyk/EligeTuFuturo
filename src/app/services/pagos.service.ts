@@ -41,18 +41,38 @@ export class PagosService {
     };
   }
 
+  /**
+   * Cuánto se espera al servidor de pagos antes de rendirse.
+   *
+   * El backend corre en un plan que apaga el servicio tras unos minutos
+   * sin uso, y despertarlo toma hasta un minuto. Sin este límite, el
+   * `fetch` esperaba en silencio para siempre: el botón quedaba
+   * deshabilitado y la persona no tenía forma de saber si estaba
+   * cargando o si se había roto algo.
+   */
+  private readonly ESPERA_MAXIMA_MS = 75_000;
+
   private async pedir<T>(ruta: string, cuerpo: unknown): Promise<T> {
     let respuesta: Response;
+
+    const corte = new AbortController();
+    const reloj = setTimeout(() => corte.abort(), this.ESPERA_MAXIMA_MS);
 
     try {
       respuesta = await fetch(`${this.api}${ruta}`, {
         method: 'POST',
         headers: await this.cabeceras(),
         body: JSON.stringify(cuerpo),
+        signal: corte.signal,
       });
-    } catch {
+    } catch (err: any) {
+      // Se agotó la espera: casi siempre es el servidor despertando.
+      if (err?.name === 'AbortError') throw new Error('SERVIDOR_DORMIDO');
+
       // fetch solo falla así cuando no hay red o el backend no responde.
       throw new Error('SIN_CONEXION');
+    } finally {
+      clearTimeout(reloj);
     }
 
     const datos = await respuesta.json().catch(() => ({}));
@@ -134,6 +154,9 @@ export class PagosService {
     const mensajes: Record<string, string> = {
       SIN_SESION: 'Tu sesión expiró. Vuelve a iniciar sesión.',
       SIN_CONEXION: 'No pudimos conectar con el servidor de pagos. Revisa tu conexión.',
+      SERVIDOR_DORMIDO:
+        'El servidor de pagos está iniciándose. Espera unos segundos y vuelve ' +
+        'a intentarlo.',
       SOLICITUD_NO_ENCONTRADA: 'No encontramos la solicitud.',
       SOLICITUD_NO_APROBADA: 'La solicitud todavía no está aprobada.',
       MONTO_NO_ASIGNADO: 'El administrador aún no define el monto a pagar.',

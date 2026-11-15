@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IonicModule, LoadingController, ToastController } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 
 import { firstValueFrom } from 'rxjs';
 
@@ -23,7 +23,6 @@ export class PagarPlanPage {
   private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private loadingCtrl = inject(LoadingController);
   private toastCtrl = inject(ToastController);
 
   solicitud: Solicitud | null = null;
@@ -69,14 +68,22 @@ export class PagarPlanPage {
   }
 
   /** Pide la transacción al backend y envía a Webpay. */
+  /*
+   * Sin cartel de carga a propósito.
+   *
+   * Antes se abría uno de Ionic justo antes de llamar al servidor. Si
+   * ese cartel se queda esperando -y las ventanas superpuestas de Ionic
+   * lo hacen cuando otra se está cerrando al mismo tiempo-, la línea
+   * siguiente nunca corre: la petición no se envía, y el botón se queda
+   * deshabilitado para siempre sin que aparezca nada en pantalla.
+   *
+   * El botón ya dice "Conectando con Transbank" mientras espera, que es
+   * lo mismo que informaba el cartel, sin el riesgo de trabarse.
+   */
   async pagar(): Promise<void> {
     if (!this.solicitud || this.procesando) return;
 
     this.procesando = true;
-    const loading = await this.loadingCtrl.create({
-      message: 'Conectando con Webpay...',
-    });
-    await loading.present();
 
     try {
       const r = await this.pagosService.crearPago(this.solicitud.id);
@@ -84,7 +91,6 @@ export class PagarPlanPage {
       this.pagosService.redirigirAWebpay(r.url, r.token);
     } catch (err: any) {
       console.error(err);
-      await loading.dismiss();
       this.procesando = false;
 
       await this.mostrarToast(this.pagosService.mensajeDeError(err?.message));
