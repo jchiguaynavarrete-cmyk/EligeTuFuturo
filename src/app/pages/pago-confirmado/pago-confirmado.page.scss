@@ -1,156 +1,307 @@
-ion-content {
-  --background: linear-gradient(180deg, var(--app-bg-top), var(--app-bg-bottom));
+/* =====================================================================
+   Resultado del pago
+
+   Mismo fondo, velo y vidrio que el resto. La marca de arriba entra con
+   una animación corta: marca el final del trámite, que es un momento
+   que vale la pena acusar recibo.
+   ===================================================================== */
+
+.cabecera-limpia ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+  --color: #fff;
+  --min-height: 44px;
 }
 
-.cabecera {
-  max-width: 720px;
-  margin: 12px auto 24px auto;
+.pantalla-confirmado {
+  --background: transparent;
+}
+
+.fondo {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 45%;
+}
+
+.velo {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      72% 62% at 50% 46%,
+      rgba(6, 6, 14, 0.93) 0%,
+      rgba(6, 6, 14, 0.8) 44%,
+      rgba(6, 6, 14, 0.42) 78%,
+      rgba(6, 6, 14, 0.28) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(8, 8, 18, 0.74) 0%,
+      rgba(8, 8, 18, 0.64) 38%,
+      rgba(8, 8, 18, 0.84) 100%
+    ),
+    radial-gradient(
+      90% 55% at 50% -10%,
+      rgba(139, 92, 246, 0.28) 0%,
+      rgba(79, 124, 255, 0.14) 46%,
+      rgba(8, 8, 18, 0) 76%
+    );
+}
+
+.lienzo {
+  position: relative;
+  z-index: 1;
+  max-width: 660px;
+  margin: 0 auto;
+  padding: 10px 20px calc(40px + var(--ion-safe-area-bottom, 0px));
+}
+
+/* --------------------------- Verificando --------------------------- */
+.cargando {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 80px 20px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 14.5px;
+}
+
+.giro {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2.6px solid rgba(255, 255, 255, 0.16);
+  border-top-color: #8b5cf6;
+  animation: girar 0.85s linear infinite;
+}
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}
+
+/* --------------------------- Encabezado --------------------------- */
+.encabezado {
   text-align: center;
+  margin-bottom: 24px;
 }
 
 .marca {
-  width: 72px;
-  height: 72px;
-  margin: 0 auto 16px auto;
+  width: 84px;
+  height: 84px;
+  margin: 0 auto 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
-  display: grid;
-  place-items: center;
 
-  font-size: 34px;
-  font-weight: 900;
-  line-height: 1;
+  animation: aparecer 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
-.cabecera[data-resultado='ok'] .marca {
-  color: var(--ion-color-success);
-  background: rgba(45, 211, 111, 0.14);
-  border: 2px solid var(--ion-color-success);
-  box-shadow: 0 0 0 8px rgba(45, 211, 111, 0.1);
+@keyframes aparecer {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
-.cabecera[data-resultado='cancelado'] .marca {
-  color: var(--app-text-muted);
-  background: var(--app-surface-elevated);
-  border: 2px solid var(--app-border-strong);
+/* Autorizado: verde, con un halo que respira */
+.encabezado[data-resultado='ok'] .marca {
+  color: #4ade80;
+  background: rgba(34, 197, 94, 0.14);
+  border: 2px solid rgba(74, 222, 128, 0.5);
+  box-shadow: 0 0 0 10px rgba(34, 197, 94, 0.07);
+  animation:
+    aparecer 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+    halo 2.8s ease-in-out 0.5s infinite;
 }
 
-.cabecera[data-resultado='rechazado'] .marca,
-.cabecera[data-resultado='error'] .marca {
-  color: var(--ion-color-danger);
-  background: rgba(235, 68, 90, 0.14);
-  border: 2px solid var(--ion-color-danger);
+@keyframes halo {
+  0%, 100% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0.07); }
+  50% { box-shadow: 0 0 0 18px rgba(34, 197, 94, 0.02); }
 }
 
-.cabecera h1 {
-  margin: 0 0 8px 0;
-  font-size: 30px;
-  font-weight: 900;
-  color: var(--app-text);
+/* Cancelado: neutro, no es un error */
+.encabezado[data-resultado='cancelado'] .marca {
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.07);
+  border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
-.mensaje {
+/* Rechazado o error: rojo */
+.encabezado[data-resultado='rechazado'] .marca,
+.encabezado[data-resultado='error'] .marca {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.13);
+  border: 2px solid rgba(248, 113, 113, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marca,
+  .encabezado[data-resultado='ok'] .marca { animation: none; }
+  .giro { animation-duration: 2.4s; }
+}
+
+.titulo {
+  margin: 0 0 9px;
+  font-size: clamp(26px, 5.4vw, 35px);
+  font-weight: 800;
+  letter-spacing: -1.1px;
+  line-height: 1.1;
+  color: #fff;
+  text-shadow: 0 3px 24px rgba(0, 0, 0, 0.78);
+}
+
+.bajada {
   margin: 0 auto;
-  max-width: 540px;
+  max-width: 470px;
   font-size: 15px;
-  line-height: 1.5;
-  color: var(--app-text-muted);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.74);
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.72);
 }
 
-/* Paneles */
+/* ------------------------------ Paneles ------------------------------ */
 .panel {
-  max-width: 720px;
-  margin: 0 auto 16px auto;
-  padding: 18px 20px;
+  margin-bottom: 14px;
+  padding: 10px 24px;
+  border-radius: 22px;
 
-  border-radius: 16px;
-  background: var(--app-surface);
-  border: 1px solid var(--app-border);
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(14, 14, 26, 0.5);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+
+  transition: transform 0.18s ease, border-color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
-.panel dl {
+.panel:hover {
+  transform: translateY(-2px);
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* ------------------------------ Detalle ------------------------------ */
+.filas {
   margin: 0;
 }
 
-.panel dl > div {
+.fila {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-
-  padding: 11px 0;
+  padding: 14px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.panel dl > div:last-child {
-  border-bottom: none;
+.fila:last-child {
+  border-bottom: 0;
 }
 
-.panel dt {
+.fila dt {
   font-size: 14px;
-  color: var(--app-text-muted);
+  color: rgba(255, 255, 255, 0.62);
 }
 
-.panel dd {
+.fila dd {
   margin: 0;
   font-size: 15px;
   font-weight: 800;
-  color: var(--app-text);
+  color: #fff;
   text-align: right;
+  overflow-wrap: anywhere;
 }
 
-.mono {
-  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+.fila dd.destacado {
+  font-size: 18px;
+  letter-spacing: -0.5px;
+}
+
+.fila dd.mono {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
   font-size: 13.5px;
+  letter-spacing: 0.3px;
 }
 
 .chip {
-  display: inline-block;
-  padding: 3px 11px;
-  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 99px;
+
   font-size: 12px;
   font-weight: 800;
+  letter-spacing: 0.3px;
 
   color: #fca5a5;
-  background: rgba(235, 68, 90, 0.16);
-  border: 1px solid rgba(235, 68, 90, 0.45);
+  background: rgba(248, 113, 113, 0.14);
+  border: 1px solid rgba(248, 113, 113, 0.38);
 }
 
 .chip[data-ok='true'] {
   color: #86efac;
-  background: rgba(45, 211, 111, 0.16);
-  border-color: rgba(45, 211, 111, 0.45);
+  background: rgba(34, 197, 94, 0.16);
+  border-color: rgba(74, 222, 128, 0.4);
 }
 
-/* Próximos pasos */
-.pasos h2 {
-  margin: 0 0 4px 0;
-  font-size: 17px;
-  font-weight: 900;
-  color: var(--app-text);
+/* -------------------------- Próximos pasos -------------------------- */
+.pasos {
+  padding: 22px 24px;
+  border-color: rgba(139, 92, 246, 0.3);
+  background:
+    linear-gradient(
+      150deg,
+      rgba(139, 92, 246, 0.16),
+      rgba(79, 124, 255, 0.1) 55%,
+      rgba(34, 211, 238, 0.06)
+    ),
+    rgba(14, 14, 26, 0.52);
 }
 
-.pasos .intro {
-  margin: 0 0 16px 0;
+.pasos-titulo {
+  margin: 0 0 5px;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #fff;
+}
+
+.pasos-intro {
+  margin: 0 0 20px;
   font-size: 14px;
-  color: var(--app-text-muted);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.68);
 }
 
-.pasos ol {
+.lista-pasos {
   list-style: none;
   margin: 0;
   padding: 0;
+
   display: grid;
-  gap: 14px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
 }
 
-@media (min-width: 720px) {
-  .pasos ol {
-    grid-template-columns: repeat(3, 1fr);
+@media (max-width: 620px) {
+  .lista-pasos {
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
 }
 
-.pasos li {
+.paso {
   display: flex;
   gap: 12px;
   align-items: flex-start;
@@ -158,71 +309,112 @@ ion-content {
 
 .numero {
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 27px;
+  height: 27px;
   border-radius: 50%;
-  display: grid;
-  place-items: center;
 
-  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 12.5px;
   font-weight: 800;
+  color: #fff;
 
-  color: #ffffff;
-  background: var(--ion-color-primary);
+  background: linear-gradient(135deg, #8b5cf6, #4f7cff);
+  box-shadow: 0 6px 16px rgba(79, 124, 255, 0.32);
 }
 
-.pasos li strong {
+.paso-texto strong {
   display: block;
-  font-size: 14px;
+  margin-bottom: 3px;
+  font-size: 14.5px;
   font-weight: 800;
-  color: var(--app-text);
+  color: #fff;
+  line-height: 1.3;
 }
 
-.pasos li p {
-  margin: 3px 0 0 0;
+.paso-texto p {
+  margin: 0;
   font-size: 13px;
-  line-height: 1.4;
-  color: var(--app-text-muted);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.64);
 }
 
-/* Acciones */
+/* ------------------------------ Acciones ------------------------------ */
 .acciones {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-
-  max-width: 720px;
-  margin: 20px auto 0 auto;
+  gap: 12px;
+  margin-top: 20px;
 }
 
-@media (min-width: 560px) {
-  .acciones {
-    flex-direction: row;
-  }
-
-  .acciones ion-button {
-    flex: 1;
-  }
+@media (max-width: 560px) {
+  .acciones { flex-direction: column; }
 }
 
-.acciones ion-button {
-  height: 48px;
+.btn-principal,
+.btn-secundario {
+  flex: 1;
+  padding: 15px 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  border-radius: 16px;
+  cursor: pointer;
+
+  font-family: inherit;
+  font-size: 15px;
   font-weight: 800;
-  --border-radius: 14px;
-  margin: 0;
+  letter-spacing: -0.2px;
+  color: #fff;
+
+  transition: transform 0.16s ease, box-shadow 0.16s ease,
+    background 0.16s ease;
 }
 
+.btn-principal {
+  border: 0;
+  background: linear-gradient(100deg, #8b5cf6, #4f7cff 55%, #22d3ee);
+  box-shadow: 0 14px 32px rgba(79, 124, 255, 0.38);
+}
+
+.btn-principal svg {
+  transition: transform 0.18s ease;
+}
+
+.btn-principal:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 44px rgba(79, 124, 255, 0.5);
+}
+
+.btn-principal:hover svg {
+  transform: translateX(3px);
+}
+
+.btn-secundario {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.btn-secundario:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.13);
+  border-color: rgba(255, 255, 255, 0.26);
+}
+
+.btn-principal:active,
+.btn-secundario:active {
+  transform: translateY(0) scale(0.985);
+}
+
+/* ------------------------------- Nota ------------------------------- */
 .nota-pruebas {
-  max-width: 720px;
-  margin: 18px auto 20px auto;
+  margin: 20px 0 0;
   text-align: center;
   font-size: 12.5px;
-  color: var(--app-text-muted);
-}
-
-.estado-centro {
-  max-width: 720px;
-  margin: 60px auto;
-  text-align: center;
-  color: var(--app-text-muted);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.46);
 }

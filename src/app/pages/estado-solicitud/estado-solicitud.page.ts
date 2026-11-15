@@ -2,11 +2,8 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
-  IonButton,
   IonContent,
   IonHeader,
-  IonSpinner,
-  IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
 
@@ -45,10 +42,7 @@ type EstadoPanel = {
     CommonModule,
     IonContent,
     IonHeader,
-    IonTitle,
     IonToolbar,
-    IonSpinner,
-    IonButton,
   ],
 })
 export class EstadoSolicitudPage {

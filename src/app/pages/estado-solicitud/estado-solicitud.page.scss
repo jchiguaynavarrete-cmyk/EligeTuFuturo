@@ -1,131 +1,389 @@
-ion-content {
-  --background: linear-gradient(180deg, var(--app-bg-top), var(--app-bg-bottom));
+/* =====================================================================
+   Panel institucional
+
+   Mismo fondo, velo y vidrio que el resto de la aplicación. La línea de
+   tiempo manda: cada paso se distingue por su marca, y el actual queda
+   encendido para que se vea de una pasada en qué va el trámite.
+   ===================================================================== */
+
+.cabecera-limpia ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+  --color: #fff;
+  --min-height: 44px;
 }
 
-/* Plan vigente */
-.plan-vigente {
-  max-width: 860px;
-  margin: 4px auto 18px auto;
-  padding: 16px 18px;
+.pantalla-institucion {
+  --background: transparent;
+}
 
-  border-radius: 16px;
-  background: rgba(45, 211, 111, 0.12);
-  border: 1px solid rgba(45, 211, 111, 0.42);
+.fondo {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 45%;
+}
+
+.velo {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      72% 62% at 50% 46%,
+      rgba(6, 6, 14, 0.93) 0%,
+      rgba(6, 6, 14, 0.8) 44%,
+      rgba(6, 6, 14, 0.42) 78%,
+      rgba(6, 6, 14, 0.28) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(8, 8, 18, 0.74) 0%,
+      rgba(8, 8, 18, 0.64) 38%,
+      rgba(8, 8, 18, 0.84) 100%
+    ),
+    radial-gradient(
+      90% 55% at 50% -10%,
+      rgba(139, 92, 246, 0.28) 0%,
+      rgba(79, 124, 255, 0.14) 46%,
+      rgba(8, 8, 18, 0) 76%
+    );
+}
+
+.lienzo {
+  position: relative;
+  z-index: 1;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 10px 20px calc(40px + var(--ion-safe-area-bottom, 0px));
+}
+
+/* --------------------------- Encabezado --------------------------- */
+.encabezado {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.titulo {
+  margin: 0 0 8px;
+  font-size: clamp(25px, 5.2vw, 33px);
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1.12;
+  color: #fff;
+  text-shadow: 0 3px 24px rgba(0, 0, 0, 0.78);
+}
+
+.bajada {
+  margin: 0 auto;
+  max-width: 470px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.74);
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.72);
+}
+
+/* ------------------------- Estados de carga ------------------------- */
+.cargando {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 70px 20px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 14.5px;
+}
+
+.giro {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2.6px solid rgba(255, 255, 255, 0.16);
+  border-top-color: #8b5cf6;
+  animation: girar 0.85s linear infinite;
+}
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .giro { animation-duration: 2.4s; }
+}
+
+.aviso-error {
+  padding: 20px 22px;
+  border-radius: 18px;
+  border: 1px solid rgba(248, 113, 113, 0.32);
+  background: rgba(60, 14, 20, 0.5);
+  backdrop-filter: blur(16px);
+}
+
+.error-titulo {
+  margin: 0 0 6px;
+  font-weight: 800;
+  font-size: 15px;
+  color: #fecaca;
+}
+
+.error-texto {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* --------------------------- Plan vigente --------------------------- */
+/* Cuando el plan está activo es la mejor noticia de la pantalla, así
+   que se pinta con el degradado de marca en vez del vidrio neutro. */
+.plan-vigente {
+  margin-bottom: 18px;
+  padding: 20px 22px;
+  border-radius: 22px;
+
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(139, 92, 246, 0.26),
+      rgba(79, 124, 255, 0.18) 55%,
+      rgba(34, 211, 238, 0.14)
+    ),
+    rgba(14, 14, 26, 0.56);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
 }
 
 .plan-vigente .etiqueta {
+  display: inline-block;
+  margin-bottom: 9px;
+  padding: 4px 12px;
+  border-radius: 99px;
+
   font-size: 11px;
   font-weight: 800;
+  letter-spacing: 0.9px;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: var(--ion-color-success);
+
+  color: #d9f99d;
+  background: rgba(132, 204, 22, 0.2);
+  border: 1px solid rgba(132, 204, 22, 0.42);
 }
 
 .plan-vigente h2 {
-  margin: 4px 0 2px 0;
-  font-size: 20px;
-  font-weight: 900;
-  color: var(--app-text);
+  margin: 0 0 5px;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #fff;
 }
 
 .plan-vigente p {
   margin: 0;
   font-size: 14px;
-  color: var(--app-text-muted);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.78);
 }
 
-/* Tarjeta de solicitud */
-.tarjeta-solicitud {
-  max-width: 860px;
-  margin: 0 auto 16px auto;
-  padding: 18px;
-
-  border-radius: 16px;
-  background: var(--app-surface);
-  border: 1px solid var(--app-border);
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.35);
+/* ------------------------- Sin solicitudes ------------------------- */
+.vacio {
+  text-align: center;
+  padding: 44px 24px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(14, 14, 26, 0.5);
+  backdrop-filter: blur(18px);
 }
 
-.cabecera-solicitud {
+.vacio-titulo {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.vacio-texto {
+  margin: 0 auto 20px;
+  max-width: 380px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.btn-planes {
+  padding: 12px 26px;
+  border: 0;
+  border-radius: 14px;
+  cursor: pointer;
+
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #fff;
+
+  background: linear-gradient(100deg, #8b5cf6, #4f7cff 55%, #22d3ee);
+  box-shadow: 0 12px 28px rgba(79, 124, 255, 0.36);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.btn-planes:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px rgba(79, 124, 255, 0.46);
+}
+
+.btn-planes:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* -------------------------- Cada solicitud -------------------------- */
+.solicitud {
+  margin-bottom: 16px;
+  padding: 20px 22px 22px;
+  border-radius: 22px;
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(14, 14, 26, 0.5);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+
+  transition: transform 0.18s ease, border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.solicitud:hover {
+  transform: translateY(-2px);
+  border-color: rgba(139, 92, 246, 0.34);
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* Un filo de color a la izquierda según el estado: se lee antes que
+   cualquier texto. */
+.solicitud[data-estado='aprobada'] { border-left: 3px solid rgba(74, 222, 128, 0.55); }
+.solicitud[data-estado='pendiente'] { border-left: 3px solid rgba(251, 191, 36, 0.55); }
+.solicitud[data-estado='rechazada'] { border-left: 3px solid rgba(248, 113, 113, 0.55); }
+
+.solicitud-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 16px;
 }
 
-.cabecera-solicitud h2 {
-  margin: 0;
+.solicitud-quien h2 {
+  margin: 0 0 3px;
   font-size: 19px;
-  font-weight: 900;
-  color: var(--app-text);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #fff;
 }
 
 .institucion {
-  margin: 2px 0 0 0;
+  margin: 0;
   font-size: 14px;
-  color: var(--app-text-muted);
+  color: rgba(255, 255, 255, 0.68);
+  overflow-wrap: anywhere;
 }
 
 .chip-estado {
   flex-shrink: 0;
-  padding: 4px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-}
+  padding: 5px 12px;
+  border-radius: 99px;
 
-.chip-estado[data-estado='pendiente'] {
-  color: #fde68a;
-  background: rgba(245, 158, 11, 0.16);
-  border: 1px solid rgba(245, 158, 11, 0.45);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 .chip-estado[data-estado='aprobada'] {
   color: #86efac;
-  background: rgba(45, 211, 111, 0.16);
-  border: 1px solid rgba(45, 211, 111, 0.45);
+  background: rgba(34, 197, 94, 0.16);
+  border-color: rgba(74, 222, 128, 0.4);
+}
+
+.chip-estado[data-estado='pendiente'] {
+  color: #fcd34d;
+  background: rgba(251, 191, 36, 0.14);
+  border-color: rgba(251, 191, 36, 0.38);
 }
 
 .chip-estado[data-estado='rechazada'] {
   color: #fca5a5;
-  background: rgba(235, 68, 90, 0.16);
-  border: 1px solid rgba(235, 68, 90, 0.45);
+  background: rgba(248, 113, 113, 0.14);
+  border-color: rgba(248, 113, 113, 0.38);
 }
 
-/* Datos */
+/* ------------------------------ Datos ------------------------------ */
 .datos {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 28px;
-  margin: 16px 0;
-  padding: 14px 0;
-  border-top: 1px solid var(--app-border);
-  border-bottom: 1px solid var(--app-border);
+  gap: 8px;
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
 }
 
-.datos div {
-  margin: 0;
+.dato {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 14px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
-.datos dt {
-  font-size: 11px;
+.dato > span {
+  font-size: 10.5px;
   font-weight: 700;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--app-text-muted);
+  color: rgba(255, 255, 255, 0.5);
 }
 
-.datos dd {
-  margin: 3px 0 0 0;
+.dato > b {
   font-size: 15px;
   font-weight: 800;
-  color: var(--app-text);
+  color: #fff;
 }
 
-/* Línea de tiempo */
+/* --------------------------- Rechazo --------------------------- */
+.aviso-rechazo {
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border-radius: 15px;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  background: rgba(60, 14, 20, 0.42);
+}
+
+.rechazo-titulo {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #fecaca;
+}
+
+.rechazo-texto {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* ------------------------- Línea de tiempo ------------------------- */
 .pasos {
   list-style: none;
   margin: 0;
@@ -133,134 +391,162 @@ ion-content {
 }
 
 .paso {
+  position: relative;
   display: flex;
   gap: 14px;
-  padding-bottom: 16px;
-  position: relative;
+  padding-bottom: 18px;
 }
 
+.paso:last-child {
+  padding-bottom: 0;
+}
+
+/* La línea que une los pasos sale de la marca y llega al siguiente */
 .paso:not(:last-child)::before {
   content: '';
   position: absolute;
-  left: 15px;
-  top: 32px;
-  bottom: 0;
+  left: 13px;
+  top: 30px;
+  bottom: 4px;
   width: 2px;
-  background: var(--app-border);
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.paso[data-estado='completado']:not(:last-child)::before {
+  background: rgba(74, 222, 128, 0.45);
 }
 
 .marca {
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  display: grid;
-  place-items: center;
 
-  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 12.5px;
   font-weight: 800;
 
-  color: var(--app-text-muted);
-  background: var(--app-surface-elevated);
-  border: 1px solid var(--app-border);
-  z-index: 1;
+  color: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .paso[data-estado='completado'] .marca {
-  color: #ffffff;
-  background: var(--ion-color-success);
-  border-color: var(--ion-color-success);
+  color: #06240f;
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+  border-color: transparent;
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.34);
 }
 
+/* El paso actual late suave: es lo único que la institución tiene que
+   mirar al entrar. */
 .paso[data-estado='actual'] .marca {
-  color: #ffffff;
-  background: var(--ion-color-primary);
-  border-color: var(--ion-color-primary);
-  box-shadow: 0 0 0 4px rgba(56, 128, 255, 0.22);
+  color: #fff;
+  background: linear-gradient(135deg, #8b5cf6, #4f7cff);
+  border-color: transparent;
+  box-shadow: 0 0 0 4px rgba(79, 124, 255, 0.18);
+  animation: latir 2.4s ease-in-out infinite;
 }
 
-.paso[data-estado='bloqueado'] .marca {
-  opacity: 0.45;
+@keyframes latir {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(79, 124, 255, 0.18); }
+  50% { box-shadow: 0 0 0 9px rgba(79, 124, 255, 0.05); }
 }
 
-.contenido-paso strong {
+@media (prefers-reduced-motion: reduce) {
+  .paso[data-estado='actual'] .marca { animation: none; }
+}
+
+.paso-texto strong {
   display: block;
+  margin-bottom: 2px;
   font-size: 15px;
   font-weight: 800;
-  color: var(--app-text);
+  color: rgba(255, 255, 255, 0.9);
 }
 
-.contenido-paso p {
-  margin: 2px 0 0 0;
-  font-size: 13px;
-  line-height: 1.4;
-  color: var(--app-text-muted);
+.paso-texto p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.6);
 }
 
-.paso[data-estado='pendiente'] .contenido-paso,
-.paso[data-estado='bloqueado'] .contenido-paso {
-  opacity: 0.6;
+.paso[data-estado='actual'] .paso-texto strong {
+  color: #fff;
 }
 
-/* Avisos */
-.aviso-rechazo {
-  margin: 14px 0;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: rgba(235, 68, 90, 0.12);
-  border: 1px solid rgba(235, 68, 90, 0.4);
-  color: var(--app-text);
+/* Los pasos que todavía no tocan se atenúan para no competir */
+.paso[data-estado='pendiente'],
+.paso[data-estado='bloqueado'] {
+  opacity: 0.52;
 }
 
-.aviso-rechazo p {
-  margin: 4px 0 0 0;
-  font-size: 14px;
-  color: var(--app-text-muted);
-}
+/* --------------------------- Botón de pago --------------------------- */
+.btn-pagar {
+  width: 100%;
+  margin-top: 20px;
+  padding: 15px 20px;
 
-.boton-pagar {
-  margin-top: 8px;
-  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  border: 0;
+  border-radius: 16px;
+  cursor: pointer;
+
+  font-family: inherit;
+  font-size: 15.5px;
   font-weight: 800;
-  --border-radius: 14px;
+  letter-spacing: -0.2px;
+  color: #fff;
+
+  background: linear-gradient(100deg, #8b5cf6, #4f7cff 55%, #22d3ee);
+  box-shadow: 0 14px 32px rgba(79, 124, 255, 0.38);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
 }
 
+.btn-pagar svg {
+  transition: transform 0.18s ease;
+}
+
+.btn-pagar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 42px rgba(79, 124, 255, 0.5);
+}
+
+.btn-pagar:hover svg {
+  transform: translateX(3px);
+}
+
+.btn-pagar:active {
+  transform: translateY(0) scale(0.985);
+}
+
+/* ------------------------------ Notas ------------------------------ */
 .nota {
-  margin: 10px 0 0 0;
-  font-size: 13px;
-  line-height: 1.45;
-  color: var(--app-text-muted);
+  margin: 18px 0 0;
+  padding: 13px 16px;
+  border-radius: 14px;
+
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.72);
+
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
 }
 
 .nota.exito {
-  font-weight: 700;
-  color: var(--ion-color-success);
-}
-
-.estado-centro {
-  max-width: 860px;
-  margin: 40px auto;
-  text-align: center;
-  color: var(--app-text-muted);
-}
-
-.estado-centro ion-button {
-  margin-top: 12px;
-}
-
-.aviso-error {
-  max-width: 860px;
-  margin: 20px auto;
-  padding: 14px 16px;
-
-  border-radius: 14px;
-  background: rgba(235, 68, 90, 0.12);
-  border: 1px solid rgba(235, 68, 90, 0.4);
-  color: var(--app-text);
-}
-
-.aviso-error p {
-  margin: 6px 0 0 0;
-  font-size: 14px;
-  color: var(--app-text-muted);
+  color: #bbf7d0;
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(74, 222, 128, 0.32);
 }

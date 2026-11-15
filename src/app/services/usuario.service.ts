@@ -312,12 +312,23 @@ export class UsuarioService {
       switchMap((perfil) => {
         if (!perfil) return of(false);
         if (perfil.rol === 'admin') return of(true);
-        if (!perfil.institucionId) return of(false);
+
+        /*
+         * Una cuenta institucional es su propia institución: su fila en
+         * `instituciones` se identifica con su mismo uid. El campo
+         * `institucionId` es el del estudiante —a qué establecimiento
+         * pertenece— y en estas cuentas viene vacío, así que mirarlo
+         * dejaba al director fuera de lo que acababa de pagar.
+         */
+        const idInstitucion =
+          perfil.rol === 'institucion' ? uid : perfil.institucionId;
+
+        if (!idInstitucion) return of(false);
 
         const consulta = this.supabase
           .from('instituciones')
           .select('estado_plan')
-          .eq('id', perfil.institucionId)
+          .eq('id', idInstitucion)
           .maybeSingle();
 
         return from(consulta).pipe(

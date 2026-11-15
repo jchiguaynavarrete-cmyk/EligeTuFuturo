@@ -1,212 +1,399 @@
-ion-content {
-  --background: linear-gradient(180deg, var(--app-bg-top), var(--app-bg-bottom));
+/* =====================================================================
+   Pago del plan
+
+   Mismo fondo, velo y vidrio que el resto. El panel del monto se separa
+   del resumen y lleva el degradado de marca: es la cifra que se está
+   autorizando, y conviene que no se confunda con el resto de los datos.
+   ===================================================================== */
+
+.cabecera-limpia ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+  --color: #fff;
+  --min-height: 44px;
 }
 
-.cabecera {
-  display: flex;
-  align-items: center;
-  gap: 14px;
+.pantalla-pago {
+  --background: transparent;
+}
 
-  max-width: 980px;
-  margin: 4px auto 22px auto;
+.fondo {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 45%;
+}
+
+.velo {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      72% 62% at 50% 46%,
+      rgba(6, 6, 14, 0.93) 0%,
+      rgba(6, 6, 14, 0.8) 44%,
+      rgba(6, 6, 14, 0.42) 78%,
+      rgba(6, 6, 14, 0.28) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(8, 8, 18, 0.74) 0%,
+      rgba(8, 8, 18, 0.64) 38%,
+      rgba(8, 8, 18, 0.84) 100%
+    ),
+    radial-gradient(
+      90% 55% at 50% -10%,
+      rgba(139, 92, 246, 0.28) 0%,
+      rgba(79, 124, 255, 0.14) 46%,
+      rgba(8, 8, 18, 0) 76%
+    );
+}
+
+.lienzo {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 10px 20px calc(40px + var(--ion-safe-area-bottom, 0px));
+}
+
+/* --------------------------- Encabezado --------------------------- */
+.encabezado {
+  text-align: center;
+  margin-bottom: 24px;
 }
 
 .candado {
-  flex-shrink: 0;
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  display: grid;
-  place-items: center;
-  font-size: 22px;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 14px;
 
-  background: rgba(126, 179, 255, 0.16);
-  border: 1px solid rgba(126, 179, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 17px;
+  color: #fff;
+  background: linear-gradient(135deg, #8b5cf6, #4f7cff 55%, #22d3ee);
+  box-shadow: 0 14px 32px rgba(79, 124, 255, 0.4);
 }
 
-.cabecera h1 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 900;
-  color: var(--app-text);
+.titulo {
+  margin: 0 0 8px;
+  font-size: clamp(25px, 5.2vw, 33px);
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1.12;
+  color: #fff;
+  text-shadow: 0 3px 24px rgba(0, 0, 0, 0.78);
 }
 
-.cabecera p {
-  margin: 3px 0 0 0;
+.bajada {
+  margin: 0 auto;
+  max-width: 460px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.74);
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.72);
+}
+
+/* ------------------------- Estados de carga ------------------------- */
+.cargando {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 70px 20px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 14.5px;
+}
+
+.giro {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2.6px solid rgba(255, 255, 255, 0.16);
+  border-top-color: #8b5cf6;
+  animation: girar 0.85s linear infinite;
+}
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .giro { animation-duration: 2.4s; }
+}
+
+.aviso-error {
+  padding: 22px 24px;
+  border-radius: 20px;
+  border: 1px solid rgba(248, 113, 113, 0.32);
+  background: rgba(60, 14, 20, 0.5);
+  backdrop-filter: blur(16px);
+  text-align: center;
+}
+
+.error-titulo {
+  margin: 0 0 6px;
+  font-weight: 800;
+  font-size: 16px;
+  color: #fecaca;
+}
+
+.error-texto {
+  margin: 0 0 18px;
   font-size: 14px;
-  color: var(--app-text-muted);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.72);
 }
 
-/* Dos paneles lado a lado en escritorio */
+.btn-volver {
+  padding: 10px 22px;
+  border-radius: 13px;
+  cursor: pointer;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  transition: background 0.16s ease, transform 0.16s ease;
+}
+
+.btn-volver:hover {
+  background: rgba(255, 255, 255, 0.14);
+  transform: translateY(-1px);
+}
+
+/* ---------------------------- Columnas ---------------------------- */
 .columnas {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1.35fr 1fr;
   gap: 16px;
-  max-width: 980px;
-  margin: 0 auto;
+  margin-bottom: 16px;
 }
 
-@media (min-width: 820px) {
+/* En pantallas angostas el monto va primero: es lo que se viene a
+   confirmar, y no tiene sentido obligar a desplazar para verlo. */
+@media (max-width: 760px) {
   .columnas {
-    grid-template-columns: 1.3fr 1fr;
-    align-items: start;
+    grid-template-columns: 1fr;
   }
+
+  .columnas .monto { order: -1; }
 }
 
 .panel {
-  padding: 20px;
-  border-radius: 16px;
-  background: var(--app-surface);
-  border: 1px solid var(--app-border);
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.35);
+  padding: 22px 24px;
+  border-radius: 22px;
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(14, 14, 26, 0.5);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+
+  transition: transform 0.18s ease, border-color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
-.panel h2 {
-  margin: 0 0 16px 0;
-  font-size: 17px;
-  font-weight: 900;
-  color: var(--app-text);
+.panel:hover {
+  transform: translateY(-2px);
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.5);
 }
 
-/* Resumen */
-.resumen dl {
+.panel-titulo {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: #fff;
+}
+
+/* ----------------------------- Resumen ----------------------------- */
+.filas {
   margin: 0;
 }
 
-.resumen dl > div {
+.fila {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-
-  padding: 11px 0;
+  padding: 13px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.resumen dl > div:last-child {
-  border-bottom: none;
+.fila:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
 }
 
-.resumen dt {
+.fila dt {
   font-size: 14px;
-  color: var(--app-text-muted);
+  color: rgba(255, 255, 255, 0.64);
 }
 
-.resumen dd {
+.fila dd {
   margin: 0;
   font-size: 15px;
   font-weight: 800;
-  color: var(--app-text);
+  color: #fff;
   text-align: right;
+  overflow-wrap: anywhere;
 }
 
 .chip-aprobada {
-  display: inline-block;
-  padding: 3px 11px;
-  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 99px;
+
   font-size: 12px;
   font-weight: 800;
+  letter-spacing: 0.3px;
 
   color: #86efac;
-  background: rgba(45, 211, 111, 0.16);
-  border: 1px solid rgba(45, 211, 111, 0.45);
+  background: rgba(34, 197, 94, 0.16);
+  border: 1px solid rgba(74, 222, 128, 0.4);
 }
 
-/* Monto */
+/* ------------------------------ Monto ------------------------------ */
 .monto {
   text-align: center;
-}
-
-.monto h2 {
-  text-align: left;
+  border-color: rgba(139, 92, 246, 0.36);
+  background:
+    linear-gradient(
+      150deg,
+      rgba(139, 92, 246, 0.2),
+      rgba(79, 124, 255, 0.12) 55%,
+      rgba(34, 211, 238, 0.08)
+    ),
+    rgba(14, 14, 26, 0.54);
 }
 
 .cifra {
-  margin: 4px 0 0 0;
-  font-size: 36px;
-  font-weight: 900;
-  line-height: 1.1;
-  color: var(--app-text);
+  margin: 4px 0 0;
+  font-size: clamp(34px, 6vw, 46px);
+  font-weight: 800;
+  letter-spacing: -2px;
+  line-height: 1.05;
+  color: #fff;
+  text-shadow: 0 4px 26px rgba(79, 124, 255, 0.4);
 }
 
 .moneda {
-  margin: 2px 0 18px 0;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--app-text-muted);
+  margin: 2px 0 20px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.52);
 }
 
-.boton-pagar {
-  height: 50px;
+.btn-pagar {
+  width: 100%;
+  padding: 15px 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  border: 0;
+  border-radius: 16px;
+  cursor: pointer;
+
+  font-family: inherit;
+  font-size: 15.5px;
   font-weight: 800;
-  --border-radius: 14px;
+  letter-spacing: -0.2px;
+  color: #fff;
+
+  background: linear-gradient(100deg, #8b5cf6, #4f7cff 55%, #22d3ee);
+  box-shadow: 0 14px 32px rgba(79, 124, 255, 0.4);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
+}
+
+.btn-pagar:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 44px rgba(79, 124, 255, 0.52);
+}
+
+.btn-pagar:active:not(:disabled) {
+  transform: translateY(0) scale(0.985);
+}
+
+.btn-pagar:disabled {
+  cursor: progress;
+  opacity: 0.62;
+  box-shadow: none;
 }
 
 .sello {
-  margin: 12px 0 0 0;
-  font-size: 12px;
-  color: var(--app-text-muted);
+  margin: 12px 0 0;
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.54);
 }
 
-/* Avisos */
-.aviso-seguridad,
-.aviso-pruebas {
-  max-width: 980px;
-  margin: 16px auto 0 auto;
-  padding: 14px 16px;
-  border-radius: 14px;
-  color: var(--app-text);
+/* ----------------------------- Avisos ----------------------------- */
+.aviso {
+  margin-top: 14px;
+  padding: 17px 20px;
+  border-radius: 18px;
+
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(14, 14, 26, 0.46);
+  backdrop-filter: blur(16px);
 }
 
-.aviso-seguridad {
-  background: rgba(126, 179, 255, 0.1);
-  border: 1px solid rgba(126, 179, 255, 0.32);
+.aviso-titulo {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
 }
 
-.aviso-pruebas {
-  margin-bottom: 20px;
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.36);
-}
-
-.aviso-seguridad p,
-.aviso-pruebas p {
-  margin: 6px 0 0 0;
+.aviso-texto {
+  margin: 0;
   font-size: 13.5px;
-  line-height: 1.5;
-  color: var(--app-text-muted);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.68);
 }
 
-.aviso-pruebas code {
-  padding: 1px 6px;
-  border-radius: 6px;
-  font-size: 13px;
+/* El aviso de ambiente de pruebas se distingue en ámbar: avisa que
+   nada de lo que pase aquí es un cobro real. */
+.aviso-pruebas {
+  border-color: rgba(251, 191, 36, 0.3);
+  background: rgba(60, 44, 10, 0.4);
+}
+
+.aviso-pruebas .aviso-titulo {
+  color: #fcd34d;
+}
+
+.aviso-texto code {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 7px;
+
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  font-size: 12.5px;
   font-weight: 700;
-  color: var(--app-text);
-  background: var(--app-surface-hover);
-  border: 1px solid var(--app-border);
-}
+  color: #fff;
 
-.estado-centro {
-  max-width: 980px;
-  margin: 40px auto;
-  text-align: center;
-  color: var(--app-text-muted);
-}
-
-.aviso-error {
-  max-width: 980px;
-  margin: 20px auto;
-  padding: 16px;
-
-  border-radius: 14px;
-  background: rgba(235, 68, 90, 0.12);
-  border: 1px solid rgba(235, 68, 90, 0.4);
-  color: var(--app-text);
-}
-
-.aviso-error p {
-  margin: 6px 0 12px 0;
-  font-size: 14px;
-  color: var(--app-text-muted);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }

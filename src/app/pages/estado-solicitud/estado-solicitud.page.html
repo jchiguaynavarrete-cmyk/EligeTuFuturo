@@ -1,112 +1,154 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Panel institucional</ion-title>
-  </ion-toolbar>
+<!--
+  Panel institucional.
+
+  Mismo lenguaje que el resto: foto de fondo, velo y paneles de vidrio.
+  La línea de tiempo es el centro de la pantalla, porque lo que la
+  institución necesita saber al entrar es en qué paso va su plan.
+-->
+<ion-header class="cabecera-limpia">
+  <ion-toolbar></ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <ng-container *ngIf="estado$ | async as estado">
-    <div class="estado-centro" *ngIf="estado.cargando">
-      <ion-spinner></ion-spinner>
-      <p>Cargando tus solicitudes...</p>
-    </div>
+<ion-content fullscreen="true" class="pantalla-institucion">
+  <div class="fondo" aria-hidden="true">
+    <img class="foto" src="/assets/estudiantes-biblioteca.jpg" alt="" decoding="async" />
+    <span class="velo"></span>
+  </div>
 
-    <div class="aviso-error" *ngIf="!estado.cargando && estado.error">
-      <strong>No se pudo cargar el panel</strong>
-      <p>{{ estado.error }}</p>
-    </div>
+  <div class="lienzo">
+    <ng-container *ngIf="estado$ | async as estado">
 
-    <ng-container *ngIf="!estado.cargando && !estado.error">
-      <!-- PLAN VIGENTE -->
-      <section
-        class="plan-vigente"
-        *ngIf="estado.institucion?.estadoPlan === 'activo'">
-        <span class="etiqueta">Plan activo</span>
-        <h2>{{ estado.institucion?.planNombre }}</h2>
-        <p>
-          {{ estado.institucion?.nombreInstitucion }} ·
-          vigente hasta {{ formatearFecha(estado.institucion?.fechaTermino) }}
-        </p>
-      </section>
-
-      <!-- SIN SOLICITUDES -->
-      <div class="estado-centro" *ngIf="estado.solicitudes.length === 0">
-        <p>Todavía no has solicitado ningún plan.</p>
-        <ion-button fill="outline" (click)="verPlanes()">Ver planes</ion-button>
+      <!-- Cargando -->
+      <div class="cargando" *ngIf="estado.cargando">
+        <span class="giro" aria-hidden="true"></span>
+        <p>Cargando tu panel…</p>
       </div>
 
-      <!-- SOLICITUDES -->
-      <article
-        class="tarjeta-solicitud"
-        *ngFor="let s of estado.solicitudes; trackBy: trackPorId">
-        <header class="cabecera-solicitud">
-          <div>
-            <h2>{{ s.planNombre }}</h2>
-            <p class="institucion">{{ s.nombreInstitucion }}</p>
-          </div>
-          <span class="chip-estado" [attr.data-estado]="s.estado">
-            {{ textoEstado(s) }}
-          </span>
-        </header>
+      <!-- Error -->
+      <div class="aviso-error" *ngIf="!estado.cargando && estado.error">
+        <p class="error-titulo">No se pudo cargar el panel</p>
+        <p class="error-texto">{{ estado.error }}</p>
+      </div>
 
-        <dl class="datos">
-          <div>
-            <dt>Estudiantes</dt>
-            <dd>{{ s.cantidadEstudiantes }}</dd>
-          </div>
-          <div>
-            <dt>Solicitado</dt>
-            <dd>{{ formatearFecha(s.fechaSolicitud) }}</dd>
-          </div>
-          <div *ngIf="s.estadoPago !== 'no_aplica'">
-            <dt>Monto</dt>
-            <dd>{{ formatearMonto(s.monto) }}</dd>
-          </div>
-        </dl>
+      <ng-container *ngIf="!estado.cargando && !estado.error">
 
-        <!-- MOTIVO DE RECHAZO -->
-        <div class="aviso-rechazo" *ngIf="s.estado === 'rechazada'">
-          <strong>Solicitud rechazada</strong>
-          <p>{{ s.motivoRechazo || 'No se indicó un motivo.' }}</p>
+        <!-- ======================== Encabezado ======================== -->
+        <div class="encabezado">
+          <h1 class="titulo">Panel institucional</h1>
+          <p class="bajada">
+            El estado de tu plan, paso a paso. Cuando el pago esté confirmado
+            se abre el acceso completo para tu establecimiento.
+          </p>
         </div>
 
-        <!-- LÍNEA DE TIEMPO -->
-        <ol class="pasos">
-          <li
-            *ngFor="let paso of pasosDe(s)"
-            class="paso"
-            [attr.data-estado]="paso.estado">
-            <span class="marca">
-              <ng-container *ngIf="paso.estado === 'completado'">✓</ng-container>
-              <ng-container *ngIf="paso.estado !== 'completado'">
-                {{ paso.numero }}
-              </ng-container>
-            </span>
-            <div class="contenido-paso">
-              <strong>{{ paso.titulo }}</strong>
-              <p>{{ paso.detalle }}</p>
+        <!-- ======================== Plan vigente ======================== -->
+        <section class="plan-vigente" *ngIf="estado.institucion?.estadoPlan === 'activo'">
+          <span class="etiqueta">Plan activo</span>
+          <h2>{{ estado.institucion?.planNombre }}</h2>
+          <p>
+            {{ estado.institucion?.nombreInstitucion }} · vigente hasta
+            {{ formatearFecha(estado.institucion?.fechaTermino) }}
+          </p>
+        </section>
+
+        <!-- ====================== Sin solicitudes ====================== -->
+        <div class="vacio" *ngIf="estado.solicitudes.length === 0">
+          <p class="vacio-titulo">Todavía no has solicitado ningún plan</p>
+          <p class="vacio-texto">
+            Revisa las modalidades disponibles y envía una solicitud; te
+            responderemos desde este mismo panel.
+          </p>
+          <button type="button" class="btn-planes" (click)="verPlanes()">
+            Ver planes
+          </button>
+        </div>
+
+        <!-- ======================== Solicitudes ======================== -->
+        <article
+          class="solicitud"
+          *ngFor="let s of estado.solicitudes; trackBy: trackPorId"
+          [attr.data-estado]="s.estado">
+
+          <div class="solicitud-top">
+            <div class="solicitud-quien">
+              <h2>{{ s.planNombre }}</h2>
+              <p class="institucion">{{ s.nombreInstitucion }}</p>
             </div>
-          </li>
-        </ol>
 
-        <!-- ACCIÓN DE PAGO -->
-        <ion-button
-          expand="block"
-          class="boton-pagar"
-          *ngIf="puedePagar(s)"
-          (click)="irAPagar(s)">
-          Ir a pagar con Webpay →
-        </ion-button>
+            <span class="chip-estado" [attr.data-estado]="s.estado">
+              {{ textoEstado(s) }}
+            </span>
+          </div>
 
-        <p class="nota" *ngIf="esperandoMonto(s)">
-          Tu solicitud fue aprobada. Estamos definiendo el monto y te avisaremos
-          cuando puedas realizar el pago.
-        </p>
+          <div class="datos">
+            <span class="dato">
+              <span>Estudiantes</span>
+              <b>{{ s.cantidadEstudiantes }}</b>
+            </span>
+            <span class="dato">
+              <span>Solicitado</span>
+              <b>{{ formatearFecha(s.fechaSolicitud) }}</b>
+            </span>
+            <span class="dato" *ngIf="s.estadoPago !== 'no_aplica'">
+              <span>Monto</span>
+              <b>{{ formatearMonto(s.monto) }}</b>
+            </span>
+          </div>
 
-        <p class="nota exito" *ngIf="s.estadoPago === 'pagado'">
-          ✓ El pago fue confirmado y tu plan está activo.
-        </p>
-      </article>
+          <!-- Motivo de rechazo -->
+          <div class="aviso-rechazo" *ngIf="s.estado === 'rechazada'">
+            <p class="rechazo-titulo">Solicitud rechazada</p>
+            <p class="rechazo-texto">{{ s.motivoRechazo || 'No se indicó un motivo.' }}</p>
+          </div>
+
+          <!-- Línea de tiempo -->
+          <ol class="pasos">
+            <li
+              *ngFor="let paso of pasosDe(s)"
+              class="paso"
+              [attr.data-estado]="paso.estado">
+              <span class="marca" aria-hidden="true">
+                <svg
+                  *ngIf="paso.estado === 'completado'"
+                  width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="3.2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+                <ng-container *ngIf="paso.estado !== 'completado'">{{ paso.numero }}</ng-container>
+              </span>
+
+              <div class="paso-texto">
+                <strong>{{ paso.titulo }}</strong>
+                <p>{{ paso.detalle }}</p>
+              </div>
+            </li>
+          </ol>
+
+          <!-- Acción de pago -->
+          <button
+            type="button"
+            class="btn-pagar"
+            *ngIf="puedePagar(s)"
+            (click)="irAPagar(s)">
+            Ir a pagar con Webpay
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </button>
+
+          <p class="nota" *ngIf="esperandoMonto(s)">
+            Tu solicitud fue aprobada. Estamos definiendo el monto y te
+            avisaremos cuando puedas realizar el pago.
+          </p>
+
+          <p class="nota exito" *ngIf="s.estadoPago === 'pagado'">
+            El pago fue confirmado y tu plan está activo.
+          </p>
+        </article>
+
+      </ng-container>
     </ng-container>
-  </ng-container>
+  </div>
 </ion-content>

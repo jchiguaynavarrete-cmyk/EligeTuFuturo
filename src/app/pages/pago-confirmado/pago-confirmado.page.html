@@ -1,115 +1,162 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Resultado del pago</ion-title>
-  </ion-toolbar>
+<!--
+  Resultado del pago.
+
+  Mismo lenguaje que el resto. La marca de arriba cambia de forma y de
+  color según cómo terminó la transacción: es lo primero que se mira al
+  volver de Transbank, antes de leer una sola palabra.
+-->
+<ion-header class="cabecera-limpia">
+  <ion-toolbar></ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <div class="estado-centro" *ngIf="cargando">
-    <ion-spinner></ion-spinner>
-    <p>Verificando el pago...</p>
+<ion-content fullscreen="true" class="pantalla-confirmado">
+  <div class="fondo" aria-hidden="true">
+    <img class="foto" src="/assets/estudiantes-biblioteca.jpg" alt="" decoding="async" />
+    <span class="velo"></span>
   </div>
 
-  <ng-container *ngIf="!cargando">
-    <div class="cabecera" [attr.data-resultado]="autorizado ? 'ok' : resultado">
-      <div class="marca">
-        <span *ngIf="autorizado">✓</span>
-        <span *ngIf="!autorizado && resultado === 'cancelado'">—</span>
-        <span *ngIf="!autorizado && resultado !== 'cancelado'">✕</span>
+  <div class="lienzo">
+
+    <!-- Verificando -->
+    <div class="cargando" *ngIf="cargando">
+      <span class="giro" aria-hidden="true"></span>
+      <p>Verificando el pago…</p>
+    </div>
+
+    <ng-container *ngIf="!cargando">
+
+      <!-- ======================== Encabezado ======================== -->
+      <div class="encabezado" [attr.data-resultado]="autorizado ? 'ok' : resultado">
+        <span class="marca" aria-hidden="true">
+          <svg *ngIf="autorizado" width="34" height="34" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+
+          <svg *ngIf="!autorizado && resultado === 'cancelado'" width="34" height="34"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14" />
+          </svg>
+
+          <svg *ngIf="!autorizado && resultado !== 'cancelado'" width="34" height="34"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </span>
+
+        <h1 class="titulo">{{ titulo }}</h1>
+        <p class="bajada">{{ mensaje }}</p>
       </div>
 
-      <h1>{{ titulo }}</h1>
-      <p class="mensaje">{{ mensaje }}</p>
-    </div>
-
-    <!-- DETALLE DE LA TRANSACCIÓN -->
-    <section class="panel" *ngIf="pago">
-      <dl>
-        <div>
-          <dt>Plan</dt>
-          <dd>{{ solicitud?.planNombre || '—' }}</dd>
-        </div>
-        <div>
-          <dt>Institución</dt>
-          <dd>{{ solicitud?.nombreInstitucion || '—' }}</dd>
-        </div>
-        <div>
-          <dt>Monto</dt>
-          <dd>{{ formatearMonto(pago.amount) }}</dd>
-        </div>
-        <div>
-          <dt>Medio de pago</dt>
-          <dd>Webpay Plus</dd>
-        </div>
-        <div>
-          <dt>Orden de compra</dt>
-          <dd class="mono">{{ pago.buyOrder }}</dd>
-        </div>
-        <div *ngIf="pago.authorizationCode">
-          <dt>Código de autorización</dt>
-          <dd class="mono">{{ pago.authorizationCode }}</dd>
-        </div>
-        <div>
-          <dt>Estado de transacción</dt>
-          <dd>
-            <span class="chip" [attr.data-ok]="autorizado">
-              {{ autorizado ? '✓ Autorizada' : 'No autorizada' }}
-            </span>
-          </dd>
-        </div>
-      </dl>
-    </section>
-
-    <!-- PRÓXIMOS PASOS -->
-    <section class="panel pasos" *ngIf="autorizado">
-      <h2>🚀 Tu plan ya está activo</h2>
-      <p class="intro">No queda nada pendiente: puedes empezar a usarlo ahora.</p>
-
-      <ol>
-        <li>
-          <span class="numero">1</span>
-          <div>
-            <strong>Pago confirmado con Transbank</strong>
-            <p>La transacción quedó registrada con su código de autorización.</p>
+      <!-- ======================== Detalle ======================== -->
+      <section class="panel" *ngIf="pago">
+        <dl class="filas">
+          <div class="fila">
+            <dt>Plan</dt>
+            <dd>{{ solicitud?.planNombre || '—' }}</dd>
           </div>
-        </li>
-        <li>
-          <span class="numero">2</span>
-          <div>
-            <strong>Plan activado</strong>
-            <p>Tu institución quedó habilitada con el plan contratado.</p>
+          <div class="fila">
+            <dt>Institución</dt>
+            <dd>{{ solicitud?.nombreInstitucion || '—' }}</dd>
           </div>
-        </li>
-        <li>
-          <span class="numero">3</span>
-          <div>
-            <strong>Cuentas para tu equipo</strong>
-            <p>
-              Desde el panel institucional puedes revisar la vigencia del plan
-              y la cobertura contratada.
-            </p>
+          <div class="fila">
+            <dt>Monto</dt>
+            <dd class="destacado">{{ formatearMonto(pago.amount) }}</dd>
           </div>
-        </li>
-      </ol>
-    </section>
+          <div class="fila">
+            <dt>Medio de pago</dt>
+            <dd>Webpay Plus</dd>
+          </div>
+          <div class="fila">
+            <dt>Orden de compra</dt>
+            <dd class="mono">{{ pago.buyOrder }}</dd>
+          </div>
+          <div class="fila" *ngIf="pago.authorizationCode">
+            <dt>Código de autorización</dt>
+            <dd class="mono">{{ pago.authorizationCode }}</dd>
+          </div>
+          <div class="fila">
+            <dt>Estado de transacción</dt>
+            <dd>
+              <span class="chip" [attr.data-ok]="autorizado">
+                <svg *ngIf="autorizado" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="3.4" stroke-linecap="round"
+                     stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+                {{ autorizado ? 'Autorizada' : 'No autorizada' }}
+              </span>
+            </dd>
+          </div>
+        </dl>
+      </section>
 
-    <div class="acciones">
-      <ion-button expand="block" (click)="irAlPanel()">
-        Ir al panel institucional →
-      </ion-button>
+      <!-- ====================== Próximos pasos ====================== -->
+      <section class="panel pasos" *ngIf="autorizado">
+        <h2 class="pasos-titulo">Tu plan ya está activo</h2>
+        <p class="pasos-intro">
+          No queda nada pendiente: puedes empezar a usarlo ahora.
+        </p>
 
-      <ion-button
-        expand="block"
-        fill="outline"
-        *ngIf="pago"
-        (click)="verComprobante()">
-        Ver comprobante
-      </ion-button>
-    </div>
+        <ol class="lista-pasos">
+          <li class="paso">
+            <span class="numero" aria-hidden="true">1</span>
+            <div class="paso-texto">
+              <strong>Pago confirmado con Transbank</strong>
+              <p>La transacción quedó registrada con su código de autorización.</p>
+            </div>
+          </li>
+          <li class="paso">
+            <span class="numero" aria-hidden="true">2</span>
+            <div class="paso-texto">
+              <strong>Plan activado</strong>
+              <p>Tu institución quedó habilitada con el plan contratado.</p>
+            </div>
+          </li>
+          <li class="paso">
+            <span class="numero" aria-hidden="true">3</span>
+            <div class="paso-texto">
+              <strong>Acceso completo</strong>
+              <p>
+                Desde el panel institucional puedes revisar la vigencia del plan
+                y la cobertura contratada.
+              </p>
+            </div>
+          </li>
+        </ol>
+      </section>
 
-    <p class="nota-pruebas">
-      Transacción realizada en el ambiente de integración de Transbank. No
-      corresponde a un cobro real.
-    </p>
-  </ng-container>
+      <!-- ======================== Acciones ======================== -->
+      <div class="acciones">
+        <button type="button" class="btn-principal" (click)="irAlPanel()">
+          Ir al panel institucional
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          class="btn-secundario"
+          *ngIf="pago"
+          (click)="verComprobante()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+            <path d="M14 2v6h6M9 13h6M9 17h4" />
+          </svg>
+          Ver comprobante
+        </button>
+      </div>
+
+      <p class="nota-pruebas">
+        Transacción realizada en el ambiente de integración de Transbank. No
+        corresponde a un cobro real.
+      </p>
+
+    </ng-container>
+  </div>
 </ion-content>
