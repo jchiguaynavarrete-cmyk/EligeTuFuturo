@@ -53,7 +53,27 @@ export class CuentaPage {
     return (a + b).toUpperCase();
   }
 
+  /**
+   * Si hay algo que mostrar en "Datos personales".
+   *
+   * Una cuenta institucional nace al aprobar una solicitud, y esa
+   * solicitud no pide RUT ni fecha de nacimiento: son datos de una
+   * persona, no de un establecimiento. Mostrar el bloque con guiones
+   * parece un error de la aplicación.
+   */
+  tieneDatosPersonales(perfil: any): boolean {
+    return Boolean(perfil?.rut || perfil?.fechaNacimiento || perfil?.edad);
+  }
+
   formatearFecha(fecha: any): string {
+    /*
+     * Sin esta guarda, una fecha vacía terminaba mostrándose como
+     * 31-12-1969: `new Date(null)` vale cero, que es el comienzo del
+     * tiempo en informática, y la comprobación de fecha inválida no lo
+     * atrapa porque cero es una fecha perfectamente válida.
+     */
+    if (fecha === null || fecha === undefined || fecha === '') return '—';
+
     try {
       const d: Date =
         fecha?.toDate?.() instanceof Date ? fecha.toDate() :

@@ -36,24 +36,38 @@
         </span>
       </section>
 
-      <!-- ====================== Datos personales ====================== -->
+      <!-- ====================== Datos de la cuenta ====================== -->
+      <!--
+        Cada dato se muestra solo si existe. Una cuenta institucional nace
+        al aprobar una solicitud, que pide datos del establecimiento y no
+        de una persona: sin esto, el bloque aparecía lleno de guiones y
+        con una fecha de nacimiento de 1969, que es como se ve una fecha
+        vacía cuando nadie la comprueba.
+      -->
       <section class="panel">
-        <h2 class="titulo-panel">Datos personales</h2>
+        <h2 class="titulo-panel">
+          {{ tieneDatosPersonales(perfil) ? 'Datos personales' : 'Datos de la cuenta' }}
+        </h2>
 
         <div class="datos">
-          <div class="dato">
+          <div class="dato" *ngIf="perfil.rut">
             <span class="etiqueta">RUT</span>
-            <span class="valor">{{ perfil.rut || '—' }}</span>
+            <span class="valor">{{ perfil.rut }}</span>
           </div>
 
-          <div class="dato">
+          <div class="dato" *ngIf="perfil.fechaNacimiento">
             <span class="etiqueta">Fecha de nacimiento</span>
             <span class="valor">{{ formatearFecha(perfil.fechaNacimiento) }}</span>
           </div>
 
-          <div class="dato">
+          <div class="dato" *ngIf="perfil.edad">
             <span class="etiqueta">Edad</span>
             <span class="valor">{{ perfil.edad }} años</span>
+          </div>
+
+          <div class="dato">
+            <span class="etiqueta">Correo</span>
+            <span class="valor correo-dato">{{ perfil.email }}</span>
           </div>
 
           <div class="dato">
@@ -62,9 +76,14 @@
           </div>
         </div>
 
-        <p class="nota-datos">
+        <p class="nota-datos" *ngIf="tieneDatosPersonales(perfil)">
           Estos datos no se pueden editar desde aquí: el RUT identifica tu
           cuenta en el sistema.
+        </p>
+
+        <p class="nota-datos" *ngIf="!tieneDatosPersonales(perfil)">
+          Esta cuenta representa a un establecimiento, no a una persona. Los
+          datos de tu institución están en tu plan.
         </p>
       </section>
 

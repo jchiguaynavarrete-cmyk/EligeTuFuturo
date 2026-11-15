@@ -409,3 +409,11 @@
     animation: none;
   }
 }
+
+/* El correo es largo y no tiene espacios: se parte donde haga falta
+   para no desbordar su casilla en pantallas angostas. */
+.valor.correo-dato {
+  font-size: 13.5px;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
