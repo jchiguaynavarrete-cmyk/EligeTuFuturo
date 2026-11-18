@@ -9,11 +9,24 @@ const { AMBIENTE, COMMERCE_CODE } = require('./config/transbank');
 const app = express();
 const PUERTO = process.env.PORT || 3000;
 
-/** Orígenes autorizados: la app local y la desplegada en Firebase Hosting. */
+/** Orígenes autorizados: la app local y la desplegada en Render. */
 const origenes = (process.env.CORS_ORIGINS ||
-  'http://localhost:8101,http://localhost:4200,https://elige-tu-futuro-21166.web.app')
+  'http://localhost:8101,http://localhost:4200,https://eligetufuturo-app.onrender.com')
   .split(',')
   .map((o) => o.trim());
+
+/*
+ * Un origen no autorizado es un rechazo esperado, no un error interno:
+ * se responde 403 antes de llegar a CORS para que no aparezca como 500
+ * en los registros.
+ */
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && !origenes.includes(origin)) {
+    return res.status(403).json({ error: 'ORIGEN_NO_AUTORIZADO' });
+  }
+  return next();
+});
 
 app.use(
   cors({

@@ -234,6 +234,9 @@
                   {{ cs.carrera.nombre_institucion }} · {{ cs.carrera.region_sede }}
                 </p>
                 <span class="nivel">{{ cs.nivelTexto }}</span>
+                <p class="aviso-faltante" *ngIf="cs.pruebasFaltantes.length">
+                  Pondera {{ cs.pruebasFaltantes.join(', ') }} y no lo ingresaste: este puntaje es menor al real.
+                </p>
               </ion-label>
 
               <!-- El puntaje es lo que la persona vino a ver: va destacado -->

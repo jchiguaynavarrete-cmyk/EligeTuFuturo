@@ -49,6 +49,8 @@ interface CarreraSimulada {
   ponderacionesTexto: string;
   nivelTexto: 'Técnica' | 'Profesional';
   detalleCalculo: DetalleCalculoLinea[];
+  /** Pruebas que la carrera pondera pero el estudiante dejó en blanco. */
+  pruebasFaltantes: string[];
 }
 
 @Component({
@@ -237,6 +239,7 @@ export class SimuladorPage implements OnInit {
         nivelTexto: String((c as any).es_tecnico) === '1' ? 'Técnica' : 'Profesional',
         ponderacionesTexto: this.ponderacionesTexto(c),
         detalleCalculo: [],
+        pruebasFaltantes: this.pruebasFaltantes(c),
       });
     }
 
@@ -321,6 +324,26 @@ export class SimuladorPage implements OnInit {
     } finally {
       this.toggling.delete(id);
     }
+  }
+
+  // =========================
+  // PRUEBAS PONDERADAS SIN PUNTAJE
+  // =========================
+  /**
+   * Una prueba en blanco aporta cero al ponderado. Si la carrera la
+   * pondera, el resultado queda más bajo de lo real: se avisa en la
+   * tarjeta para que el estudiante no lo tome como su puntaje definitivo.
+   */
+  private pruebasFaltantes(c: CarreraDoc): string[] {
+    const pares: [string, number | null, any][] = [
+      ['Ciencias', this.puntajes.ciencias, (c as any).psu_ciencias],
+      ['Historia', this.puntajes.historia, (c as any).psu_historia],
+      ['Ranking', this.puntajes.ranking, (c as any).ranking],
+      ['NEM', this.puntajes.notasEm, (c as any).notas_em],
+    ];
+    return pares
+      .filter(([, valor, peso]) => valor == null && this.pesoToPercent(peso) > 0)
+      .map(([nombre]) => nombre);
   }
 
   // =========================

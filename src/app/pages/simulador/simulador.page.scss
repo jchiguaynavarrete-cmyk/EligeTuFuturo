@@ -731,3 +731,12 @@ ion-accordion ion-label {
     animation: none;
   }
 }
+
+/* Aviso cuando la carrera pondera una prueba que el estudiante dejó en blanco */
+.aviso-faltante {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.3;
+  color: #fbbf24;
+  white-space: normal;
+}
