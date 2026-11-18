@@ -30,7 +30,8 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from 'src/app/services/auth.service';
 import { UsuarioService } from 'src/app/services/usuario.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
+import { filter, take, timeout } from 'rxjs/operators';
 
 import { addIcons } from 'ionicons';
 import {
@@ -139,6 +140,22 @@ export class AuthPage implements OnInit {
     // formulario de registro, en vez de obligar a pasar por el login.
     if (this.route.snapshot.queryParamMap.get('modo') === 'register') {
       this.modo = 'register';
+    }
+
+    // Enlace del correo vencido o ya usado: Supabase vuelve aquí con el
+    // error en la dirección y, sin este aviso, solo se veía el login.
+    if (this.authService.tomarErrorDelEnlace()) {
+      this.mostrarToast(
+        'El enlace del correo ya no es válido: venció o ya se usó. Pide uno nuevo.',
+        6000
+      );
+    }
+
+    // Llegó desde "¿Olvidaste tu contraseña?": antes de entrar tiene que
+    // definir la contraseña nueva, así que no se le redirige.
+    if (this.authService.enRecuperacion) {
+      this.pedirPasswordNueva();
+      return;
     }
 
     this.authService.user$.pipe(take(1)).subscribe((user) => {
@@ -779,15 +796,21 @@ export class AuthPage implements OnInit {
     } catch (err: any) {
       console.error(err);
 
-      // Solo estos dos se le muestran a la persona.
-      if (err?.code === 'auth/invalid-email') {
+      // Solo estos dos se le muestran a la persona. Son los códigos de
+      // Supabase: los de Firebase que había aquí nunca llegaban, y con el
+      // tope de correos agotado se decía "te enviamos el enlace" sin que
+      // saliera ninguno.
+      const codigo = String(err?.code ?? '');
+      if (codigo === 'email_address_invalid' || codigo === 'validation_failed') {
         errorVisible = 'El correo no es válido.';
-      } else if (err?.code === 'auth/too-many-requests') {
-        errorVisible = 'Demasiados intentos. Espera unos minutos.';
+      } else if (err?.status === 429 || codigo.includes('rate_limit')) {
+        errorVisible =
+          'No pudimos enviar el correo: hubo demasiados envíos seguidos. Inténtalo en unos minutos.';
       }
 
-      // El resto (p. ej. auth/user-not-found) se silencia a propósito:
-      // confirmar si un correo existe permitiría enumerar usuarios.
+      // Supabase ya responde igual exista o no la cuenta, y cualquier otro
+      // error se calla: confirmar si un correo existe permitiría enumerar
+      // usuarios.
     } finally {
       await loading.dismiss();
     }
@@ -795,13 +818,107 @@ export class AuthPage implements OnInit {
     // Sin error visible, el mensaje es idéntico exista o no la cuenta.
     await this.mostrarToast(
       errorVisible ||
-        'Si el correo está registrado, te enviamos el enlace 📩 Revisa tu bandeja y spam.'
+        'Si el correo está registrado, te enviamos el enlace 📩 Revisa tu bandeja y spam.',
+      errorVisible ? 5000 : 2200
     );
+  }
+
+  /**
+   * Pide la contraseña nueva a quien llegó con el enlace del correo.
+   *
+   * El enlace ya abrió la sesión, así que basta con cambiarla. Si la
+   * persona cancela se cierra esa sesión: no eligió contraseña y no
+   * debería quedar dentro sin saber cuál es.
+   */
+  private async pedirPasswordNueva(): Promise<void> {
+    // La sesión del enlace se valida contra Supabase y tarda un instante.
+    const usuario = await firstValueFrom(
+      this.authService.user$.pipe(filter(Boolean), take(1), timeout(15000))
+    ).catch(() => null);
+
+    if (!usuario) {
+      this.authService.terminarRecuperacion();
+      await this.mostrarToast(
+        'No pudimos abrir el enlace del correo. Pide uno nuevo con "¿Olvidaste tu contraseña?".',
+        6000
+      );
+      return;
+    }
+
+    let problema = '';
+
+    while (true) {
+      const alert = await this.alertCtrl.create({
+        header: 'Crea tu contraseña nueva',
+        subHeader: problema || undefined,
+        message:
+          'Al menos 8 caracteres, con una mayúscula, una minúscula, un número y un símbolo.',
+        backdropDismiss: false,
+        inputs: [
+          { name: 'nueva', type: 'password', placeholder: 'Contraseña nueva' },
+          { name: 'repetir', type: 'password', placeholder: 'Repítela' },
+        ],
+        buttons: [
+          { text: 'Cancelar', role: 'cancel' },
+          { text: 'Guardar', role: 'guardar' },
+        ],
+      });
+
+      await alert.present();
+
+      // El trabajo va después del cierre: abrir la espera encima de un
+      // diálogo que aún se cierra la deja colgada para siempre.
+      const { role, data } = await alert.onDidDismiss();
+
+      if (role !== 'guardar') {
+        this.authService.terminarRecuperacion();
+        await this.authService.logout().catch(() => undefined);
+        await this.mostrarToast(
+          'No cambiaste tu contraseña. Puedes pedir otro enlace cuando quieras.',
+          4000
+        );
+        return;
+      }
+
+      const nueva = (data?.values?.nueva ?? '') as string;
+      const repetir = (data?.values?.repetir ?? '') as string;
+
+      if (!nueva || !repetir) {
+        problema = 'Escribe la contraseña nueva en los dos campos.';
+        continue;
+      }
+      const revision = this.validarPasswordFinal(nueva);
+      if (!revision.ok) {
+        problema = revision.msg;
+        continue;
+      }
+      if (nueva !== repetir) {
+        problema = 'Las contraseñas no coinciden.';
+        continue;
+      }
+
+      const loading = await this.loadingCtrl.create({ message: 'Guardando...' });
+      await loading.present();
+
+      try {
+        await this.authService.cambiarPassword(nueva);
+      } catch (err: any) {
+        console.error(err);
+        problema = this.authService.mensajeDeError(err);
+        continue;
+      } finally {
+        await loading.dismiss();
+      }
+
+      await this.mostrarToast('Listo. Tu contraseña quedó cambiada ✅', 3000);
+      this.router.navigateByUrl(this.rutaTrasLogin, { replaceUrl: true });
+      return;
+    }
   }
   // ------------------------------------------------------
 
-  async mostrarToast(message: string) {
-    const toast = await this.toastCtrl.create({ message, duration: 2200 });
+  async mostrarToast(message: string, duration = 2200) {
+    const toast = await this.toastCtrl.create({ message, duration });
     await toast.present();
   }
 

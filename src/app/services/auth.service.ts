@@ -31,12 +31,24 @@ export interface DatosRegistro {
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private supabase = inject(SupabaseClientService).cliente;
+  private clienteSupabase = inject(SupabaseClientService);
+  private supabase = this.clienteSupabase.cliente;
 
   private usuarioActual = new BehaviorSubject<User | null>(null);
   user$: Observable<User | null> = this.usuarioActual.asObservable();
 
   private sesionActual: Session | null = null;
+
+  /**
+   * La persona entró con el enlace de recuperación y aún no define su
+   * contraseña nueva.
+   *
+   * Ese enlace abre una sesión normal: sin esta marca la app la dejaba
+   * dentro, o en el login, sin pedirle nunca la contraseña nueva.
+   */
+  enRecuperacion = this.clienteSupabase.llegoPorRecuperacion;
+
+  private errorEnlacePendiente = this.clienteSupabase.errorDelEnlace;
 
   constructor() {
     // Sesión guardada de una visita anterior.
@@ -45,10 +57,22 @@ export class AuthService {
       this.usuarioActual.next(data.session?.user ?? null);
     });
 
-    this.supabase.auth.onAuthStateChange((_evento, sesion) => {
+    this.supabase.auth.onAuthStateChange((evento, sesion) => {
+      if (evento === 'PASSWORD_RECOVERY') this.enRecuperacion = true;
       this.sesionActual = sesion;
       this.usuarioActual.next(sesion?.user ?? null);
     });
+  }
+
+  /** El error con que volvió un enlace del correo, una sola vez. */
+  tomarErrorDelEnlace(): string | null {
+    const error = this.errorEnlacePendiente;
+    this.errorEnlacePendiente = null;
+    return error;
+  }
+
+  terminarRecuperacion(): void {
+    this.enRecuperacion = false;
   }
 
   /**
@@ -107,6 +131,7 @@ export class AuthService {
   async cambiarPassword(nueva: string): Promise<void> {
     const { error } = await this.supabase.auth.updateUser({ password: nueva });
     if (error) throw error;
+    this.enRecuperacion = false;
   }
 
   /** Envía el correo para definir una contraseña nueva. */
@@ -185,6 +210,9 @@ export class AuthService {
     }
     if (msg.includes('rate limit') || msg.includes('too many')) {
       return 'Demasiados intentos. Espera unos minutos.';
+    }
+    if (error?.code === 'same_password' || msg.includes('different from the old')) {
+      return 'La contraseña nueva debe ser distinta de la anterior.';
     }
 
     return 'Ocurrió un error. Intenta nuevamente.';
