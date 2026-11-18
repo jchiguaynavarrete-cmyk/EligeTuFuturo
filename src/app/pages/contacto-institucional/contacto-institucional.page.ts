@@ -91,6 +91,10 @@ export class ContactoInstitucionalPage {
     if (campo === 'nombre') this.nombre = this.mayusculaInicial(this.nombre, true);
     if (campo === 'institucion') this.institucion = this.mayusculaInicial(this.institucion, false);
     if (campo === 'cargo') this.cargo = this.primeraMayuscula(this.cargo);
+    if (campo === 'telefono') {
+      const nacional = this.telefonoNacional(this.telefono);
+      if (nacional) this.telefono = this.formatearTelefono(nacional);
+    }
   }
 
   /** Van en minúscula dentro de un nombre: "Juan de la Fuente", "Colegio San José de Maipo". */
@@ -126,13 +130,44 @@ export class ContactoInstitucionalPage {
     this.salido[campo] = false;
   }
 
+  /**
+   * Solo dígitos, espacios y un "+" al comienzo.
+   *
+   * La limpieza se escribe también en el campo: si solo se asigna a
+   * `telefono`, Angular no repinta el input cuando el valor limpio coincide
+   * con el que tenía antes de la tecla, y las letras quedaban a la vista
+   * aunque no se guardaran.
+   */
   onTelefonoInput(event: any): void {
-    const limpio = ((event?.detail?.value ?? event?.target?.value ?? '') as string)
+    const escrito = (event?.target?.value ?? '') as string;
+    const limpio = escrito
       .replace(/[^\d+ ]/g, '')
+      .replace(/(?!^)\+/g, '')
       .slice(0, 16);
+
+    if (event?.target && escrito !== limpio) event.target.value = limpio;
 
     this.telefono = limpio;
     this.alEscribir('telefono');
+  }
+
+  /**
+   * Los 9 dígitos del número chileno, sin el 56 inicial, o null si no lo es.
+   * Desde 2016 todos los teléfonos de Chile tienen 9 dígitos: los móviles
+   * empiezan con 9 y los fijos con el código de área (2 en Santiago).
+   */
+  private telefonoNacional(valor: string): string | null {
+    let d = (valor || '').replace(/\D/g, '');
+    if (d.length === 11 && d.startsWith('56')) d = d.slice(2);
+    return /^[2-9]\d{8}$/.test(d) ? d : null;
+  }
+
+  /** "+56 9 1234 5678", "+56 2 2123 4567" o "+56 32 212 3456". */
+  private formatearTelefono(d: string): string {
+    if (d[0] === '9' || d[0] === '2') {
+      return `+56 ${d[0]} ${d.slice(1, 5)} ${d.slice(5)}`;
+    }
+    return `+56 ${d.slice(0, 2)} ${d.slice(2, 5)} ${d.slice(5)}`;
   }
 
   private validar(campo: Campo): string {
@@ -162,9 +197,10 @@ export class ContactoInstitucionalPage {
         return '';
       }
       case 'telefono': {
-        const v = this.telefono.replace(/\D/g, '');
-        if (!v) return '';
-        if (v.length < 8) return 'El teléfono está incompleto.';
+        if (!this.telefono.replace(/\D/g, '')) return '';
+        if (!this.telefonoNacional(this.telefono)) {
+          return 'Ingresa un teléfono chileno de 9 dígitos, por ejemplo +56 9 1234 5678.';
+        }
         return '';
       }
       case 'cantidadAlumnos': {
@@ -193,13 +229,16 @@ export class ContactoInstitucionalPage {
     this.enviando = true;
     this.errorEnvio = '';
 
+    // Ya validado: o es un número chileno o viene vacío (es opcional).
+    const telefonoNacional = this.telefonoNacional(this.telefono);
+
     try {
       await this.contactoService.enviar({
         nombre: this.nombre.trim(),
         cargo: this.cargo.trim(),
         institucion: this.institucion.trim(),
         correo: this.correo.trim().toLowerCase(),
-        telefono: this.telefono.trim(),
+        telefono: telefonoNacional ? this.formatearTelefono(telefonoNacional) : '',
         cantidadAlumnos: Number(this.cantidadAlumnos),
         planId: this.plan?.id ?? null,
         planNombre: this.plan?.nombre ?? null,
