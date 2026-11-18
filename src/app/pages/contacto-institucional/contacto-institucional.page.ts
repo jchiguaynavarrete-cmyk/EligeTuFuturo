@@ -85,6 +85,41 @@ export class ContactoInstitucionalPage {
 
   marcarSalida(campo: Campo): void {
     this.salido[campo] = true;
+
+    // Se ordena al salir del campo, no mientras se escribe, igual que en el
+    // registro: corregir letra a letra mueve el cursor y distrae.
+    if (campo === 'nombre') this.nombre = this.mayusculaInicial(this.nombre, true);
+    if (campo === 'institucion') this.institucion = this.mayusculaInicial(this.institucion, false);
+    if (campo === 'cargo') this.cargo = this.primeraMayuscula(this.cargo);
+  }
+
+  /** Van en minúscula dentro de un nombre: "Juan de la Fuente", "Colegio San José de Maipo". */
+  private readonly particulas = ['de', 'del', 'la', 'las', 'los', 'y', 'da', 'van', 'von'];
+
+  /**
+   * Mayúscula inicial en cada palabra, salvo las partículas que no van al
+   * comienzo. En el nombre el resto pasa a minúscula ("MAURICIO" queda
+   * "Mauricio"); en la institución se respeta tal cual, para no estropear
+   * siglas como SLEP o DAEM.
+   */
+  private mayusculaInicial(valor: string, restoEnMinuscula: boolean): string {
+    return (valor || '')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((p, i) => {
+        const palabra = restoEnMinuscula ? p.toLocaleLowerCase('es') : p;
+        const min = palabra.toLocaleLowerCase('es');
+        if (i > 0 && this.particulas.includes(min)) return min;
+        return palabra.charAt(0).toLocaleUpperCase('es') + palabra.slice(1);
+      })
+      .join(' ');
+  }
+
+  /** Solo la primera letra: "director de estudios" queda "Director de estudios". */
+  private primeraMayuscula(valor: string): string {
+    const v = (valor || '').trim().replace(/\s+/g, ' ');
+    return v.charAt(0).toLocaleUpperCase('es') + v.slice(1);
   }
 
   alEscribir(campo: Campo): void {
