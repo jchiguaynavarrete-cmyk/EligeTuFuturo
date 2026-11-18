@@ -377,17 +377,26 @@ export class SimuladorPage implements OnInit {
    * Una prueba en blanco aporta cero al ponderado. Si la carrera la
    * pondera, el resultado queda más bajo de lo real: se avisa en la
    * tarjeta para que el estudiante no lo tome como su puntaje definitivo.
+   *
+   * Sigue las mismas reglas que calcularPonderado: si la carrera acepta
+   * Ciencias o Historia, basta con una de las dos; y el Ranking en blanco
+   * se completa con el NEM, así que solo falta si tampoco hay NEM.
    */
   private pruebasFaltantes(c: CarreraDoc): string[] {
-    const pares: [string, number | null, any][] = [
-      ['Ciencias', this.puntajes.ciencias, (c as any).psu_ciencias],
-      ['Historia', this.puntajes.historia, (c as any).psu_historia],
-      ['Ranking', this.puntajes.ranking, (c as any).ranking],
-      ['NEM', this.puntajes.notasEm, (c as any).notas_em],
-    ];
-    return pares
-      .filter(([, valor, peso]) => valor == null && this.pesoToPercent(peso) > 0)
-      .map(([nombre]) => nombre);
+    const w = this.pesos(c);
+    const p = this.puntajes;
+    const faltan: string[] = [];
+
+    if (w.electivaLibre) {
+      if (p.ciencias == null && p.historia == null) faltan.push('Ciencias o Historia');
+    } else {
+      if (w.cie > 0 && p.ciencias == null) faltan.push('Ciencias');
+      if (w.his > 0 && p.historia == null) faltan.push('Historia');
+    }
+    if (w.rank > 0 && p.ranking == null && p.notasEm == null) faltan.push('Ranking');
+    if (w.nem > 0 && p.notasEm == null) faltan.push('NEM');
+
+    return faltan;
   }
 
   // =========================
