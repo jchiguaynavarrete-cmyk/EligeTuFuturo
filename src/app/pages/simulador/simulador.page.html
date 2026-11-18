@@ -52,7 +52,7 @@
         <h2 class="titulo-panel">Tus puntajes</h2>
         <p class="ayuda-panel">
           Entre <b>{{ PAES_MIN }}</b> y <b>{{ PAES_MAX }}</b> puntos. Deja en blanco
-          los que no hayas rendido.
+          los que no hayas rendido. Si no sabes tu Ranking, usamos tu NEM.
         </p>
 
         <div class="rejilla-puntajes">
@@ -180,8 +180,8 @@
           class="buscador"
           [debounce]="300"
           placeholder="Buscar carrera, institución o sede"
-          [(ngModel)]="searchTerm"
-          (ionInput)="aplicarFiltrosResultados()">
+          [ngModel]="searchTerm"
+          (ngModelChange)="onBuscar($event)">
         </ion-searchbar>
 
         <div class="filtros">

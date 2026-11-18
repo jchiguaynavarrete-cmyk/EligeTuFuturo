@@ -144,6 +144,7 @@ export class SimuladorPage implements OnInit {
 
     this.carrerasService.getCarreras().subscribe((carreras) => {
       this.todasLasCarreras = carreras ?? [];
+      this.armarOpcionesFiltros();
       this.cargando = false;
     });
 
@@ -271,11 +272,54 @@ export class SimuladorPage implements OnInit {
     this.aplicarFiltrosResultados();
   }
 
+  onBuscar(termino: string | null | undefined) {
+    this.searchTerm = termino ?? '';
+    this.aplicarFiltrosResultados();
+  }
+
+  /**
+   * Las opciones salen de las carreras que el simulador puede calcular (las
+   * que traen ponderaciones). Con el catálogo completo habría opciones que
+   * siempre dejan la lista vacía.
+   */
+  private armarOpcionesFiltros(): void {
+    const calculables = this.todasLasCarreras.filter((c) => this.pesos(c).suma > 0);
+
+    const opciones = (leer: (c: CarreraDoc) => unknown): string[] => [
+      'TODAS',
+      ...Array.from(
+        new Set(calculables.map((c) => String(leer(c) ?? '').trim()).filter(Boolean))
+      ).sort((a, b) => a.localeCompare(b, 'es')),
+    ];
+
+    this.areas = opciones((c) => c.area_cineunesco);
+    this.regiones = opciones((c) => c.region_sede);
+    this.instituciones = opciones((c) => c.nombre_institucion);
+  }
+
+  /** Minúsculas y sin tildes: "ingenieria" encuentra "INGENIERÍA". */
+  private normalizar(texto: unknown): string {
+    return String(texto ?? '')
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .toLowerCase()
+      .trim();
+  }
+
   aplicarFiltrosResultados() {
+    const termino = this.normalizar(this.searchTerm);
+
     this.filtradas = this.carrerasSimuladas
       .filter((cs) => {
         const c = cs.carrera;
+        const calzaTexto =
+          !termino ||
+          this.normalizar(
+            `${c.carrera} ${c.nombre_institucion} ${c.sede ?? ''} ${c.region_sede ?? ''}`
+          ).includes(termino);
+
         return (
+          calzaTexto &&
           (this.filtroNivel === 'TODAS' || cs.nivelTexto === this.filtroNivel) &&
           (this.filtroArea === 'TODAS' || c.area_cineunesco === this.filtroArea) &&
           (this.filtroRegion === 'TODAS' || c.region_sede === this.filtroRegion) &&
@@ -349,26 +393,57 @@ export class SimuladorPage implements OnInit {
   // =========================
   // CÁLCULO (normaliza ponderaciones a 100%)
   // =========================
+
+  /**
+   * Ciencias e Historia son la prueba electiva de la PAES: el postulante usa
+   * la mejor de las dos. Las carreras que aceptan cualquiera traen el mismo
+   * peso en ambas columnas (las 432 del catálogo que traen las dos lo
+   * cumplen, y contándolo una vez suman 100%), así que ese peso va una sola
+   * vez. Contarlo doble inflaba la suma y castigaba a quien rindió solo una.
+   */
+  private pesos(c: CarreraDoc) {
+    const leng = this.pesoToPercent((c as any).psu_lenguaje);
+    const mat  = this.pesoToPercent((c as any).psu_matematicas);
+    const cie  = this.pesoToPercent((c as any).psu_ciencias);
+    const his  = this.pesoToPercent((c as any).psu_historia);
+    const rank = this.pesoToPercent((c as any).ranking);
+    const nem  = this.pesoToPercent((c as any).notas_em);
+
+    const electivaLibre = cie > 0 && his > 0;
+    const electiva = electivaLibre ? Math.max(cie, his) : 0;
+    const suma = leng + mat + (electivaLibre ? electiva : cie + his) + rank + nem;
+
+    return { leng, mat, cie, his, rank, nem, electivaLibre, electiva, suma };
+  }
+
   private calcularPonderado(c: CarreraDoc): number {
-    const wLeng = this.pesoToPercent((c as any).psu_lenguaje);
-    const wMat  = this.pesoToPercent((c as any).psu_matematicas);
-    const wCie  = this.pesoToPercent((c as any).psu_ciencias);
-    const wHis  = this.pesoToPercent((c as any).psu_historia);
-    const wRank = this.pesoToPercent((c as any).ranking);
-    const wNem  = this.pesoToPercent((c as any).notas_em);
+    const w = this.pesos(c);
+    if (w.suma <= 0) return 0;
 
-    const suma = wLeng + wMat + wCie + wHis + wRank + wNem;
-    if (suma <= 0) return 0;
-
-    const f = 100 / suma;
-
+    const f = 100 / w.suma;
+    const p = this.puntajes;
     let total = 0;
-    if (this.puntajes.lenguaje != null)    total += this.puntajes.lenguaje    * ((wLeng * f) / 100);
-    if (this.puntajes.matematicas != null) total += this.puntajes.matematicas * ((wMat  * f) / 100);
-    if (this.puntajes.ciencias != null)    total += this.puntajes.ciencias    * ((wCie  * f) / 100);
-    if (this.puntajes.historia != null)    total += this.puntajes.historia    * ((wHis  * f) / 100);
-    if (this.puntajes.ranking != null)     total += this.puntajes.ranking     * ((wRank * f) / 100);
-    if (this.puntajes.notasEm != null)     total += this.puntajes.notasEm     * ((wNem  * f) / 100);
+
+    const sumar = (puntaje: number | null, peso: number) => {
+      if (puntaje != null && peso > 0) total += puntaje * ((peso * f) / 100);
+    };
+
+    sumar(p.lenguaje, w.leng);
+    sumar(p.matematicas, w.mat);
+
+    if (w.electivaLibre) {
+      const rendidas = [p.ciencias, p.historia].filter((v): v is number => v != null);
+      sumar(rendidas.length ? Math.max(...rendidas) : null, w.electiva);
+    } else {
+      sumar(p.ciencias, w.cie);
+      sumar(p.historia, w.his);
+    }
+
+    // Sin Ranking se usa el NEM: el Ranking nunca es menor que el NEM, así
+    // que es la estimación prudente. Contarlo como 0 hundía a las carreras
+    // que lo ponderan (entre 20% y 40%).
+    sumar(p.ranking ?? p.notasEm, w.rank);
+    sumar(p.notasEm, w.nem);
 
     return total;
   }
@@ -377,26 +452,25 @@ export class SimuladorPage implements OnInit {
   // TEXTO DE PONDERACIONES (bonito)
   // =========================
   private ponderacionesTexto(c: CarreraDoc): string {
-    let wLeng = this.pesoToPercent((c as any).psu_lenguaje);
-    let wMat  = this.pesoToPercent((c as any).psu_matematicas);
-    let wCie  = this.pesoToPercent((c as any).psu_ciencias);
-    let wHis  = this.pesoToPercent((c as any).psu_historia);
-    let wRank = this.pesoToPercent((c as any).ranking);
-    let wNem  = this.pesoToPercent((c as any).notas_em);
+    const w = this.pesos(c);
+    if (w.suma <= 0) return 'Sin ponderación disponible';
 
-    const suma = wLeng + wMat + wCie + wHis + wRank + wNem;
-    if (suma <= 0) return 'Sin ponderación disponible';
-
-    const f = 100 / suma;
-    wLeng *= f; wMat *= f; wCie *= f; wHis *= f; wRank *= f; wNem *= f;
-
+    const f = 100 / w.suma;
     const parts: string[] = [];
-    if (wLeng > 0) parts.push(`L ${Math.round(wLeng)}%`);
-    if (wMat  > 0) parts.push(`M ${Math.round(wMat)}%`);
-    if (wCie  > 0) parts.push(`C ${Math.round(wCie)}%`);
-    if (wHis  > 0) parts.push(`H ${Math.round(wHis)}%`);
-    if (wRank > 0) parts.push(`Rk ${Math.round(wRank)}%`);
-    if (wNem  > 0) parts.push(`NEM ${Math.round(wNem)}%`);
+    const poner = (etiqueta: string, peso: number) => {
+      if (peso > 0) parts.push(`${etiqueta} ${Math.round(peso * f)}%`);
+    };
+
+    poner('L', w.leng);
+    poner('M', w.mat);
+    if (w.electivaLibre) {
+      poner('C o H', w.electiva);
+    } else {
+      poner('C', w.cie);
+      poner('H', w.his);
+    }
+    poner('Rk', w.rank);
+    poner('NEM', w.nem);
 
     return parts.join(' · ');
   }
